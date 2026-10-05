@@ -12,9 +12,11 @@ import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
-import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL } from './data/oefeningen.js';
+import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
+import { Meesters } from './meesters.js';
+import { Meestervraag } from './ui/meestervraag.js';
 import { geluid } from './geluid.js';
 import { voorlezen } from './voorlezen.js';
 import { voortgang, NIVEAU_VOOR_STEMPEL } from './voortgang.js';
@@ -75,6 +77,8 @@ const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) 
 const oorkonde = new Oorkonde(uiLaag);
 const vuurwerk = new Vuurwerk(scene, geluid);
 const muntenteller = new Muntenteller(geluid);
+const meesters = new Meesters(scene, botsing, uiLaag, camera, voorlezen);
+const meestervraag = new Meestervraag(uiLaag, { geluid, voorlezen, beloon: (a, v, l) => muntenteller.beloon(a, v, l) });
 
 // Verstopte muntjes op het plein: eroverheen lopen = 2 munten.
 const pleinMuntjes = new PleinMuntjes(scene);
@@ -265,6 +269,7 @@ hud.opOpnieuw = () => {
   munten.wis();
   pleinMuntjes.wis();
   kledingkast.wis();
+  meesters.wis();
   stempelkaart.ververs();
   zetKraamSterren();
   speler.positie.copy(STARTPLEK);
@@ -282,8 +287,42 @@ function spreekKindAan(kind) {
   kinderen.spreekAan(kind, speler.positie);
 }
 
+/* Meesters: stellen een vraag (20 munten bij een goed antwoord). */
+const MEESTER_PRAATAFSTAND = 2.6;
+let dichtsteMeester = null;
+
+function spreekMeesterAan(m) {
+  if (!m || dialoog.open || actiefSpel || actiefVenster || meestervraag.open || startOpen) return;
+  speler.richting = Math.atan2(m.positie.x - speler.positie.x, m.positie.z - speler.positie.z);
+  if (!meesters.heeftVraag(m)) {
+    meesters.zeg(m, MEESTER_VRAAG.wachten.replace('{minuten}', meesters.minutenTeGaan(m) === 1 ? '1 minuut' : `${meesters.minutenTeGaan(m)} minuten`), speler.positie);
+    return;
+  }
+  besturing.aan = false;
+  besturing.doel = null;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  kinderen.verbergBallon();
+  meesters.verbergBallon();
+  m.houVast(speler.positie);
+  meesters.startWachttijd(m); // meteen: weglopen en terugkomen geeft geen nieuwe vraag
+  meestervraag.opSluiten = (meester) => {
+    meester.laatLos();
+    klok.update();
+    besturing.aan = true;
+  };
+  meestervraag.toon(m);
+}
+
+/** Praat met een figuur op het plein: kind of meester. */
+function praatMetFiguur(f) {
+  if (f?.isMeester) spreekMeesterAan(f);
+  else spreekKindAan(f);
+}
+
 function praatMetDichtste() {
   if (dichtsteKraam) startGesprek(dichtsteKraam);
+  else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
 }
 
@@ -291,7 +330,7 @@ besturing.opPraten = praatMetDichtste;
 hud.opWolkjeKlik = praatMetDichtste;
 besturing.opKlikKind = (kind) => {
   const d = Math.hypot(kind.positie.x - speler.positie.x, kind.positie.z - speler.positie.z);
-  if (d < 3.5) spreekKindAan(kind);
+  if (d < 3.5) praatMetFiguur(kind);
   else {
     besturing.doel = kind.positie.clone().setY(0);
     besturing.doelIsKraam = false;
@@ -306,7 +345,7 @@ function volgKind() {
   besturing.doel.set(kindDoel.positie.x, 0, kindDoel.positie.z);
   if (Math.hypot(kindDoel.positie.x - speler.positie.x, kindDoel.positie.z - speler.positie.z) < 2) {
     besturing.doel = null;
-    spreekKindAan(kindDoel);
+    praatMetFiguur(kindDoel);
     kindDoel = null;
   }
 }
@@ -377,20 +416,31 @@ function frame() {
   if (!dialoog.open && besturing.aan) {
     dichtsteKraam = zoekDichtsteKraam();
     dichtsteKind = kinderen.dichtsteBij(speler.positie, KIND_PRAATAFSTAND);
-    if (dichtsteKraam && dichtsteKind) {
-      // Wie staat het dichtst bij: het kind of de kraam?
-      const dKraam = speler.positie.distanceTo(dichtsteKraam.praatPunt);
-      const dKind = Math.hypot(dichtsteKind.positie.x - speler.positie.x, dichtsteKind.positie.z - speler.positie.z);
-      if (dKind < dKraam) dichtsteKraam = null;
-      else dichtsteKind = null;
-    }
+    dichtsteMeester = meesters.dichtsteBij(speler.positie, MEESTER_PRAATAFSTAND);
+    // Wie staat het dichtst bij: de kraam, een meester of een kind? Alleen die blijft over.
+    const afstand = (p) => Math.hypot(p.x - speler.positie.x, p.z - speler.positie.z);
+    const kandidaten = [
+      dichtsteKraam && ['kraam', afstand(dichtsteKraam.praatPunt)],
+      dichtsteMeester && ['meester', afstand(dichtsteMeester.positie)],
+      dichtsteKind && ['kind', afstand(dichtsteKind.positie)],
+    ].filter(Boolean).sort((a, b) => a[1] - b[1]);
+    const winnaar = kandidaten[0]?.[0];
+    if (winnaar !== 'kraam') dichtsteKraam = null;
+    if (winnaar !== 'meester') dichtsteMeester = null;
+    if (winnaar !== 'kind') dichtsteKind = null;
     if (dichtsteKraam?.isWinkel) hud.toonWolkje(besturing.isTouch ? WINKEL.openTik : WINKEL.openToets);
     else if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
-    else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
+    else if (dichtsteMeester && meesters.ballonMeester !== dichtsteMeester) {
+      const tekst = meesters.heeftVraag(dichtsteMeester)
+        ? (besturing.isTouch ? MEESTER_VRAAG.wolkjeTik : MEESTER_VRAAG.wolkjeToets)
+        : MEESTER_VRAAG.wolkjeWacht;
+      hud.toonWolkje(tekst.replace('{naam}', dichtsteMeester.info.naam));
+    } else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
   kinderen.update(dt, speler);
+  meesters.update(dt, speler);
   for (const k of alleKramen) k.update(dt, tijd, speler.positie);
 
   wereld.update(dt, tijd);
@@ -432,4 +482,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

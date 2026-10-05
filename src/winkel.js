@@ -6,7 +6,7 @@ import { Paspop } from './ui/paspop.js';
 
 const hex = (k) => `#${k.toString(16).padStart(6, '0')}`;
 
-/** De Bunders Boetiek: kleding kopen (en straks tips van de meesters). */
+/** De Bunders Boetiek: kleding kopen en passen. */
 export class Winkel {
   constructor(laag, { geluid, voorlezen }) {
     this.laag = laag;
@@ -40,10 +40,6 @@ export class Winkel {
           <button type="button" class="wk-sluit">✕ ${WINKEL.sluiten}</button>
         </header>
         <div class="wk-welkom"><span class="wk-bo" aria-hidden="true">👩‍🦰</span><span><b>${WINKEL.verkoper}:</b> ${WINKEL.welkom}</span></div>
-        <div class="wk-tabs" role="tablist">
-          <button type="button" data-tab="kleding" class="actief">👕 ${WINKEL.tabKleding}</button>
-          <button type="button" data-tab="tips">💡 ${WINKEL.tabTips}</button>
-        </div>
         <div class="wk-inhoud">
           <div class="wk-paspop"><div class="wk-canvas"></div><div class="wk-pasmelding"></div></div>
           <div class="wk-rechts">
@@ -62,10 +58,6 @@ export class Winkel {
     this.pasId = null;
 
     this.el.querySelector('.wk-sluit').addEventListener('click', () => this.sluit());
-    this.el.querySelector('.wk-tabs').addEventListener('click', (e) => {
-      const knop = e.target.closest('button[data-tab]');
-      if (knop) this.kiesTab(knop.dataset.tab);
-    });
     window.addEventListener('keydown', this.toetsen);
     this.kiesTab('kleding');
     this.voorlezen?.zeg(`${WINKEL.welkom}`, { toonhoogte: 1.3 });
@@ -74,12 +66,6 @@ export class Winkel {
 
   kiesTab(tab) {
     this.tab = tab;
-    this.el.querySelectorAll('.wk-tabs button').forEach((b) => b.classList.toggle('actief', b.dataset.tab === tab));
-    if (tab === 'tips') {
-      this.categorieEl.innerHTML = '';
-      this.itemsEl.innerHTML = `<p class="wk-binnenkort">🎓 ${WINKEL.tipsBinnenkort}</p>`;
-      return;
-    }
     this.categorieEl.innerHTML = CATEGORIEEN.map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
     this.categorieEl.onclick = (e) => {
       const knop = e.target.closest('button[data-cat]');

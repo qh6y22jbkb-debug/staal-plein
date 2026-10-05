@@ -547,3 +547,15 @@ body.venster-open .hulp, body.venster-open .stempelkaart, body.venster-open .tit
   .wk-welkom { font-size: 16px; }
   .wk-items { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
+
+/* ---------- Vraag van een meester ---------- */
+.meestervraag { --kraamkleur: #5f3dc4; z-index: 22; }
+.meestervraag .dialoog-tekst { margin-bottom: 10px; }
+.mv-vraag { font-size: 28px; font-weight: bold; text-align: center; }
+.mv-werkwoord { color: #868e96; font-size: .8em; }
+.mv-invoer { margin-bottom: 10px; }
+.mv-feedback { margin-bottom: 10px; }
+.mv-feedback:empty { display: none; }
+.dialoog-knoppen .mv-bedankt { background: #b2f2bb; flex: 1 1 200px; }
+.tekstballon.meester { border-color: #5f3dc4; }
+.tekstballon.meester b { color: #5f3dc4; }

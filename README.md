@@ -116,13 +116,24 @@ Alle bedragen staan in `src/data/oefeningen.js` bij `MUNTEN`.
 
 Bij de ingang staat **De Bunders Boetiek** met verkoopster **Bo Boetiek**. Druk op **E** om de winkel te openen.
 
-- Tabblad **Kleding**: Hoofd, Shirt, Broek, Schoenen en Extra (22 items, 20 tot 300 munten; de kroon en de cape zijn het duurst).
+- Categorieën: Hoofd, Shirt, Broek, Schoenen en Extra (22 items, 20 tot 300 munten; de kroon en de cape zijn het duurst).
 - **Pas aan** laat je iets eerst proberen op het draaiende poppetje. Te duur? Dan staat er "Nog X munten nodig".
 - Voor elke aankoop vraagt de winkel: "Weet je het zeker?"
 - Gekochte kleding trek je meteen aan. In de **Kledingkast** (toets **K** of de knop 👕) trek je kleding aan en uit.
-- Tabblad **Tips**: hier komen de tips van de meesters (volgende stap).
 
 Alle kleding en prijzen staan in `src/data/oefeningen.js` bij `KLEDING`; hoe het eruitziet staat in `src/kleding.js`.
+
+## De meesters op het plein
+
+**Meester Jop**, **Meester Bram** en **Meester Koen** lopen rond op het plein. Heeft een meester een
+geel **vraagteken** boven zijn hoofd? Dan heeft hij een vraag voor je over een van de zes onderwerpen.
+
+- Druk op **E** (of klik/tik op de meester) en typ het antwoord.
+- Goed in één keer: **20 munten**. Bij de tweede poging: 10 munten. Twee keer fout? Dan legt de meester het uit.
+- Daarna heeft die meester **3 minuten** pauze voordat hij een nieuwe vraag heeft.
+- De vragen komen uit de oefeningen van de minispellen (tot en met 2 sterren).
+
+Bedragen, wachttijd en teksten staan in `src/data/oefeningen.js` bij `MEESTERS` en `MEESTER_VRAAG`.
 
 ## Stempelkaart, geluid en voorlezen
 
@@ -162,6 +173,9 @@ src/
   ui/kastvenster.js    het venster van de kledingkast
   ui/paspop.js         het draaiende poppetje in winkel en kast
   wereld/pleinmuntjes.js  de 15 verstopte muntjes op het plein
+  meesters.js          Meester Jop, Bram en Koen (rondlopen, vraagteken, wachttijd)
+  meestervragen.js     maakt een vraag uit de oefeningen
+  ui/meestervraag.js   het vraagvenster van een meester
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt
     kramen.js          de zes marktkramen met versiering

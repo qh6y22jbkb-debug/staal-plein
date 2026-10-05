@@ -123,7 +123,6 @@ export class Minispel {
     this.wachtOpVolgende = false;
     // Munten en bonussen van deze ronde.
     this.pogingen = 0;
-    this.tipDezeVraag = false;
     this.rondeFouten = 0;
     this.reeks = 0;
     this.verdiendAntwoorden = 0;
@@ -196,8 +195,7 @@ export class Minispel {
   /** Munten voor dit goede antwoord (fout kost nooit iets). */
   muntenVoorAntwoord() {
     const basis = MUNTEN.perNiveau[this.niveau - 1] ?? MUNTEN.perNiveau.at(-1);
-    let factor = this.pogingen === 0 ? 1 : this.pogingen === 1 ? MUNTEN.tweedePoging : MUNTEN.latereKeer;
-    if (this.tipDezeVraag) factor = Math.min(factor, MUNTEN.metTip);
+    const factor = this.pogingen === 0 ? 1 : this.pogingen === 1 ? MUNTEN.tweedePoging : MUNTEN.latereKeer;
     return Math.round(basis * factor);
   }
 
@@ -205,16 +203,15 @@ export class Minispel {
   goed(uitlegHtml = '', { automatisch = false } = {}) {
     if (!this.foutDezeVraag) this.inEenKeer++;
     const verdiend = this.muntenVoorAntwoord();
-    // Reeks: goede antwoorden op rij, in één keer goed en zonder tip.
+    // Reeks: goede antwoorden op rij, in één keer goed.
     let reeksBonus = 0;
-    if (this.pogingen === 0 && !this.tipDezeVraag) {
+    if (this.pogingen === 0) {
       this.reeks++;
       if (this.reeks % MUNTEN.reeksLengte === 0) reeksBonus = MUNTEN.reeksBonus;
     } else {
       this.reeks = 0;
     }
     this.pogingen = 0;
-    this.tipDezeVraag = false;
     this.bolletjes[this.nr].classList.add('goed');
     this.bolletjes[this.nr].classList.remove('nu');
     this.nr++;

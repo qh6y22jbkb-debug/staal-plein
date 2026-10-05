@@ -22,7 +22,7 @@ const UITERLIJKEN = [
 
 const WANDELSNELHEID = 2.4;
 
-class Kind {
+export class Kind {
   constructor(scene, botsing, naam, uiterlijk, start) {
     this.naam = naam;
     this.botsing = botsing;

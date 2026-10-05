@@ -435,7 +435,6 @@ export const MUNTEN = {
   perNiveau: [5, 10, 15], // munten per goed antwoord bij ★, ★★ en ★★★
   tweedePoging: 0.5, // goed bij de 2e poging: de helft
   latereKeer: 0, // goed bij de 3e poging of later: (nog) geen munten
-  metTip: 0.5, // goed met hulp van een tip: de helft
   reeksLengte: 3, // elke 3 goede antwoorden op rij (in één keer goed)...
   reeksBonus: 5, // ...geven 5 extra munten
   foutloosBonus: 20, // ronde zonder één fout
@@ -501,8 +500,6 @@ export const WINKEL = {
   verkoper: 'Bo Boetiek',
   welkom: 'Welkom bij De Bunders Boetiek! Ik ben Bo. Kijk maar rond en pas gerust iets aan!',
   tabKleding: 'Kleding',
-  tabTips: 'Tips',
-  tipsBinnenkort: 'De meesters komen er bijna aan! Hier kun je straks tips kopen.',
   categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra' },
   openToets: 'Druk op E om de winkel te openen',
   openTik: 'Tik hier om de winkel te openen',
@@ -522,6 +519,66 @@ export const WINKEL = {
   kastLeeg: 'Je kast is nog leeg. Koop kleding in De Bunders Boetiek!',
   uittrekken: 'Uittrekken',
   kastUitleg: 'Klik op kleding om het aan of uit te trekken.',
+};
+
+/*
+ * ============================================================
+ *  DE MEESTERS OP HET PLEIN
+ * ============================================================
+ *  Meester Jop, Meester Bram en Meester Koen lopen rond en stellen een vraag
+ *  over een van de onderwerpen. De vragen komen uit de minispellen hierboven.
+ * ============================================================
+ */
+export const MEESTERS = [
+  {
+    id: 'jop', naam: 'Meester Jop', stem: 0.85,
+    uiterlijk: { shirt: 0x1c7ed6, broek: 0x343a40, pet: null, haar: 0x5c3a1a, kapsel: 'kort', rugzak: null },
+    extra: ['bril', 'keycord'],
+    begroeting: 'Hé, hallo! Heb jij even tijd voor een vraag?',
+  },
+  {
+    id: 'bram', naam: 'Meester Bram', stem: 0.75,
+    uiterlijk: { shirt: 0x2f9e44, broek: 0x5c4033, pet: null, haar: 0x868e96, kapsel: 'kort', rugzak: null },
+    extra: ['baard', 'vlinderdas'],
+    begroeting: 'Goedemorgen! Ik heb een pittige vraag voor je.',
+  },
+  {
+    id: 'koen', naam: 'Meester Koen', stem: 0.95,
+    uiterlijk: { shirt: 0xe03131, broek: 0x212529, pet: 0x212529, rugzak: null },
+    extra: ['fluitje'],
+    begroeting: 'Yo! Klaar voor een vraag? Kom op, jij kunt dit!',
+  },
+];
+
+export const MEESTER_VRAAG = {
+  beloning: 20, // munten voor een goed antwoord in één keer
+  tweedePoging: 10, // munten als het bij de tweede poging goed is
+  wachtMinuten: 3, // daarna heeft die meester even geen nieuwe vraag
+  onderwerpen: {
+    kofschip: { intro: "Mijn vraag gaat over 't kofschip-x.", hint: "Haal -en van het hele werkwoord af. Zit de laatste letter in 't kofschip-x? Dan -te, anders -de." },
+    taarten: { intro: 'Mijn vraag gaat over werkwoorden met -te en -ten.', hint: 'Eindigt de ik-vorm al op een t? Dan komt er nog -te achter: twee keer t!' },
+    drummer: { intro: 'Mijn vraag gaat over werkwoorden met -de en -den.', hint: 'Eindigt de ik-vorm al op een d? Dan komt er nog -de achter: twee keer d!' },
+    voorvoegsel: { intro: 'Mijn vraag gaat over werkwoorden met be-, ge-, ver-, her- en ont-.', hint: "De regel blijft hetzelfde: ik-vorm + te of de. Gebruik 't kofschip-x." },
+    poffertjes: { intro: 'Mijn vraag gaat over de persoonsvorm en het onderwerp.', hint: '' },
+    ijs: { intro: 'Mijn vraag gaat over het werkwoordelijk gezegde.', hint: 'Zoek eerst de persoonsvorm. Zoek daarna de andere werkwoorden in de zin.' },
+  },
+  vraagVerleden: 'Hoe schrijf je de verleden tijd?',
+  vraagZin: 'Typ het werkwoord in de verleden tijd:',
+  vraagPv: 'Wat is de persoonsvorm in deze zin?',
+  vraagOw: 'Wat is het onderwerp in deze zin?',
+  vraagWwg: 'Welke werkwoorden horen bij het werkwoordelijk gezegde? Typ ze allemaal.',
+  hintPv: 'Doe de vraagproef: maak er een vraag van. Welk woord komt vooraan?',
+  hintOw: 'Vraag: wie of wat + persoonsvorm?',
+  goed: ['Helemaal goed! Hier zijn je munten.', 'Top! Dat wist je goed.', 'Knap hoor! Die munten heb je verdiend.'],
+  nogEens: 'Bijna! Probeer het nog één keer.',
+  helaas: 'Jammer! Het goede antwoord is: {antwoord}. Volgende keer beter!',
+  wachten: 'Ik heb zo weer een nieuwe vraag! Kom over {minuten} terug.',
+  controleer: 'Controleer',
+  doei: 'Doei!',
+  bedankt: 'Bedankt, meester!',
+  wolkjeToets: 'Druk op E: {naam} heeft een vraag!',
+  wolkjeTik: 'Tik hier: {naam} heeft een vraag!',
+  wolkjeWacht: 'Druk op E om met {naam} te praten',
 };
 
 /*
