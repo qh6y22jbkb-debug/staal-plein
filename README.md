@@ -151,7 +151,10 @@ In het hek aan de oostkant van het plein (naast de klimtoren) staat een grote po
 - In de Voetbalwereld staat een stadion met tribunes, juichend publiek, lichtmasten, reclameborden
   (zonder echte merken) en een groot scorebord. Je speelt in het blauw-gele tenue van **De Bunders**;
   je gekochte hoofddeksel, schoenen en extra's houd je aan.
-- *In aanbouw:* teamgenoten, tegenstanders, de wedstrijd en het toernooi volgen in de volgende stappen.
+- Met de knop **Start wedstrijd** (of Enter) speel je een wedstrijd van **4 tegen 4**: een keeper en drie
+  veldspelers per team. Jij bestuurt één veldspeler (geel ringetje); de rest doet de computer.
+  Een wedstrijd duurt 3 minuten. Bal uit? Dan legt de computer hem terug (ingooi, hoekschop of doelschop).
+- *In aanbouw:* het keuzebord met drie tegenstanders en de Bunders Beker volgen in de volgende stap.
 
 | Actie in de Voetbalwereld | Toetsenbord | Touchscreen |
 |---|---|---|
@@ -159,6 +162,14 @@ In het hek aan de oostkant van het plein (naast de klimtoren) staat een grote po
 | Sprinten | Shift (energiebalk onderin) | knop Sprint |
 | Schieten | spatie vasthouden (krachtbalkje) en loslaten | knop Schiet vasthouden |
 | Dribbelen | loop tegen de bal: hij blijft voor je voeten | idem |
+| Passen | Q (naar de teamgenoot in je looprichting) | knop Pass |
+| Wisselen | E (naar de veldspeler het dichtst bij de bal) | knop Wissel |
+| Bal afpakken | loop tegen de tegenstander met de bal | idem |
+| Wedstrijd stoppen | Esc of de knop Stoppen | knop Stoppen |
+
+Krijgt een teamgenoot de bal (bijvoorbeeld na jouw pass), dan bestuur je hem meteen.
+Wedstrijdduur, de computerspelers van De Bunders en de drie tegenstanders (snelheid, schieten, keeper,
+afpakken, passen) staan in `src/data/oefeningen.js` bij `VOETBAL_WEDSTRIJD` en `VOETBAL_TEAMS`.
 
 ### Testen met F9 (voor de leerkracht)
 
@@ -236,7 +247,10 @@ src/
   voetbal/stadion.js   veld, doelen, tribunes met publiek, scorebord, lichtmasten
   voetbal/bal.js       de bal met eigen natuurkunde (rollen, stuiteren, palen, net)
   voetbal/tenue.js     het tenue van De Bunders
-  voetbal/voetbalhud.js  sprint- en krachtbalk, GOAL!, touchknoppen
+  voetbal/voetbalhud.js  stand, tijd, sprint- en krachtbalk, GOAL!, eindscherm, touchknoppen
+  voetbal/wedstrijd.js  de wedstrijd: balbezit, afpakken, uitballen, doelpunten, aftrap, tijd
+  voetbal/voetbalai.js  de computerspelers en keepers
+  voetbal/voetbalspeler.js  een speler in de wedstrijd (team, rol, plek)
   voetbal/voetbalstand.js   voortgang in de Voetbalwereld (bewaard in de browser)
   ui/overgang.js       witte overgang tussen de werelden
   ui/meestervraag.js   het vraagvenster van een meester

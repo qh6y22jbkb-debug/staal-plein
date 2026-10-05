@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { Speler } from '../speler.js';
 import { Botsing } from '../wereld/botsing.js';
 import { Poort } from '../poort.js';
-import { VOETBAL } from '../data/oefeningen.js';
+import { VOETBAL, VOETBAL_TEAMS } from '../data/oefeningen.js';
+import { Wedstrijd } from './wedstrijd.js';
 import { confetti } from '../ui/confetti.js';
 import { bouwStadion, HALF_L } from './stadion.js';
 import { Bal, BAL_STRAAL } from './bal.js';
@@ -25,12 +26,13 @@ const TOETSEN = {
   vooruit: ['KeyW', 'ArrowUp'], achteruit: ['KeyS', 'ArrowDown'],
   links: ['KeyA', 'ArrowLeft'], rechts: ['KeyD', 'ArrowRight'],
   sprint: ['ShiftLeft', 'ShiftRight'], schiet: ['Space'],
+  pass: ['KeyQ'], wissel: ['KeyE'], start: ['Enter', 'NumpadEnter'],
 };
 
 /**
  * De Voetbalwereld. Wordt pas gemaakt als je door de poort loopt,
  * en weer helemaal opgeruimd (dispose) als je teruggaat naar het schoolplein.
- * Stap 2: stadion, bal en de eigen speler (rondlopen, dribbelen, schieten op een leeg doel).
+ * Zonder wedstrijd: vrij oefenen op een leeg doel. Met de startknop begint een wedstrijd van 4 tegen 4.
  */
 export class VoetbalWereld {
   constructor({ camera, besturing, uiLaag, geluid, kleding, opTerug, toonWolkje }) {
@@ -75,6 +77,65 @@ export class VoetbalWereld {
     this.goalTimer = 0;
     this.camFocus = new THREE.Vector3(-4, 0, 0);
     this.weg = false;
+    this.wedstrijd = null;
+    this.vorigeToets = {};
+    this.tegenstander = VOETBAL_TEAMS[0]; // stap 4: hier komt het keuzebord
+    this.hud.opStart = () => this.startWedstrijd(this.tegenstander);
+    this.hud.opStop = () => this.stopWedstrijd(true);
+    this.hud.zetStartKnop(VOETBAL.startWedstrijd.replace('{team}', this.tegenstander.naam));
+  }
+
+  /** Toets net ingedrukt (niet vastgehouden)? */
+  netIngedrukt(naam) {
+    const nu = this.toets(naam);
+    const was = this.vorigeToets[naam];
+    this.vorigeToets[naam] = nu;
+    return nu && !was;
+  }
+
+  /* ---------- Wedstrijd ---------- */
+
+  startWedstrijd(tegenstander) {
+    this.stopWedstrijd();
+    this.hud.verbergEinde();
+    this.hud.zetStartKnop(null);
+    this.goalTimer = 0;
+    this.wedstrijd = new Wedstrijd({
+      scene: this.scene, bal: this.bal, botsing: this.botsing, eigenFiguur: this.speler,
+      tegenstander, scorebord: this.stadion.scorebord, hud: this.hud, publiek: this.stadion.publiek, geluid: this.geluid,
+      opGoal: (eigen, team) => {
+        this.hud.toonGoal(eigen ? VOETBAL.goal : VOETBAL.goalTegen.replace('{team}', team.naam));
+        this.geluid?.juichen?.();
+        if (eigen) confetti(150);
+      },
+      opEinde: (uitslag) => this.toonEinde(uitslag),
+    });
+  }
+
+  toonEinde({ thuis, uit, tegenstander }) {
+    const resultaat = thuis > uit ? VOETBAL.gewonnen : thuis === uit ? VOETBAL.gelijk : VOETBAL.verloren;
+    if (thuis > uit) { confetti(200); this.geluid?.klaar?.(); }
+    this.hud.toonEinde(VOETBAL.eindeTitel, `De Bunders ${thuis} - ${uit} ${tegenstander.naam}`, [resultaat], [
+      { tekst: `↻ ${VOETBAL.nogEenKeer}`, actie: () => this.startWedstrijd(tegenstander), hoofd: true },
+      { tekst: VOETBAL.terugVeld, actie: () => this.stopWedstrijd(true) },
+    ]);
+  }
+
+  /** Terug naar vrij oefenen. */
+  stopWedstrijd(naarVeld = false) {
+    if (!this.wedstrijd) return;
+    this.wedstrijd.verwijder();
+    this.wedstrijd = null;
+    this.speler.uiterlijk.snelheid = LOOPSNELHEID;
+    if (naarVeld) {
+      this.hud.verbergEinde();
+      this.speler.positie.set(-6, 0, 0);
+      this.speler.richting = Math.PI / 2;
+      this.bal.zetOp(0, 0);
+      this.stadion.scorebord.zet({ thuis: VOETBAL.thuisTeam, uit: VOETBAL.oefenen, scoreThuis: 0, scoreUit: 0, tijd: '--:--' });
+      this.hud.zetStand(null);
+      this.hud.zetStartKnop(VOETBAL.startWedstrijd.replace('{team}', this.tegenstander.naam));
+    }
   }
 
   /** Is een toets (of touchknop) ingedrukt? */
@@ -97,6 +158,8 @@ export class VoetbalWereld {
     this.tijd += dt;
     this.besturing.neemSprong(); // spatie is hier schieten, niet springen
     this.besturing.neemCamera();
+    if (this.wedstrijd) { this.updateWedstrijd(dt); return; }
+    if (this.netIngedrukt('start') && !this.hud.eindeOpen) { this.startWedstrijd(this.tegenstander); return; }
 
     // Lopen en sprinten.
     const inv = this.besturing.aan ? this.invoer() : { x: 0, z: 0, actief: false };
@@ -126,6 +189,38 @@ export class VoetbalWereld {
       this.weg = true;
       this.opTerug?.();
     }
+  }
+
+  updateWedstrijd(dt) {
+    const ws = this.wedstrijd;
+    if (this.besturing.ingedrukt.has('Escape') && !this.hud.eindeOpen) { this.stopWedstrijd(true); return; }
+    const inv = this.besturing.aan && !this.hud.eindeOpen ? this.invoer() : { x: 0, z: 0, actief: false };
+    const wilSprinten = this.toets('sprint') && inv.actief && this.energie > 0.02;
+    this.energie = THREE.MathUtils.clamp(this.energie + (wilSprinten ? -ENERGIE_OP : ENERGIE_BIJ) * dt, 0, 1);
+    this.hud.zetEnergie(this.energie);
+    // Schot: kracht opbouwen met spatie / Schiet-knop, loslaten = schieten.
+    const ingedrukt = this.besturing.aan && this.toets('schiet');
+    if (ingedrukt && !this.schietToetsVorige) this.laden = 0;
+    if (ingedrukt && this.laden >= 0) this.laden += dt;
+    const kracht = this.laden >= 0 ? Math.min(1, this.laden / LAADTIJD) : 0;
+    this.hud.zetKracht(kracht);
+    let schot = null;
+    if (!ingedrukt && this.schietToetsVorige && this.laden >= 0) { schot = Math.max(0.15, kracht); this.laden = -1; }
+    this.schietToetsVorige = ingedrukt;
+
+    ws.update(dt, {
+      ...inv,
+      sprint: wilSprinten,
+      schot,
+      pass: this.netIngedrukt('pass') || this.hud.neemTik('pass'),
+      wissel: this.netIngedrukt('wissel') || this.hud.neemTik('wissel'),
+    });
+    this.stadion.update(dt);
+    this.poort.update(dt);
+    this.updateCamera(dt, ws.gebruiker.pos);
+    this.zon.position.set(this.camFocus.x + 20, 40, this.camFocus.z + 18);
+    this.zon.target.position.copy(this.camFocus);
+    this.toonWolkje?.(null);
   }
 
   /** Dribbelen: dichtbij en op de grond? Dan blijft de bal voor je voeten. */
@@ -197,8 +292,8 @@ export class VoetbalWereld {
   }
 
   /** Camera schuin achter en boven de speler; de bal blijft goed in beeld. */
-  updateCamera(dt) {
-    const s = this.speler.positie, b = this.bal.pos;
+  updateCamera(dt, volg = this.speler.positie) {
+    const s = volg, b = this.bal.pos;
     const doel = new THREE.Vector3().lerpVectors(s, b, Math.min(0.35, 6 / Math.max(6, s.distanceTo(b))));
     doel.x = THREE.MathUtils.clamp(doel.x, -HALF_L - 2, HALF_L + 2);
     this.camFocus.lerp(doel, Math.min(1, dt * 4));

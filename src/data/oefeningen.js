@@ -610,7 +610,59 @@ export const VOETBAL = {
   oefenen: 'OEFENEN',
   goal: 'GOAL!',
   thuisTeam: 'DE BUNDERS',
+  uitlegPass: 'Q: passen',
+  uitlegWissel: 'E: wissel van speler',
+  knopPass: 'Pass',
+  knopWissel: 'Wissel',
+  startWedstrijd: 'Start wedstrijd tegen {team}',
+  aftrap: 'Aftrap!',
+  uitBal: 'Uit! Bal voor {team}',
+  hoekschop: 'Hoekschop voor {team}',
+  doelschop: 'Doelschop voor {team}',
+  goalTegen: 'Goal voor {team}',
+  eindeTitel: 'Einde wedstrijd!',
+  gewonnen: 'Gewonnen! 🎉',
+  gelijk: 'Gelijkspel!',
+  verloren: 'Verloren… volgende keer beter!',
+  nogEenKeer: 'Nog een keer',
+  terugVeld: 'Terug naar het veld',
+  stoppen: 'Stoppen',
 };
+
+/*
+ * ============================================================
+ *  VOETBALWEDSTRIJD EN TEGENSTANDERS
+ * ============================================================
+ *  snelheid: hardlopen (meter per seconde)
+ *  schot: hoe zuiver ze schieten (0 = altijd naast, 1 = heel zuiver)
+ *  keeper: hoe goed de keeper is (0 = laat alles door, 1 = houdt bijna alles)
+ *  afpakken: hoe vaak ze de bal van je afpakken (per seconde dat ze naast je staan)
+ *  passen: hoe graag ze naar elkaar passen (0..1)
+ * ============================================================
+ */
+export const VOETBAL_WEDSTRIJD = {
+  duurMinuten: 3,
+  eigenTeam: { snelheid: 5.2, schot: 0.6, keeper: 0.6, afpakken: 0.8, passen: 0.5 }, // de computerspelers van De Bunders
+  kindAfpakken: 2, // hoe makkelijk het kind de bal afpakt (per seconde naast de balbezitter)
+};
+
+export const VOETBAL_TEAMS = [
+  {
+    id: 'slakken', naam: 'De Slakken', kort: 'SLAKKEN', niveau: 'makkelijk',
+    tenue: { shirt: '#82c91e', streep: '#5c940d', broek: 0x2b8a3e },
+    snelheid: 4.2, schot: 0.3, keeper: 0.35, afpakken: 0.5, passen: 0.3,
+  },
+  {
+    id: 'wervelwinden', naam: 'De Wervelwinden', kort: 'WERVELWINDEN', niveau: 'gemiddeld',
+    tenue: { shirt: '#ae3ec9', streep: '#ffffff', broek: 0x5f3dc4 },
+    snelheid: 5.4, schot: 0.55, keeper: 0.6, afpakken: 1.2, passen: 0.55,
+  },
+  {
+    id: 'bliksems', naam: 'De Bliksems', kort: 'BLIKSEMS', niveau: 'moeilijk',
+    tenue: { shirt: '#fab005', streep: '#212529', broek: 0x212529 },
+    snelheid: 6.4, schot: 0.8, keeper: 0.85, afpakken: 2.0, passen: 0.75,
+  },
+];
 
 /*
  * ============================================================

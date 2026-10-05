@@ -55,7 +55,11 @@ export class Bal {
     const stappen = 3; // kleine stapjes: zo vliegt de bal niet door een paal heen
     const h = dt / stappen;
     for (let i = 0; i < stappen; i++) this.stap(h);
-    // Draaien terwijl hij rolt.
+    this.rol(dt);
+  }
+
+  /** Draaien terwijl hij rolt. */
+  rol(dt) {
     const v = this.snelheid;
     if (v > 0.01) {
       this._as.set(this.vel.z, 0, -this.vel.x).normalize();
