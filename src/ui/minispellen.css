@@ -348,3 +348,30 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; 
 .ms-niveau.op-slot:active { transform: none; box-shadow: 0 5px 0 #adb5bd; }
 .ms-niveau.op-slot .ms-sterren { color: #ced4da; text-shadow: none; }
 .ms-slot { font-size: 30px; }
+
+/* Munten in de minispellen */
+.minispel { padding-top: 76px; }
+.ms-munt-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff3bf; border: 3px solid #fab005; border-radius: 20px;
+  padding: 0 10px 0 4px; font-weight: bold; color: #e67700; white-space: nowrap;
+}
+.ms-munt-badge .munt { width: 22px; height: 22px; border-width: 2px; }
+.ms-munt-badge .munt::after { font-size: 11px; }
+.ms-overzicht {
+  margin: 4px auto 18px; max-width: 440px; text-align: left;
+  background: #fff; border: 3px solid #e9ecef; border-radius: 18px; padding: 10px 16px;
+}
+.ms-overzicht h4 { margin: 0 0 6px; font-size: 20px; text-align: center; }
+.ms-overzicht div { display: flex; justify-content: space-between; gap: 12px; font-size: 19px; padding: 3px 0; border-bottom: 1px dashed #e9ecef; }
+.ms-overzicht div:last-child { border-bottom: none; }
+.ms-overzicht b { display: inline-flex; align-items: center; gap: 6px; }
+.ms-overzicht .ms-foutloos b { color: #2b8a3e; }
+.ms-overzicht .ms-totaal { font-size: 22px; padding-top: 8px; }
+.ms-overzicht .ms-totaal .munt { width: 24px; height: 24px; }
+@media (max-width: 700px), (max-height: 620px) {
+  .minispel { padding-top: 64px; }
+  .ms-overzicht div { font-size: 16px; }
+}
+.munt.klein { width: 18px; height: 18px; border-width: 2px; }
+.munt.klein::after { font-size: 9px; }

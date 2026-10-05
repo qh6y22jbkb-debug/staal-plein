@@ -100,6 +100,13 @@ export const geluid = {
     toon(NOOT(88), 0.12, 0.15, { type: 'sine', volume: 0.2 });
   },
 
+  /** "Kling": een muntje komt binnen. */
+  kling() {
+    if (!aan) return;
+    toon(NOOT(88), 0, 0.12, { type: 'sine', volume: 0.22 });
+    toon(NOOT(95), 0.05, 0.3, { type: 'sine', volume: 0.18 });
+  },
+
   /** Plopje bij het openen van een gesprek of knop. */
   plop() {
     if (!aan) return;

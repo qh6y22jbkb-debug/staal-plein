@@ -8,6 +8,7 @@ import { IjsSpel } from './ijs.js';
 import '../ui/minispellen.css';
 import { geluid } from '../geluid.js';
 import { voorlezen } from '../voorlezen.js';
+import { munten } from '../munten.js';
 
 const SPEL_PER_KRAAM = {
   kofschip: KofschipSpel,
@@ -21,7 +22,7 @@ const SPEL_PER_KRAAM = {
 /** Start het minispel van een kraam. */
 export function startMinispel(kraam, opties) {
   const Spel = SPEL_PER_KRAAM[kraam.data.id];
-  const spel = new Spel({ geluid, voorlezen, ...opties, kraam, data: SPELLEN[kraam.data.id] });
+  const spel = new Spel({ geluid, voorlezen, muntenTotaal: () => munten.totaal, ...opties, kraam, data: SPELLEN[kraam.data.id] });
   spel.start();
   return spel;
 }

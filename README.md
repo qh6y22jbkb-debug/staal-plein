@@ -90,6 +90,23 @@ Met **↺ Opnieuw beginnen** gaan alle niveaus weer op slot.
 In `src/data/oefeningen.js` heeft elke vraag een `niveau: 1, 2 of 3`. Bij 2 of 3 sterren komen
 vooral vragen van dat niveau, aangevuld met makkelijkere vragen.
 
+## Munten
+
+Rechtsboven staat de muntenteller. Munten verdien je in de minispellen:
+
+| | ★ | ★★ | ★★★ |
+|---|---|---|---|
+| Goed in één keer | 5 | 10 | 15 |
+| Goed bij de 2e poging | de helft | de helft | de helft |
+
+- Goed bij de 3e poging of later: geen munten (wel gewoon verder).
+- **Reeks**: elke 3 goede antwoorden op rij (in één keer goed) = +5 extra.
+- **Foutloze ronde**: +20.
+- Een fout kost **nooit** munten.
+- Na elke ronde zie je een overzicht: goede antwoorden, munten, bonussen en je nieuwe totaal.
+
+Alle bedragen staan in `src/data/oefeningen.js` bij `MUNTEN`.
+
 ## Stempelkaart, geluid en voorlezen
 
 - Een kraam krijgt pas een **stempel** op de stempelkaart (linksboven) als alle **3 niveaus** gehaald zijn.
@@ -121,6 +138,7 @@ src/
   geluid.js            alle geluidjes (Web Audio API)
   voorlezen.js         voorlezen met een Nederlandse stem (Web Speech API)
   voortgang.js         stempels bewaren in de browser
+  munten.js            de munten van de speler (bewaard in de browser)
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt
     kramen.js          de zes marktkramen met versiering
@@ -130,6 +148,7 @@ src/
   ui/dialoog.js        gespreksvenster met de drie knoppen
   ui/confetti.js       confetti bij een goed antwoord
   ui/stempelkaart.js   de stempelkaart in beeld
+  ui/muntenteller.js   muntenteller rechtsboven en vliegende muntjes
   ui/oorkonde.js       de kampioensoorkonde
   ui/startscherm.js    het startscherm
   wereld/vuurwerk.js   vuurwerk bij het feest

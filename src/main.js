@@ -19,6 +19,8 @@ import { Oorkonde } from './ui/oorkonde.js';
 import { toonStartscherm } from './ui/startscherm.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
+import { munten } from './munten.js';
+import { Muntenteller } from './ui/muntenteller.js';
 
 /* ---------- Renderer, scène en licht ---------- */
 
@@ -62,6 +64,7 @@ const kinderen = new Kinderen(scene, botsing, uiLaag, camera, voorlezen);
 const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) => [k.data.id, k.stijl.bord])));
 const oorkonde = new Oorkonde(uiLaag);
 const vuurwerk = new Vuurwerk(scene, geluid);
+const muntenteller = new Muntenteller(geluid);
 
 /* ---------- Praten met de karakters ---------- */
 
@@ -113,6 +116,7 @@ function speelMinispel(kraam) {
   dialoog.sluit();
   actiefSpel = startMinispel(kraam, {
     laag: uiLaag,
+    beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
     // Ronde gehaald: een niveau verder. Alle 3 de niveaus gehaald = stempel.
     opKlaar: (k, { niveau }) => {
       const wat = voortgang.rondeGehaald(k.data.id, niveau);
@@ -212,6 +216,7 @@ function toonBanner(tekst) {
 
 hud.opOpnieuw = () => {
   voortgang.wis();
+  munten.wis();
   stempelkaart.ververs();
   zetKraamSterren();
   speler.positie.copy(STARTPLEK);
@@ -377,4 +382,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, kinderen, dialoog, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, kinderen, dialoog, munten, muntenteller, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

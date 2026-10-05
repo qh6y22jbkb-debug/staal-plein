@@ -1,4 +1,4 @@
-import { SPEL_TEKSTEN } from '../data/oefeningen.js';
+import { SPEL_TEKSTEN, MUNTEN, MUNT_TEKSTEN } from '../data/oefeningen.js';
 import { confetti } from '../ui/confetti.js';
 import { voortgang } from '../voortgang.js';
 
@@ -58,8 +58,10 @@ export function el(tag, klasse, html) {
  *   toets(e)            → (optioneel) toetsenbord
  */
 export class Minispel {
-  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen }) {
+  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen, beloon, muntenTotaal }) {
+    this.muntenTotaal = muntenTotaal;
     this.voorlezen = voorlezen;
+    this.beloon = beloon; // (aantal, vanElement, label) → munten naar de teller
     this.laag = laag;
     this.kraam = kraam;
     this.data = data;
@@ -119,6 +121,13 @@ export class Minispel {
     this.inEenKeer = 0;
     this.foutDezeVraag = false;
     this.wachtOpVolgende = false;
+    // Munten en bonussen van deze ronde.
+    this.pogingen = 0;
+    this.tipDezeVraag = false;
+    this.rondeFouten = 0;
+    this.reeks = 0;
+    this.verdiendAntwoorden = 0;
+    this.verdiendReeks = 0;
     this.vragen = this.maakVragen();
     this.bouwVenster(true);
     this.volgendeVraag();
@@ -184,9 +193,28 @@ export class Minispel {
     this.voorlezen?.zeg(tekst, { altijd });
   }
 
-  /** Goed antwoord: confetti, geluidje, korte uitleg en een knop "Volgende". */
+  /** Munten voor dit goede antwoord (fout kost nooit iets). */
+  muntenVoorAntwoord() {
+    const basis = MUNTEN.perNiveau[this.niveau - 1] ?? MUNTEN.perNiveau.at(-1);
+    let factor = this.pogingen === 0 ? 1 : this.pogingen === 1 ? MUNTEN.tweedePoging : MUNTEN.latereKeer;
+    if (this.tipDezeVraag) factor = Math.min(factor, MUNTEN.metTip);
+    return Math.round(basis * factor);
+  }
+
+  /** Goed antwoord: confetti, geluidje, munten, korte uitleg en een knop "Volgende". */
   goed(uitlegHtml = '', { automatisch = false } = {}) {
     if (!this.foutDezeVraag) this.inEenKeer++;
+    const verdiend = this.muntenVoorAntwoord();
+    // Reeks: goede antwoorden op rij, in één keer goed en zonder tip.
+    let reeksBonus = 0;
+    if (this.pogingen === 0 && !this.tipDezeVraag) {
+      this.reeks++;
+      if (this.reeks % MUNTEN.reeksLengte === 0) reeksBonus = MUNTEN.reeksBonus;
+    } else {
+      this.reeks = 0;
+    }
+    this.pogingen = 0;
+    this.tipDezeVraag = false;
     this.bolletjes[this.nr].classList.add('goed');
     this.bolletjes[this.nr].classList.remove('nu');
     this.nr++;
@@ -194,6 +222,17 @@ export class Minispel {
     confetti(automatisch ? 40 : 90);
     this.feedback.className = 'ms-feedback ms-goed';
     this.feedback.innerHTML = `<span><b>${willekeurig(SPEL_TEKSTEN.goed)}</b> ${uitlegHtml}</span>`;
+    if (verdiend > 0) {
+      const badge = el('span', 'ms-munt-badge', `<span class="munt" aria-hidden="true"></span>+${verdiend}`);
+      this.feedback.firstChild.append(' ', badge);
+      this.verdiendAntwoorden += verdiend;
+      this.beloon?.(verdiend, badge, `+${verdiend}`);
+    }
+    if (reeksBonus) {
+      this.verdiendReeks += reeksBonus;
+      const label = MUNT_TEKSTEN.reeks.replace('{aantal}', this.reeks).replace('{bonus}', reeksBonus);
+      setTimeout(() => this.beloon?.(reeksBonus, this.bolletjes[this.nr - 1] ?? this.feedback, label), 450);
+    }
     if (!automatisch) this.voorlezen?.zeg(this.feedback.querySelector('b').textContent);
     if (automatisch) return;
     const knop = el('button', 'ms-volgende', this.nr >= VRAGEN_PER_RONDE ? 'Klaar! ▶' : 'Volgende ▶');
@@ -207,6 +246,9 @@ export class Minispel {
   /** Fout antwoord: nooit straffen, wel een vriendelijke hint. Daarna nog een poging. */
   fout(hintHtml) {
     this.foutDezeVraag = true;
+    this.pogingen++;
+    this.rondeFouten++;
+    this.reeks = 0;
     this.geluid?.bijna();
     this.feedback.className = 'ms-feedback ms-bijna';
     void this.feedback.offsetWidth;
@@ -227,6 +269,7 @@ export class Minispel {
         <div class="ms-klaar-icoon">${this.kraam.data.icoon}</div>
         <h3>${SPEL_TEKSTEN.klaarTitel}</h3>
         <p>${tekst}</p>
+        ${this.overzichtHtml()}
         <div class="ms-klaar-knoppen">
           <button type="button" class="ms-opnieuw">↻ ${SPEL_TEKSTEN.opnieuw}</button>
           <button type="button" class="ms-ander">${sterren(this.niveau)} ${SPEL_TEKSTEN.anderNiveau}</button>
@@ -240,12 +283,35 @@ export class Minispel {
     const terug = this.inhoud.querySelector('.ms-terug');
     terug.addEventListener('click', () => this.sluit());
     terug.focus({ preventScroll: true });
+    if (this.foutloos) {
+      const label = MUNT_TEKSTEN.foutloos.replace('{bonus}', MUNTEN.foutloosBonus);
+      setTimeout(() => this.beloon?.(MUNTEN.foutloosBonus, this.inhoud.querySelector('.ms-foutloos') ?? this.inhoud, label), 500);
+    }
     const openVoor = this.hoogsteOpen;
     let extra = this.opKlaar?.(this.kraam, { niveau: this.niveau, inEenKeer: this.inEenKeer }) ?? '';
     if (this.hoogsteOpen > openVoor) {
       extra = `${SPEL_TEKSTEN.niveauVrij.replace('{sterren}', sterren(this.hoogsteOpen))}${extra ? `<br>${extra}` : ''}`;
     }
     if (extra) this.inhoud.querySelector('.ms-klaar p').insertAdjacentHTML('afterend', `<p class="ms-stempel-bericht">${extra}</p>`);
+  }
+
+  /** Overzicht van de ronde: goede antwoorden, munten, bonussen en het nieuwe totaal. */
+  overzichtHtml() {
+    const T = MUNT_TEKSTEN;
+    this.foutloos = this.rondeFouten === 0;
+    const bonus = this.foutloos ? MUNTEN.foutloosBonus : 0;
+    const totaalNa = (this.muntenTotaal?.() ?? 0) + bonus;
+    const rij = (icoon, label, waarde, klasse = '') => `<div class="${klasse}"><span>${icoon} ${label}</span><b>${waarde}</b></div>`;
+    return `
+      <div class="ms-overzicht">
+        <h4>${T.overzichtTitel}</h4>
+        ${rij('✅', T.goedeAntwoorden, `${VRAGEN_PER_RONDE} van ${VRAGEN_PER_RONDE}`)}
+        ${rij('⭐', T.inEenKeer, this.inEenKeer)}
+        ${rij('<span class="munt klein" aria-hidden="true"></span>', T.muntenAntwoorden, `+${this.verdiendAntwoorden}`)}
+        ${rij('🔥', T.reeksBonus, this.verdiendReeks ? `+${this.verdiendReeks}` : '–')}
+        ${rij('🏅', T.foutloosBonus, bonus ? `+${bonus}` : '–', bonus ? 'ms-foutloos' : '')}
+        ${rij('💰', T.totaal, `<span class="munt" aria-hidden="true"></span> ${totaalNa} ${T.munten}`, 'ms-totaal')}
+      </div>`;
   }
 
   opnieuw() {

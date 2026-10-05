@@ -148,7 +148,7 @@ export const TEKSTEN = {
   geluidAan: 'Geluid staat aan',
   geluidUit: 'Geluid staat uit',
   opnieuwKnop: 'Opnieuw beginnen',
-  opnieuwVraag: 'Weet je het zeker? Al je stempels worden gewist.',
+  opnieuwVraag: 'Weet je het zeker? Al je stempels en munten worden gewist.',
   opnieuwJa: 'Ja, opnieuw beginnen',
   opnieuwNee: 'Nee, toch niet',
 
@@ -394,6 +394,36 @@ export const SPEL_TEKSTEN = {
   klaarTekst: 'Je hebt alle 8 vragen gedaan. {aantal} keer had je het in één keer goed!',
   opnieuw: 'Nog een keer',
   terug: 'Terug naar het plein',
+};
+
+/*
+ * ============================================================
+ *  MUNTEN
+ * ============================================================
+ *  Hier stel je de beloningen in. Een fout antwoord kost nooit munten.
+ * ============================================================
+ */
+export const MUNTEN = {
+  perNiveau: [5, 10, 15], // munten per goed antwoord bij ★, ★★ en ★★★
+  tweedePoging: 0.5, // goed bij de 2e poging: de helft
+  latereKeer: 0, // goed bij de 3e poging of later: (nog) geen munten
+  metTip: 0.5, // goed met hulp van een tip: de helft
+  reeksLengte: 3, // elke 3 goede antwoorden op rij (in één keer goed)...
+  reeksBonus: 5, // ...geven 5 extra munten
+  foutloosBonus: 20, // ronde zonder één fout
+};
+
+export const MUNT_TEKSTEN = {
+  reeks: '{aantal} op rij! +{bonus}',
+  foutloos: 'Foutloze ronde! +{bonus}',
+  overzichtTitel: 'Jouw ronde',
+  goedeAntwoorden: 'Goede antwoorden',
+  inEenKeer: 'In één keer goed',
+  muntenAntwoorden: 'Munten voor antwoorden',
+  reeksBonus: 'Reeks-bonus',
+  foutloosBonus: 'Bonus foutloze ronde',
+  totaal: 'Je hebt nu',
+  munten: 'munten',
 };
 
 /*

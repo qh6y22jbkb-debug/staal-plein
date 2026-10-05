@@ -391,3 +391,49 @@ body.start-open .joystick, body.start-open .springknop { visibility: hidden; }
 .sk-vak:not(.gestempeld) .sk-sterren { color: #868e96; text-shadow: none; }
 .sk-vak.wip { animation: wip .5s ease-out; }
 @keyframes wip { 40% { transform: scale(1.2); } }
+
+/* ---------- Munten ---------- */
+.munt {
+  display: inline-block; width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3bf 0 12%, #ffd43b 30%, #f59f00 75%, #e67700 100%);
+  border: 3px solid #b8860b;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.35);
+  position: relative; vertical-align: middle; flex: none;
+}
+.munt::after {
+  content: '★'; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 14px; line-height: 1; color: #b8860b;
+}
+.munt.draait { animation: muntDraai 3s linear infinite; }
+@keyframes muntDraai { 0% { transform: scaleX(1); } 25% { transform: scaleX(.15); } 50% { transform: scaleX(1); } 75% { transform: scaleX(.15); } 100% { transform: scaleX(1); } }
+.muntenteller {
+  position: fixed; top: 14px; right: 14px; z-index: 30;
+  display: flex; align-items: center; gap: 10px;
+  background: #fff9db; color: var(--donker);
+  border: 4px solid var(--donker); border-radius: 30px;
+  padding: 6px 18px 6px 10px;
+  font-size: 26px; font-weight: bold; min-width: 110px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.2);
+  pointer-events: none;
+}
+.muntenteller .munt { width: 34px; height: 34px; }
+.muntenteller .munt::after { font-size: 17px; }
+.muntenteller.hup { animation: muntHup .25s ease-out; }
+@keyframes muntHup { 50% { transform: scale(1.12); } }
+.hud-rechts { top: 78px; }
+.munt.vliegend { position: fixed; left: 0; top: 0; z-index: 31; pointer-events: none; }
+.munt-label {
+  position: fixed; z-index: 31; transform: translate(-50%, -50%);
+  font-size: 26px; font-weight: bold; color: #e67700;
+  text-shadow: 0 2px 0 #fff, 0 -2px 0 #fff, 2px 0 0 #fff, -2px 0 0 #fff;
+  pointer-events: none; white-space: nowrap;
+  animation: labelOp 1.3s ease-out forwards;
+}
+@keyframes labelOp { to { transform: translate(-50%, -150%); opacity: 0; } }
+body.start-open .muntenteller { visibility: hidden; }
+@media (max-width: 700px) {
+  .muntenteller { font-size: 21px; padding: 4px 14px 4px 8px; min-width: 90px; }
+  .muntenteller .munt { width: 28px; height: 28px; }
+  .hud-rechts { top: 66px; }
+}
+@media print { .muntenteller { display: none; } }
