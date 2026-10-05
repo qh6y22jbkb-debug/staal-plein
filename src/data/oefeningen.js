@@ -148,7 +148,7 @@ export const TEKSTEN = {
   geluidAan: 'Geluid staat aan',
   geluidUit: 'Geluid staat uit',
   opnieuwKnop: 'Opnieuw beginnen',
-  opnieuwVraag: 'Weet je het zeker? Al je stempels en munten worden gewist.',
+  opnieuwVraag: 'Weet je het zeker? Al je stempels, munten en kleding worden gewist.',
   opnieuwJa: 'Ja, opnieuw beginnen',
   opnieuwNee: 'Nee, toch niet',
 
@@ -455,6 +455,73 @@ export const MUNT_TEKSTEN = {
   munten: 'munten',
   pleinGevonden: 'Muntje gevonden! {aantal} van de {totaal}',
   pleinAlles: 'Alle {totaal} muntjes gevonden! Morgen liggen er weer nieuwe.',
+};
+
+/*
+ * ============================================================
+ *  DE BUNDERS BOETIEK (winkel) EN KLEDING
+ * ============================================================
+ *  categorie: hoofd, shirt, broek, schoenen of extra
+ *  model: hoe het eruitziet (zie src/kleding.js), kleur: hoofdkleur
+ *  prijs: in munten
+ * ============================================================
+ */
+export const KLEDING = [
+  // Hoofd
+  { id: 'pet-rood', categorie: 'hoofd', naam: 'Rode pet', icoon: '🧢', kleur: 0xe03131, model: 'pet', prijs: 20 },
+  { id: 'beanie', categorie: 'hoofd', naam: 'Warme muts', icoon: '🧶', kleur: 0x12b886, model: 'beanie', prijs: 40 },
+  { id: 'cowboyhoed', categorie: 'hoofd', naam: 'Cowboyhoed', icoon: '🤠', kleur: 0x9c6b3c, model: 'cowboy', prijs: 90 },
+  { id: 'piratenhoed', categorie: 'hoofd', naam: 'Piratenhoed', icoon: '🏴‍☠️', kleur: 0x1d1d1d, model: 'piraat', prijs: 120 },
+  { id: 'kroon', categorie: 'hoofd', naam: 'Gouden kroon', icoon: '👑', kleur: 0xffc929, model: 'kroon', prijs: 300 },
+  // Shirt
+  { id: 'shirt-groen', categorie: 'shirt', naam: 'Groen shirt', icoon: '👕', kleur: 0x40c057, model: 'kleur', prijs: 20 },
+  { id: 'shirt-paars', categorie: 'shirt', naam: 'Paars shirt', icoon: '👕', kleur: 0x9c36b5, model: 'kleur', prijs: 20 },
+  { id: 'shirt-geel', categorie: 'shirt', naam: 'Geel shirt', icoon: '👕', kleur: 0xfcc419, model: 'kleur', prijs: 25 },
+  { id: 'voetbalshirt', categorie: 'shirt', naam: 'Voetbalshirt', icoon: '⚽', kleur: 0xe03131, model: 'voetbal', prijs: 70 },
+  { id: 'heldenshirt', categorie: 'shirt', naam: 'Superheldenshirt', icoon: '⚡', kleur: 0x1971c2, model: 'held', prijs: 140 },
+  // Broek
+  { id: 'broek-spijker', categorie: 'broek', naam: 'Spijkerbroek', icoon: '👖', kleur: 0x4a6fa5, model: 'kleur', prijs: 25 },
+  { id: 'broek-rood', categorie: 'broek', naam: 'Rode broek', icoon: '👖', kleur: 0xc92a2a, model: 'kleur', prijs: 30 },
+  { id: 'korte-broek', categorie: 'broek', naam: 'Korte broek', icoon: '🩳', kleur: 0xf08c00, model: 'kort', prijs: 40 },
+  { id: 'broek-goud', categorie: 'broek', naam: 'Glimmende broek', icoon: '✨', kleur: 0xe0b000, model: 'glim', prijs: 110 },
+  // Schoenen
+  { id: 'schoenen-rood', categorie: 'schoenen', naam: 'Rode sneakers', icoon: '👟', kleur: 0xfa5252, model: 'kleur', prijs: 25 },
+  { id: 'schoenen-wit', categorie: 'schoenen', naam: 'Witte sneakers', icoon: '👟', kleur: 0xf1f3f5, model: 'kleur', prijs: 30 },
+  { id: 'laarzen', categorie: 'schoenen', naam: 'Stoere laarzen', icoon: '🥾', kleur: 0x7a4a24, model: 'laars', prijs: 60 },
+  { id: 'schoenen-goud', categorie: 'schoenen', naam: 'Gouden schoenen', icoon: '🌟', kleur: 0xffc929, model: 'glim', prijs: 150 },
+  // Extra
+  { id: 'zonnebril', categorie: 'extra', naam: 'Zonnebril', icoon: '🕶️', kleur: 0x212529, model: 'zonnebril', prijs: 50 },
+  { id: 'vlinderdas', categorie: 'extra', naam: 'Vlinderdas', icoon: '🎀', kleur: 0xe64980, model: 'vlinderdas', prijs: 40 },
+  { id: 'rugzak-paars', categorie: 'extra', naam: 'Paarse rugzak', icoon: '🎒', kleur: 0x7048e8, model: 'rugzak', prijs: 35 },
+  { id: 'cape', categorie: 'extra', naam: 'Heldencape', icoon: '🦸', kleur: 0xe03131, model: 'cape', prijs: 250 },
+];
+
+export const WINKEL = {
+  naam: 'De Bunders Boetiek',
+  verkoper: 'Bo Boetiek',
+  welkom: 'Welkom bij De Bunders Boetiek! Ik ben Bo. Kijk maar rond en pas gerust iets aan!',
+  tabKleding: 'Kleding',
+  tabTips: 'Tips',
+  tipsBinnenkort: 'De meesters komen er bijna aan! Hier kun je straks tips kopen.',
+  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra' },
+  openToets: 'Druk op E om de winkel te openen',
+  openTik: 'Tik hier om de winkel te openen',
+  pasAan: 'Pas aan',
+  uitproberen: 'Je past nu: {naam}',
+  kopen: 'Kopen',
+  gekocht: 'Gekocht ✓',
+  aantrekken: 'Aantrekken',
+  aan: 'Heb je aan ✓',
+  nogNodig: 'Nog {aantal} munten nodig',
+  zekerVraag: 'Weet je het zeker? Je koopt: {naam} voor {prijs} munten.',
+  ja: 'Ja, kopen!',
+  nee: 'Nee, toch niet',
+  bedankt: 'Gekocht! {naam} staat je super!',
+  sluiten: 'Sluiten',
+  kast: 'Kledingkast',
+  kastLeeg: 'Je kast is nog leeg. Koop kleding in De Bunders Boetiek!',
+  uittrekken: 'Uittrekken',
+  kastUitleg: 'Klik op kleding om het aan of uit te trekken.',
 };
 
 /*

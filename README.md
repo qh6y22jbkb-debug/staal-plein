@@ -46,6 +46,7 @@ Dit bouwt het spel en zet het op de `gh-pages`-tak. Na een minuutje staat de nie
 | Achteruit | ↓ of S | joystick omlaag |
 | Ergens heen lopen | klik op de grond | tik op de grond |
 | Springen | spatie | Spring-knop |
+| Kledingkast | K | knop 👕 |
 | Camera | draait vanzelf mee achter de speler (slepen mag ook) | idem |
 | Zoomen | scrollwiel | – |
 | Praten met een karakter of kind | E (of klik op de kraam/het kind) | tik op het wolkje, de kraam of het kind |
@@ -111,6 +112,18 @@ Rechtsboven staat de muntenteller. Munten verdien je in de minispellen:
 
 Alle bedragen staan in `src/data/oefeningen.js` bij `MUNTEN`.
 
+## De Bunders Boetiek en de kledingkast
+
+Bij de ingang staat **De Bunders Boetiek** met verkoopster **Bo Boetiek**. Druk op **E** om de winkel te openen.
+
+- Tabblad **Kleding**: Hoofd, Shirt, Broek, Schoenen en Extra (22 items, 20 tot 300 munten; de kroon en de cape zijn het duurst).
+- **Pas aan** laat je iets eerst proberen op het draaiende poppetje. Te duur? Dan staat er "Nog X munten nodig".
+- Voor elke aankoop vraagt de winkel: "Weet je het zeker?"
+- Gekochte kleding trek je meteen aan. In de **Kledingkast** (toets **K** of de knop 👕) trek je kleding aan en uit.
+- Tabblad **Tips**: hier komen de tips van de meesters (volgende stap).
+
+Alle kleding en prijzen staan in `src/data/oefeningen.js` bij `KLEDING`; hoe het eruitziet staat in `src/kleding.js`.
+
 ## Stempelkaart, geluid en voorlezen
 
 - Een kraam krijgt pas een **stempel** op de stempelkaart (linksboven) als alle **3 niveaus** gehaald zijn.
@@ -143,6 +156,11 @@ src/
   voorlezen.js         voorlezen met een Nederlandse stem (Web Speech API)
   voortgang.js         stempels bewaren in de browser
   munten.js            de munten van de speler (bewaard in de browser)
+  winkel.js            De Bunders Boetiek (winkelvenster)
+  kleding.js           hoe elk kledingstuk eruitziet op het poppetje
+  kledingkast.js       gekochte en aangetrokken kleding (bewaard in de browser)
+  ui/kastvenster.js    het venster van de kledingkast
+  ui/paspop.js         het draaiende poppetje in winkel en kast
   wereld/pleinmuntjes.js  de 15 verstopte muntjes op het plein
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt

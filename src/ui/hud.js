@@ -12,6 +12,7 @@ export class Hud {
       <div class="titel">Schoolplein De Bunders</div>
       <div class="hud-rechts">
         <div class="hud-knoppen">
+          <button type="button" class="rond" data-knop="kast" title="Kledingkast (K)" aria-label="Kledingkast">👕</button>
           <button type="button" class="rond" data-knop="voorlezen"></button>
           <button type="button" class="rond" data-knop="geluid"></button>
           <button type="button" class="rond" data-knop="opnieuw" title="${TEKSTEN.opnieuwKnop}" aria-label="${TEKSTEN.opnieuwKnop}">↺</button>
@@ -26,6 +27,7 @@ export class Hud {
             <li>⬆️ Springen: <b>${isTouch ? 'Spring-knop' : 'spatie'}</b></li>
             <li>💬 Praten: <b>${isTouch ? 'tik op het wolkje' : 'E'}</b></li>
             <li>👆 ${isTouch ? 'Tik' : 'Klik'} op de grond: loop erheen</li>
+            <li>👕 Kledingkast: <b>${isTouch ? 'knop 👕' : 'K'}</b></li>
           </ul>
         </div>
       </div>
@@ -54,6 +56,9 @@ export class Hud {
         case 'geluid':
           this.geluid.aan = !this.geluid.aan;
           this.geluid.plop();
+          break;
+        case 'kast':
+          this.opKast?.();
           break;
         case 'opnieuw':
           this.vraagOpnieuw(laag);

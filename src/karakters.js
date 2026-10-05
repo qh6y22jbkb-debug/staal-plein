@@ -13,6 +13,7 @@ export const STIJLEN = {
   peter: { huid: 0xf0c09a, shirt: 0xffffff, haar: 0xc08a3e, hoed: 'bakkerspet', petKleur: 0x2a4f8f, extra: ['snor', 'schort'] },
   olga: { huid: 0xd99a6c, shirt: 0xfd7e14, haar: 0x3b2314, kapsel: 'staartjes', extra: ['strik'] },
   gijs: { huid: 0xf2c29b, shirt: 0x12b886, haar: 0xe0a33a, hoed: 'ijsmuts', extra: ['vlinderdas'] },
+  bo: { huid: 0xe8b48f, shirt: 0xf06595, haar: 0xe8590c, kapsel: 'knot', extra: ['bril', 'meetlint', 'bloem'] },
 };
 
 export class Karakter {
@@ -187,6 +188,24 @@ export class Karakter {
         const lus = kegel(0.09, 0.16, 0xd9473e, k * 0.08, 1.62, 0.36, this.lijf, 6);
         lus.rotation.z = (k * Math.PI) / 2;
       }
+    }
+    if (extra.includes('meetlint')) {
+      // Geel meetlint om de nek, met twee hangende uiteinden.
+      for (const x of [-0.16, 0.16]) doos(0.07, 0.5, 0.02, 0xffd43b, x, 1.38, 0.38, this.lijf);
+      const kraag = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.025, 4, 16), mat(0xffd43b));
+      kraag.rotation.x = Math.PI / 2;
+      kraag.position.y = 1.68;
+      this.lijf.add(kraag);
+    }
+    if (extra.includes('bloem')) {
+      const bloem = new THREE.Group();
+      bloem.position.set(0.3, 0.28, 0.12);
+      hoofd.add(bloem);
+      for (let i = 0; i < 5; i++) {
+        const h = (i / 5) * Math.PI * 2;
+        bol(0.06, 0xffffff, Math.cos(h) * 0.07, Math.sin(h) * 0.07, 0, bloem);
+      }
+      bol(0.05, 0xfab005, 0, 0, 0.02, bloem);
     }
     if (extra.includes('papegaai')) {
       const p = new THREE.Group();

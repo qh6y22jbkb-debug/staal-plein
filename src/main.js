@@ -7,8 +7,12 @@ import { VolgCamera } from './camera.js';
 import { Besturing } from './besturing.js';
 import { Hud } from './ui/hud.js';
 import { Dialoog } from './ui/dialoog.js';
-import { bouwKramen } from './wereld/kramen.js';
-import { TEKSTEN, MUNTEN, MUNT_TEKSTEN } from './data/oefeningen.js';
+import { bouwKramen, bouwBoetiek } from './wereld/kramen.js';
+import { Winkel } from './winkel.js';
+import { Kastvenster } from './ui/kastvenster.js';
+import { kledingkast } from './kledingkast.js';
+import { trekAan } from './kleding.js';
+import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
 import { geluid } from './geluid.js';
@@ -52,8 +56,13 @@ scene.add(zon, zon.target);
 const botsing = new Botsing(PLEIN);
 const wereld = bouwSchoolplein(scene, botsing);
 const kramen = bouwKramen(scene, botsing);
+const boetiek = bouwBoetiek(scene, botsing);
+const alleKramen = [...kramen, boetiek]; // de 6 leerkramen + de winkel
 const speler = new Speler(scene);
 speler.positie.copy(STARTPLEK);
+// Gekochte kleding aantrekken (en opnieuw als je iets aan- of uittrekt).
+trekAan(speler, kledingkast.aan);
+kledingkast.opVerandering(() => trekAan(speler, kledingkast.aan));
 
 const volgCam = new VolgCamera(camera, wereld.blokkers);
 const uiLaag = document.getElementById('ui');
@@ -82,7 +91,7 @@ let dichtsteKraam = null;
 
 function zoekDichtsteKraam() {
   let beste = null, besteAfstand = PRAATAFSTAND;
-  for (const k of kramen) {
+  for (const k of alleKramen) {
     const d = Math.hypot(speler.positie.x - k.praatPunt.x, speler.positie.z - k.praatPunt.z);
     if (d < besteAfstand) { beste = k; besteAfstand = d; }
   }
@@ -91,6 +100,10 @@ function zoekDichtsteKraam() {
 
 function startGesprek(kraam) {
   if (!kraam || dialoog.open) return;
+  if (kraam.isWinkel) {
+    openVenster(winkel);
+    return;
+  }
   besturing.aan = false;
   besturing.doel = null;
   besturing.ingedrukt.clear();
@@ -114,6 +127,30 @@ function terugNaarPlein() {
   volgCam.zetGesprek(null);
   document.body.classList.remove('in-gesprek');
 }
+
+/* ---------- Winkel en kledingkast ---------- */
+
+const winkel = new Winkel(uiLaag, { geluid, voorlezen });
+const kastvenster = new Kastvenster(uiLaag, { geluid });
+let actiefVenster = null;
+
+function openVenster(venster) {
+  if (actiefVenster || dialoog.open || actiefSpel || startOpen) return;
+  besturing.aan = false;
+  besturing.doel = null;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  kinderen.verbergBallon();
+  actiefVenster = venster;
+  venster.opSluiten = () => {
+    actiefVenster = null;
+    klok.update(); // geen sprong in de tijd
+    besturing.aan = true;
+  };
+  venster.toon();
+}
+besturing.opKast = () => openVenster(kastvenster);
+hud.opKast = () => openVenster(kastvenster);
 
 /* ---------- Minispellen ---------- */
 
@@ -227,6 +264,7 @@ hud.opOpnieuw = () => {
   voortgang.wis();
   munten.wis();
   pleinMuntjes.wis();
+  kledingkast.wis();
   stempelkaart.ververs();
   zetKraamSterren();
   speler.positie.copy(STARTPLEK);
@@ -292,7 +330,7 @@ let vastTijd = 0;
 
 function frame() {
   klok.update();
-  if (actiefSpel) return; // tijdens een minispel staat het plein stil (scheelt rekenkracht)
+  if (actiefSpel || actiefVenster) return; // plein staat stil tijdens een spel of winkel (scheelt rekenkracht)
   const dt = Math.min(klok.getDelta(), 0.05);
   tijd += dt;
 
@@ -346,13 +384,14 @@ function frame() {
       if (dKind < dKraam) dichtsteKraam = null;
       else dichtsteKind = null;
     }
-    if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
+    if (dichtsteKraam?.isWinkel) hud.toonWolkje(besturing.isTouch ? WINKEL.openTik : WINKEL.openToets);
+    else if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
     else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
   kinderen.update(dt, speler);
-  for (const k of kramen) k.update(dt, tijd, speler.positie);
+  for (const k of alleKramen) k.update(dt, tijd, speler.positie);
 
   wereld.update(dt, tijd);
   pleinMuntjes.update(dt, speler.positie, camera);
@@ -393,4 +432,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

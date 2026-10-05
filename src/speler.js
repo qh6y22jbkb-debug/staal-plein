@@ -39,13 +39,15 @@ export class Speler {
   bouwModel() {
     const m = this.model;
     const { huid, shirt, broek, schoen, pet, haar, kapsel, rugzak } = this.uiterlijk;
+    // Verwijzingen naar onderdelen, zodat er kleding op/aan kan (zie kleding.js).
+    this.delen = { mouwen: [], broeken: [], schoenen: [], pet: [], rugzak: [] };
 
     // Benen (draaien om de heup).
     this.benen = [-0.17, 0.17].map((x) => {
       const heup = new THREE.Group();
       heup.position.set(x, 0.75, 0);
-      doos(0.24, 0.62, 0.26, broek, 0, -0.33, 0, heup);
-      doos(0.26, 0.14, 0.38, schoen, 0, -0.68, 0.05, heup);
+      this.delen.broeken.push(doos(0.24, 0.62, 0.26, broek, 0, -0.33, 0, heup));
+      this.delen.schoenen.push(doos(0.26, 0.14, 0.38, schoen, 0, -0.68, 0.05, heup));
       m.add(heup);
       return heup;
     });
@@ -55,16 +57,19 @@ export class Speler {
     lijf.position.y = 1.15;
     lijf.castShadow = true;
     m.add(lijf);
+    this.delen.lijf = lijf;
     if (rugzak != null) {
-      doos(0.5, 0.55, 0.22, rugzak, 0, 1.2, -0.38, m);
-      doos(0.4, 0.2, 0.05, new THREE.Color(rugzak).multiplyScalar(0.8).getHex(), 0, 1.08, -0.5, m);
+      this.delen.rugzak.push(
+        doos(0.5, 0.55, 0.22, rugzak, 0, 1.2, -0.38, m),
+        doos(0.4, 0.2, 0.05, new THREE.Color(rugzak).multiplyScalar(0.8).getHex(), 0, 1.08, -0.5, m),
+      );
     }
 
     // Armen (draaien om de schouder).
     this.armen = [-0.5, 0.5].map((x) => {
       const schouder = new THREE.Group();
       schouder.position.set(x, 1.45, 0);
-      doos(0.18, 0.55, 0.2, shirt, 0, -0.25, 0, schouder);
+      this.delen.mouwen.push(doos(0.18, 0.55, 0.2, shirt, 0, -0.25, 0, schouder));
       bol(0.12, huid, 0, -0.58, 0, schouder);
       m.add(schouder);
       return schouder;
@@ -98,7 +103,7 @@ export class Speler {
       petBol.position.y = 0.06;
       petBol.castShadow = true;
       hoofd.add(petBol);
-      doos(0.5, 0.05, 0.3, pet, 0, 0.1, 0.42, hoofd);
+      this.delen.pet.push(petBol, doos(0.5, 0.05, 0.3, pet, 0, 0.1, 0.42, hoofd));
     } else {
       const kap = new THREE.Mesh(new THREE.SphereGeometry(0.385, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat(haar));
       kap.rotation.x = -0.3;
@@ -167,6 +172,11 @@ export class Speler {
     this.model.rotation.y = this.richting;
     this.huidigeSnelheid += (snelheid - this.huidigeSnelheid) * Math.min(1, dt * 10);
     const s = this.huidigeSnelheid / SNELHEID;
+    // Cape wappert mee als je loopt of springt.
+    if (this.cape) {
+      const doel = 0.12 + Math.min(1, s) * 0.55 + (this.opGrond ? 0 : 0.5) + Math.sin(performance.now() / 180) * 0.04 * Math.min(1, s);
+      this.cape.rotation.x += (doel - this.cape.rotation.x) * Math.min(1, dt * 6);
+    }
 
     if (!this.opGrond) {
       // In de lucht: armen omhoog, benen een beetje gebogen.

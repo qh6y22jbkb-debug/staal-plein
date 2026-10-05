@@ -451,3 +451,99 @@ body.start-open .muntenteller { visibility: hidden; }
 }
 .melding.zichtbaar { transform: translate(-50%, 0); }
 @media (max-width: 700px) { .melding { font-size: 17px; max-width: calc(100% - 140px); top: 70px; } }
+
+/* ---------- Winkel (De Bunders Boetiek) en kledingkast ---------- */
+body.venster-open .joystick, body.venster-open .springknop, body.venster-open .wolkje,
+body.venster-open .hulp, body.venster-open .stempelkaart, body.venster-open .titel, body.venster-open .hud-knoppen { display: none; }
+.winkel-achtergrond {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(20, 35, 60, .55);
+  display: grid; place-items: center; padding: 76px 14px 14px;
+}
+.winkel {
+  position: relative;
+  width: min(1040px, 100%); max-height: 100%; overflow: auto;
+  background: #fff8fb; border: 6px solid #c2255c; border-radius: 30px;
+  padding: 14px 22px 20px; display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 10px 0 rgba(0,0,0,.2);
+}
+.winkel.kast { border-color: #7a4a24; background: #fffaf3; }
+.wk-kop { display: flex; align-items: center; gap: 12px; }
+.wk-kop h2 { margin: 0; flex: 1; font-size: 30px; color: #c2255c; }
+.winkel.kast .wk-kop h2 { color: #7a4a24; }
+.wk-logo { font-size: 36px; }
+.wk-sluit {
+  font: inherit; font-weight: bold; font-size: 18px; cursor: pointer;
+  background: #fff; color: var(--donker); border: 3px solid var(--donker); border-radius: 14px; padding: 6px 14px;
+}
+.wk-welkom { display: flex; align-items: center; gap: 12px; font-size: 20px; background: #fff0f6; border-radius: 16px; padding: 8px 14px; }
+.wk-bo { font-size: 38px; }
+.wk-tabs { display: flex; gap: 10px; }
+.wk-tabs button, .wk-categorieen button {
+  font: inherit; font-weight: bold; cursor: pointer; color: var(--donker);
+  border: 3px solid var(--donker); border-radius: 16px; background: #fff;
+}
+.wk-tabs button { font-size: 22px; padding: 8px 22px; }
+.wk-tabs button.actief { background: #c2255c; color: #fff; border-color: #c2255c; }
+.wk-inhoud { display: grid; grid-template-columns: 280px 1fr; gap: 18px; align-items: start; }
+.wk-paspop {
+  position: sticky; top: 0;
+  background: radial-gradient(circle at 50% 35%, #fff, #ffe3ec);
+  border: 4px solid #fcc2d7; border-radius: 22px; overflow: hidden;
+}
+.winkel.kast .wk-paspop { background: radial-gradient(circle at 50% 35%, #fff, #f3e3d3); border-color: #e0c48f; }
+.wk-canvas { width: 100%; height: 340px; touch-action: none; }
+.wk-canvas canvas { display: block; cursor: grab; }
+.wk-pasmelding { min-height: 30px; text-align: center; font-weight: bold; font-size: 17px; padding: 0 8px 8px; color: #c2255c; }
+.wk-categorieen { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.wk-categorieen button { font-size: 18px; padding: 5px 14px; }
+.wk-categorieen button.actief { background: #ffd43b; }
+.wk-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.wk-item {
+  background: #fff; border: 3px solid #e9ecef; border-radius: 18px; padding: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+}
+.wk-item.past { border-color: #c2255c; box-shadow: 0 0 0 3px #fcc2d7; }
+.wk-item.heeft { background: #f4fce3; }
+.wk-icoon {
+  width: 74px; height: 74px; border-radius: 50%; font-size: 40px;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fff 0 15%, var(--kleur) 70%);
+  border: 3px solid rgba(0,0,0,.15);
+}
+.wk-icoon.groot { width: 96px; height: 96px; font-size: 52px; margin: 0 auto 6px; }
+.wk-naam { font-weight: bold; font-size: 19px; }
+.wk-prijs { font-size: 19px; font-weight: bold; color: #e67700; display: flex; align-items: center; gap: 6px; }
+.wk-knoppen { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 4px; }
+.wk-knoppen button {
+  font: inherit; font-weight: bold; font-size: 16px; cursor: pointer; color: var(--donker);
+  border: 3px solid var(--donker); border-radius: 12px; padding: 6px 8px;
+}
+.wk-pas { background: #fff0f6; }
+.wk-koop { background: #b2f2bb; }
+.wk-koop:disabled { background: #e9ecef; color: #868e96; border-color: #adb5bd; cursor: not-allowed; }
+.wk-draag { background: #e7f5ff; }
+.wk-draag.aan { background: #d3f9d8; }
+.wk-binnenkort { font-size: 22px; text-align: center; padding: 30px 10px; }
+.bevestig .ja-groen { background: #b2f2bb; }
+.kast-uitleg { margin: 0 0 8px; font-size: 19px; }
+.kast-rij h3 { margin: 8px 0 6px; font-size: 20px; }
+.kast-vakken { display: flex; flex-wrap: wrap; gap: 10px; }
+.kast-item {
+  font: inherit; cursor: pointer; color: var(--donker);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 140px; padding: 8px; background: #fff; border: 3px solid #e9ecef; border-radius: 16px;
+  font-weight: bold; font-size: 16px;
+}
+.kast-item .wk-icoon { width: 60px; height: 60px; font-size: 32px; }
+.kast-item small { font-size: 14px; color: #868e96; }
+.kast-item.aan { border-color: #2b8a3e; background: #d3f9d8; }
+.kast-item.aan small { color: #2b8a3e; }
+@media (max-width: 760px) {
+  .wk-inhoud { grid-template-columns: 1fr; }
+  .wk-paspop { position: static; }
+  .wk-canvas { height: 230px; }
+  .wk-kop h2 { font-size: 22px; }
+  .wk-welkom { font-size: 16px; }
+  .wk-items { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mat, doos, cilinder, kegel, bol, canvasTextuur, tekstTextuur } from './helpers.js';
-import { KRAMEN } from '../data/oefeningen.js';
+import { KRAMEN, WINKEL } from '../data/oefeningen.js';
 import { Karakter, STIJLEN } from '../karakters.js';
 
 // Uiterlijk per kraam (kleuren, karakters, versiering).
@@ -27,6 +27,20 @@ export function bouwKramen(scene, botsing) {
     const draai = Math.atan2(MIDDEN.x - x, MIDDEN.y - z); // voorkant naar het midden
     return bouwKraam(scene, botsing, data, UITERLIJK[data.id], x, z, draai);
   });
+}
+
+/** De Bunders Boetiek: de winkelkraam, schuin bij de ingang. */
+export function bouwBoetiek(scene, botsing) {
+  const x = 13, z = 13;
+  const draai = Math.atan2(2 - x, 20 - z); // voorkant richting de ingang
+  const data = { id: 'boetiek', kraamNaam: WINKEL.naam, karakterNaam: WINKEL.verkoper, icoon: '👗' };
+  const stijl = {
+    kleur: 0xf06595, luifel: ['#cc5de8', '#ffdeeb'], bord: '#c2255c', stem: 1.3,
+    karakters: ['bo'], versier: versierBoetiek,
+  };
+  const kraam = bouwKraam(scene, botsing, data, stijl, x, z, draai);
+  kraam.isWinkel = true;
+  return kraam;
 }
 
 function streepTextuur([a, b]) {
@@ -127,6 +141,32 @@ function bouwKraam(scene, botsing, data, stijl, x, z, draai) {
 }
 
 /* ---------- Versieringen op de toonbank ---------- */
+
+function versierBoetiek(g) {
+  // Stapeltjes opgevouwen shirts.
+  [[0xe03131, 0x1c7ed6, 0xfab005], [0x40c057, 0xcc5de8]].forEach((stapel, i) => {
+    stapel.forEach((k, j) => doos(0.55, 0.09, 0.42, k, -1.15 + i * 0.7, BLAD + 0.05 + j * 0.09, 0.7, g));
+  });
+  // Paspophoofd met hoed en een zonnebril.
+  cilinder(0.05, 0.25, 0xdddddd, 1.0, BLAD + 0.12, 0.7, g, 6);
+  bol(0.17, 0xf1f3f5, 1.0, BLAD + 0.38, 0.7, g);
+  cilinder(0.26, 0.03, 0x9c6b3c, 1.0, BLAD + 0.5, 0.7, g, 14);
+  cilinder(0.13, 0.14, 0x9c6b3c, 1.0, BLAD + 0.58, 0.7, g, 12);
+  doos(0.3, 0.07, 0.04, 0x212529, 1.0, BLAD + 0.4, 0.86, g);
+  // Kledingrek naast de kraam met hangende shirts.
+  for (const z of [-0.9, 0.9]) cilinder(0.04, 2.1, 0xadb5bd, 2.55, 1.05, z, g, 6);
+  const stang = cilinder(0.035, 1.9, 0xadb5bd, 2.55, 2.05, 0, g, 6);
+  stang.rotation.x = Math.PI / 2;
+  [0xe03131, 0xfab005, 0x1c7ed6, 0x40c057, 0xcc5de8].forEach((k, i) => {
+    const shirt = doos(0.08, 0.7, 0.55, k, 2.55, 1.6, -0.7 + i * 0.35, g);
+    shirt.rotation.x = (i - 2) * 0.05;
+  });
+  // Vrolijke ballonnen.
+  [[-2.2, 0xff6b6b, 4.6], [-2.4, 0xffd43b, 4.2], [-2.0, 0x4dabf7, 4.0]].forEach(([bx, k, by], i) => {
+    bol(0.3, k, bx, by, -1.1 + i * 0.25, g, 2).scale.y = 1.2;
+    cilinder(0.01, by - 2.9, 0xffffff, bx + 0.1, (by + 2.9) / 2 - 0.15, -1.1 + i * 0.25, g, 3);
+  });
+}
 
 const BLAD = 1.13; // hoogte van het toonbankblad
 

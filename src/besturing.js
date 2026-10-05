@@ -48,6 +48,7 @@ export class Besturing {
     this.ingedrukt.add(e.code);
     if (e.code === 'Space' && !e.repeat) this.sprong = true;
     if (e.code === 'KeyE' && !e.repeat && this.opPraten) this.opPraten();
+    if (e.code === 'KeyK' && !e.repeat && this.opKast) this.opKast();
   }
 
   koppelAanwijzer() {
