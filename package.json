@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && cd dist && touch .nojekyll && git init -q -b gh-pages && git add -A && git -c user.name=qh6y22jbkb-debug -c user.email=276084259+qh6y22jbkb-debug@users.noreply.github.com commit -qm 'Nieuwe versie online' && git push -f https://github.com/qh6y22jbkb-debug/staal-plein.git gh-pages"
   },
   "dependencies": {
     "three": "^0.186.1"

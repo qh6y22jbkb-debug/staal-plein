@@ -2,7 +2,13 @@
 
 Een 3D-leerspel voor groep 7 van basisschool De Bunders. Je loopt over het schoolplein, praat met de karakters achter de marktkramen en oefent de leerdoelen van **Staal blok 2** (werkwoordspelling en zinsontleding).
 
-## Starten
+## Direct spelen
+
+👉 **https://qh6y22jbkb-debug.github.io/staal-plein/**
+
+Werkt in Chrome op Chromebook, laptop en digibord. Er hoeft niets geïnstalleerd te worden.
+
+## Starten (voor wie aan het spel wil werken)
 
 Je hebt [Node.js](https://nodejs.org) nodig (versie 20 of nieuwer).
 
@@ -20,6 +26,16 @@ npm run build
 ```
 
 De map `dist/` bevat dan het complete spel. Het spel gebruikt geen internet, plaatjes of externe 3D-modellen.
+
+### Nieuwe versie online zetten
+
+Na een aanpassing (bijvoorbeeld nieuwe vragen in `src/data/oefeningen.js`):
+
+```bash
+npm run deploy
+```
+
+Dit bouwt het spel en zet het op de `gh-pages`-tak. Na een minuutje staat de nieuwe versie op de link hierboven.
 
 ## Besturing
 
