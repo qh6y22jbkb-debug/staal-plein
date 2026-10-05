@@ -12,9 +12,15 @@ const makkelijk = (lijst) => lijst.filter((v) => (v.niveau ?? 1) <= 2);
 
 /**
  * Maakt een willekeurige vraag over een van de zes onderwerpen.
- * Geeft: { onderwerp, intro, vraag, voorbeeld (html), controleer(tekst), antwoord, uitleg, hint }
+ * Geeft: { onderwerp, intro, vraag, voorbeeld (html), vakken, controleer(tekst), antwoord, uitleg, hint }
+ * vakken = aantal invulvakken (één per woord van het antwoord).
  */
 export function maakMeesterVraag() {
+  const vraag = maakVraag();
+  return { vakken: 1, ...vraag };
+}
+
+function maakVraag() {
   const onderwerp = willekeurig(Object.keys(MEESTER_VRAAG.onderwerpen));
   const info = MEESTER_VRAAG.onderwerpen[onderwerp];
   const basis = { onderwerp, intro: info.intro, hint: info.hint };
@@ -81,6 +87,7 @@ export function maakMeesterVraag() {
         hint: vraagOw ? MEESTER_VRAAG.hintOw : MEESTER_VRAAG.hintPv,
         vraag: vraagOw ? MEESTER_VRAAG.vraagOw : MEESTER_VRAAG.vraagPv,
         voorbeeld: zin,
+        vakken: (vraagOw ? ow : pv).split(/\s+/).length,
         controleer: (t) => schoon(t) === schoon(vraagOw ? ow : pv),
         antwoord: vraagOw ? ow : pv,
         uitleg: vraagOw ? `Wie of wat ${pv.toLowerCase()}? → <mark>${ow}</mark>` : `De persoonsvorm is <mark>${pv}</mark>.`,
@@ -96,6 +103,7 @@ export function maakMeesterVraag() {
         ...basis,
         vraag: MEESTER_VRAAG.vraagWwg,
         voorbeeld: zin,
+        vakken: werkwoorden.length,
         controleer: (t) => sorteer(schoon(t).split(' ')) === sorteer(werkwoorden),
         antwoord: werkwoorden.join(' '),
         uitleg: `Werkwoordelijk gezegde: <mark>${werkwoorden.join(' ')}</mark>`,

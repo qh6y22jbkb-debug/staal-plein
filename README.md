@@ -128,7 +128,8 @@ Alle kleding en prijzen staan in `src/data/oefeningen.js` bij `KLEDING`; hoe het
 **Meester Jop**, **Meester Bram** en **Meester Koen** lopen rond op het plein. Heeft een meester een
 geel **vraagteken** boven zijn hoofd? Dan heeft hij een vraag voor je over een van de zes onderwerpen.
 
-- Druk op **E** (of klik/tik op de meester) en typ het antwoord.
+- Druk op **E** (of klik/tik op de meester) en typ het antwoord. Bestaat het antwoord uit meer woorden
+  (bijv. "heb gekocht" of "De kinderen"), dan krijg je voor elk woord een eigen vakje.
 - Goed in één keer: **20 munten**. Bij de tweede poging: 10 munten. Twee keer fout? Dan legt de meester het uit.
 - Daarna heeft die meester **5 minuten** pauze. Elke meester stelt **maximaal 5 vragen per dag**.
 - De vragen komen uit de oefeningen van de minispellen (tot en met 2 sterren).

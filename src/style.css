@@ -560,3 +560,6 @@ body.venster-open .hulp, body.venster-open .stempelkaart, body.venster-open .tit
 .tekstballon.meester { border-color: #5f3dc4; }
 .tekstballon.meester b { color: #5f3dc4; }
 .ss-extra { font-size: 18px !important; background: #fff9db; border-radius: 14px; padding: 6px 12px; }
+.mv-vakken { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.mv-vak { width: 170px; }
+@media (max-width: 700px) { .mv-vak { width: 130px; } }
