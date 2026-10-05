@@ -12,7 +12,7 @@ import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
-import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST } from './data/oefeningen.js';
+import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST, LEERKRACHT, KLEDING, VOETBAL_TEAMS } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
 import { Meesters } from './meesters.js';
@@ -602,13 +602,53 @@ renderer.setAnimationLoop(frame);
 // Startscherm: pas na een klik kan de browser geluid en voorlezen gebruiken.
 let startOpen = true;
 besturing.aan = false;
+/* ---------- Leerkrachtmodus: alles vrijspelen met de code ---------- */
+
+function speelAllesVrij() {
+  for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3); // alle stempels en niveaus
+  voortgang.zetKampioen();
+  stempelkaart.ververs();
+  zetKraamSterren();
+  werkPoortBordjeBij();
+  voetbalstand.zetPoortOpen();
+  for (const t of VOETBAL_TEAMS) voetbalstand.zetVerslagen(t.id);
+  voetbalstand.zetBeker();
+  if (!poort.open) poort.zetOpen(true, geluid);
+  zetBekerOpPlein();
+  kledingkast.geefAlles(KLEDING.map((k) => k.id));
+  voetbal?.bord?.teken();
+  hud.toonMelding(LEERKRACHT.melding);
+  geluid.klaar();
+}
+
+function controleerCode(code) {
+  if (!TEST.leerkrachtCode || code.trim().toLowerCase() !== TEST.leerkrachtCode.toLowerCase()) return false;
+  speelAllesVrij();
+  return true;
+}
+
+// De code kan ook gewoon getypt worden (zonder invulvak).
+if (TEST.leerkrachtCode) {
+  let getypt = '';
+  window.addEventListener('keydown', (e) => {
+    if (e.target?.tagName === 'INPUT' || e.key.length !== 1) return;
+    getypt = (getypt + e.key.toLowerCase()).slice(-TEST.leerkrachtCode.length);
+    if (getypt === TEST.leerkrachtCode.toLowerCase()) {
+      getypt = '';
+      // De laatste letter (k) opent anders ook de kledingkast.
+      setTimeout(() => { if (kastvenster.open) kastvenster.sluit(); }, 0);
+      speelAllesVrij();
+    }
+  });
+}
+
 toonStartscherm(uiLaag, () => {
   startOpen = false;
   besturing.aan = true;
   geluid.plop();
   // Al alle stempels (bijv. van vóór de Voetbalwereld)? Dan gaat de poort nu open.
   if (voortgang.aantal === KRAAM_AANTAL && !poort.open) setTimeout(openPoortMetMelding, 1200);
-});
+}, controleerCode);
 
 /* Geheime testtoets F9: alle stempels (uitzetten in src/data/oefeningen.js bij TEST). */
 if (TEST.geheimeToetsF9) {

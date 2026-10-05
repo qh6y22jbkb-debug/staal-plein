@@ -707,3 +707,20 @@ body.in-voetbal .springknop { display: none !important; }
 .vb-munt-rij:last-child { border-bottom: none; }
 .vb-munt-rij b { color: #e67700; display: inline-flex; align-items: center; gap: 6px; }
 .vb-munt-rij.totaal { font-size: 20px; font-weight: bold; padding-top: 6px; }
+/* Leerkrachtcode op het startscherm */
+.ss-leerkracht {
+  display: block; margin: 14px auto 0; font: inherit; font-size: 15px; cursor: pointer;
+  background: none; border: 2px dashed #adb5bd; border-radius: 12px; padding: 4px 12px; color: #868e96;
+}
+.ss-code { margin-top: 10px; }
+.ss-code p { font-size: 16px !important; margin: 6px 0; }
+.ss-code input {
+  font: inherit; font-size: 20px; padding: 6px 10px; width: 200px; text-align: center;
+  border: 3px solid var(--donker); border-radius: 12px;
+}
+.ss-code button {
+  font: inherit; font-size: 18px; font-weight: bold; cursor: pointer; margin-left: 6px;
+  background: #e7f5ff; border: 3px solid var(--donker); border-radius: 12px; padding: 6px 14px;
+}
+.ss-code-uitslag { font-weight: bold; color: #c92a2a; min-height: 22px; }
+.ss-code-uitslag.goed { color: #2b8a3e; }

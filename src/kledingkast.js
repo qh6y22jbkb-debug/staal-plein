@@ -78,6 +78,12 @@ export const kledingkast = {
     return u;
   },
 
+  /** Leerkrachtmodus: alles in de kast (zonder het aan te trekken). */
+  geefAlles(ids) {
+    for (const id of ids) if (!staat.gekocht.includes(id)) staat.gekocht.push(id);
+    bewaar();
+  },
+
   opVerandering(f) { luisteraars.add(f); },
 
   wis() {

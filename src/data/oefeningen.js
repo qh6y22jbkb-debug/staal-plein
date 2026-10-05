@@ -711,6 +711,19 @@ export const VOETBAL_TEAMS = [
  */
 export const TEST = {
   geheimeToetsF9: true,
+  // Leerkrachtcode: typ deze code ergens in het spel (of vul hem in op het startscherm bij 🔑 Leerkracht)
+  // om ALLES vrij te spelen. Zet hem op '' om dit uit te zetten.
+  leerkrachtCode: 'lezenisleuk',
+};
+
+export const LEERKRACHT = {
+  knop: '🔑 Leerkracht',
+  uitleg: 'Vul de leerkrachtcode in om alles vrij te spelen.',
+  plaatshouder: 'Code',
+  ok: 'OK',
+  goed: '🔑 Alles is vrijgespeeld!',
+  fout: 'Die code klopt niet.',
+  melding: '🔑 Leerkrachtmodus: alles is vrijgespeeld!',
 };
 
 /*

@@ -191,6 +191,14 @@ een aanvoerdersband en een **gouden bal** (alleen te koop na het winnen van de B
 In de Voetbalwereld draag je het teamshirt, maar je eigen hoofddeksel, schoenen en extra's houd je aan.
 Alle bedragen staan in `src/data/oefeningen.js` bij `VOETBAL_MUNTEN` en `winstMunten` per team.
 
+### Leerkrachtcode: alles vrijspelen
+
+Typ **lezenisleuk** ergens in het spel (gewoon op het toetsenbord, zonder invulvak), of klik op het startscherm
+op **🔑 Leerkracht** en vul de code daar in (handig op het digibord). Dan wordt alles vrijgespeeld: alle stempels
+en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker en alle kleding.
+De code staat in `src/data/oefeningen.js` bij `TEST.leerkrachtCode`; zet hem op `''` om dit uit te zetten.
+Met **↺ Opnieuw beginnen** zet je alles weer terug.
+
 ### Testen met F9 (voor de leerkracht)
 
 Druk op **F9** om meteen alle stempels te krijgen; daarna komen het feest, de oorkonde en gaat de poort open.
