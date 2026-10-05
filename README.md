@@ -138,6 +138,24 @@ geel **vraagteken** boven zijn hoofd? Dan heeft hij een vraag voor je over een v
 
 Bedragen, wachttijd en teksten staan in `src/data/oefeningen.js` bij `MEESTERS` en `MEESTER_VRAAG`.
 
+## De Voetbalwereld
+
+In het hek aan de oostkant van het plein (naast de klimtoren) staat een grote poort met het bord **Voetbalwereld**.
+
+- Zolang je nog niet alle 6 stempels hebt, zit er een slot op. Het bordje vertelt hoeveel stempels je nog nodig hebt.
+- Na het feest bij de laatste stempel valt het slot eraf, zwaait de poort open en glinstert er licht in de opening.
+- Loop door de poort: het scherm wordt even wit en je bent in de Voetbalwereld. Daar staat een poort terug
+  naar het schoolplein. Je kunt altijd heen en weer.
+- De Voetbalwereld wordt pas geladen als je erheen gaat. Zolang je daar bent, staat het schoolplein stil
+  (dat houdt het spel soepel op een Chromebook).
+- *In aanbouw:* het stadion, de wedstrijd en het toernooi volgen in de volgende stappen.
+
+### Testen met F9 (voor de leerkracht)
+
+Druk op **F9** om meteen alle stempels te krijgen; daarna komen het feest, de oorkonde en gaat de poort open.
+**Zet dit uit voordat de kinderen gaan spelen:** zet in `src/data/oefeningen.js` bij `TEST` de regel
+`geheimeToetsF9: true` op `false`, en zet de nieuwe versie online met `npm run deploy`.
+
 ## Balans van de munten
 
 Doorgerekend met een simulatie (`MUNTEN`, `KLEDING` en `MEESTER_VRAAG` in het databestand):
@@ -203,6 +221,10 @@ src/
   meesters.js          Meester Jop, Bram en Koen (rondlopen, vraagteken, wachttijd)
   meestervragen.js     maakt een vraag uit de oefeningen
   opslag.js            lijst van alles wat in de browser bewaard wordt
+  poort.js             de poort (dicht/open, slot, glinsterend licht)
+  voetbal/voetbalwereld.js  de Voetbalwereld (wordt pas geladen bij de poort)
+  voetbal/voetbalstand.js   voortgang in de Voetbalwereld (bewaard in de browser)
+  ui/overgang.js       witte overgang tussen de werelden
   ui/meestervraag.js   het vraagvenster van een meester
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt

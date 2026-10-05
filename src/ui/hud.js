@@ -124,6 +124,11 @@ export class Hud {
     this.meldingTimer = setTimeout(() => this.melding.classList.remove('zichtbaar'), 2600);
   }
 
+  verbergMelding() {
+    clearTimeout(this.meldingTimer);
+    this.melding?.classList.remove('zichtbaar');
+  }
+
   toonWolkje(tekst) {
     if (tekst === this.wolkjeTekst) return;
     this.wolkjeTekst = tekst;

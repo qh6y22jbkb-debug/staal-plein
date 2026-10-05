@@ -107,6 +107,22 @@ export const geluid = {
     toon(NOOT(95), 0.05, 0.3, { type: 'sine', volume: 0.18 });
   },
 
+  /** Slot springt open: metalen klik, plof en een vrolijk loopje. */
+  slotOpen() {
+    if (!aan) return;
+    toon(1400, 0, 0.06, { type: 'square', volume: 0.12 });
+    toon(900, 0.05, 0.08, { type: 'square', volume: 0.1 });
+    ruis(0.45, 0.15, { volume: 0.5, filter: 500 });
+    [72, 76, 79, 84, 88].forEach((n, i) => toon(NOOT(n), 0.7 + i * 0.1, 0.35, { type: 'triangle', volume: 0.25 }));
+  },
+
+  /** Zacht "woesj" bij de overgang naar een andere wereld. */
+  woesj() {
+    if (!aan) return;
+    ruis(0, 0.6, { volume: 0.25, filter: 1800 });
+    toon(300, 0, 0.6, { type: 'sine', volume: 0.12, glijNaar: 900 });
+  },
+
   /** Plopje bij het openen van een gesprek of knop. */
   plop() {
     if (!aan) return;

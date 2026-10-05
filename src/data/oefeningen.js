@@ -583,6 +583,37 @@ export const MEESTER_VRAAG = {
 
 /*
  * ============================================================
+ *  DE VOETBALWERELD (gaat open als alle 6 stempels gehaald zijn)
+ * ============================================================
+ */
+export const VOETBAL = {
+  poortBord: 'Voetbalwereld',
+  terugBord: 'Schoolplein',
+  slotTekst: 'Haal eerst alle stempels!',
+  nogStempels: 'Nog {aantal} stempels',
+  nogEenStempel: 'Nog 1 stempel',
+  wolkjeDicht: '🔒 Haal eerst alle stempels! ({nog})',
+  wolkjeOpen: '⚽ Loop door de poort naar de Voetbalwereld!',
+  poortOpen: 'De poort is open!',
+  poortOpenUitleg: 'De poort naar de Voetbalwereld bij het hek is open!',
+  welkom: 'Welkom in de Voetbalwereld!',
+  wolkjeTerug: '🏫 Loop door de poort terug naar het schoolplein',
+};
+
+/*
+ * ============================================================
+ *  TESTEN (voor de leerkracht)
+ * ============================================================
+ *  F9 = geheime testtoets: geeft meteen alle stempels, zodat de poort opengaat.
+ *  ZET DIT OP false VOORDAT DE KINDEREN GAAN SPELEN!
+ * ============================================================
+ */
+export const TEST = {
+  geheimeToetsF9: true,
+};
+
+/*
+ * ============================================================
  *  KINDEREN OP HET PLEIN
  * ============================================================
  *  Ze lopen rond en zeggen iets grappigs als je ze aanspreekt.

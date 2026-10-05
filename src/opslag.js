@@ -7,6 +7,7 @@
  *   staal-blok2-kleding      gekochte en aangetrokken kleding
  *   staal-blok2-pleinmunten  welke verstopte muntjes vandaag al gevonden zijn
  *   staal-blok2-meesters     pauze en aantal vragen per meester (per dag)
+ *   staal-blok2-voetbal      poort open, verslagen tegenstanders, Bunders Beker
  *   staal-niveau-<kraam>     laatst gekozen niveau per kraam
  *   staal-voorlezen          voorlezen aan/uit   (blijft staan bij opnieuw beginnen)
  *   staal-geluid             geluid aan/uit      (blijft staan bij opnieuw beginnen)
@@ -17,6 +18,7 @@ export const SPEL_SLEUTELS = [
   'staal-blok2-kleding',
   'staal-blok2-pleinmunten',
   'staal-blok2-meesters',
+  'staal-blok2-voetbal',
 ];
 
 /** Wist alle spelgegevens (niet de instellingen voor geluid en voorlezen). */

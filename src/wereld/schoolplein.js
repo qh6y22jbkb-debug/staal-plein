@@ -316,7 +316,8 @@ function bouwHek(scene) {
 
   const { minX, maxX, minZ, maxZ } = PLEIN;
   maakStuk(minX, minZ, minX, maxZ);
-  maakStuk(maxX, minZ, maxX, maxZ);
+  maakStuk(maxX, minZ, maxX, -3); // oostkant: opening voor de poort naar de Voetbalwereld
+  maakStuk(maxX, 3, maxX, maxZ);
   maakStuk(minX, maxZ, -3, maxZ); // ingang in het midden van de zuidkant
   maakStuk(3, maxZ, maxX, maxZ);
   for (const x of [-3, 3]) {
@@ -567,7 +568,7 @@ function bouwBankjes(scene, botsing) {
   bankje(scene, botsing, -12, -19.5, 0);
   bankje(scene, botsing, 18, -19.5, 0);
   bankje(scene, botsing, -31, 4, Math.PI / 2);
-  bankje(scene, botsing, 37.5, -3, -Math.PI / 2);
+  bankje(scene, botsing, 37.5, -9, -Math.PI / 2);
   bankje(scene, botsing, 10, 26, Math.PI);
 }
 

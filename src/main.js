@@ -12,7 +12,7 @@ import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
-import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG } from './data/oefeningen.js';
+import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
 import { Meesters } from './meesters.js';
@@ -26,6 +26,9 @@ import { toonStartscherm } from './ui/startscherm.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
 import { wisSpelOpslag } from './opslag.js';
+import { Poort } from './poort.js';
+import { voetbalstand } from './voetbal/voetbalstand.js';
+import { naarWit, vanWit } from './ui/overgang.js';
 import { munten } from './munten.js';
 import { Muntenteller } from './ui/muntenteller.js';
 import { PleinMuntjes } from './wereld/pleinmuntjes.js';
@@ -61,6 +64,10 @@ const wereld = bouwSchoolplein(scene, botsing);
 const kramen = bouwKramen(scene, botsing);
 const boetiek = bouwBoetiek(scene, botsing);
 const alleKramen = [...kramen, boetiek]; // de 6 leerkramen + de winkel
+
+// Poort naar de Voetbalwereld in het oostelijke hek. Gaat open bij alle 6 stempels.
+const poort = new Poort(scene, { x: 40, z: 0, draai: 0, bord: VOETBAL.poortBord, open: voetbalstand.poortOpen, botsing });
+wereld.blokkers.push(poort.groep); // de camera gaat niet door de poort heen
 const speler = new Speler(scene);
 speler.positie.copy(STARTPLEK);
 // Gekochte kleding aantrekken (en opnieuw als je iets aan- of uittrekt).
@@ -194,6 +201,7 @@ function speelMinispel(kraam) {
           stempelkaart.stempel(id);
           geluid.stempel();
           zetKraamSterren();
+          werkPoortBordjeBij();
           if (voortgang.aantal === KRAAM_AANTAL && !voortgang.kampioen) setTimeout(startFeest, 900);
         }, 350);
       }
@@ -229,6 +237,79 @@ function zetKraamSterren() {
 }
 zetKraamSterren();
 
+/* ---------- Poort naar de Voetbalwereld ---------- */
+
+function stempelsNog() { return KRAAM_AANTAL - voortgang.aantal; }
+function nogTekst() { return stempelsNog() === 1 ? VOETBAL.nogEenStempel : VOETBAL.nogStempels.replace('{aantal}', stempelsNog()); }
+function werkPoortBordjeBij() { poort.zetBordje(VOETBAL.slotTekst, nogTekst()); }
+werkPoortBordjeBij();
+
+/** Na het feest (of meteen bij oude opslag met alle stempels): de poort gaat open. */
+function openPoortMetMelding() {
+  if (poort.open || voortgang.aantal < KRAAM_AANTAL) return;
+  voetbalstand.zetPoortOpen();
+  poort.zetOpen(true, geluid);
+  toonBanner(`🔓 ${VOETBAL.poortOpen}`);
+  hud.toonMelding(VOETBAL.poortOpenUitleg);
+  voorlezen.zeg(`${VOETBAL.poortOpen} ${VOETBAL.poortOpenUitleg}`);
+}
+
+/* ---------- Wisselen tussen schoolplein en Voetbalwereld ---------- */
+
+let voetbal = null; // de Voetbalwereld (alleen als je er bent)
+let bezigMetWisselen = false;
+
+async function naarVoetbal() {
+  if (bezigMetWisselen || voetbal) return;
+  bezigMetWisselen = true;
+  besturing.aan = false;
+  besturing.doel = null;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  kinderen.verbergBallon();
+  meesters.verbergBallon();
+  geluid.woesj();
+  await naarWit();
+  // Pas nu laden: de code van de Voetbalwereld wordt pas opgehaald als je door de poort gaat.
+  const { VoetbalWereld } = await import('./voetbal/voetbalwereld.js');
+  voetbal = new VoetbalWereld({
+    camera, besturing, uiLaag, geluid,
+    kleding: kledingkast.aan,
+    opTerug: naarPlein,
+    toonWolkje: (t) => hud.toonWolkje(t),
+  });
+  document.body.classList.add('in-voetbal');
+  klok.update();
+  besturing.aan = true;
+  await vanWit();
+  hud.toonMelding(VOETBAL.welkom);
+  bezigMetWisselen = false;
+}
+
+async function naarPlein() {
+  if (bezigMetWisselen || !voetbal) return;
+  bezigMetWisselen = true;
+  besturing.aan = false;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  geluid.woesj();
+  await naarWit();
+  voetbal.dispose();
+  voetbal = null;
+  hud.verbergMelding();
+  document.body.classList.remove('in-voetbal');
+  // Terug op het plein, vlak voor de poort, met de rug naar het hek.
+  speler.positie.set(33.5, 0, 0);
+  speler.richting = -Math.PI / 2;
+  volgCam.yaw = speler.richting + Math.PI;
+  volgCam.doelYaw = volgCam.doelPitch = null;
+  volgCam.eersteKeer = true;
+  klok.update();
+  besturing.aan = true;
+  await vanWit();
+  bezigMetWisselen = false;
+}
+
 /* ---------- Feest bij alle 6 stempels ---------- */
 
 function startFeest() {
@@ -252,7 +333,10 @@ function toonOorkonde() {
   besturing.aan = false;
   oorkonde.toon();
 }
-oorkonde.opSluiten = () => { besturing.aan = !startOpen; };
+oorkonde.opSluiten = () => {
+  besturing.aan = !startOpen;
+  setTimeout(openPoortMetMelding, 600); // na het feest gaat de poort open
+};
 stempelkaart.opOorkonde = toonOorkonde;
 
 function toonBanner(tekst) {
@@ -275,6 +359,9 @@ hud.opOpnieuw = () => {
   wisSpelOpslag();
   stempelkaart.ververs();
   zetKraamSterren();
+  voetbalstand.wis();
+  poort.zetDicht();
+  werkPoortBordjeBij();
   speler.positie.copy(STARTPLEK);
   speler.richting = Math.PI;
   volgCam.yaw = 0;
@@ -376,7 +463,14 @@ let vastTijd = 0;
 
 function frame() {
   klok.update();
-  if (actiefSpel || actiefVenster) return; // plein staat stil tijdens een spel of winkel (scheelt rekenkracht)
+  if (voetbal) {
+    // In de Voetbalwereld: het schoolplein staat helemaal stil en wordt niet getekend.
+    const dtV = Math.min(klok.getDelta(), 0.05);
+    voetbal.update(dtV);
+    if (voetbal) renderer.render(voetbal.scene, camera);
+    return;
+  }
+  if (actiefSpel || actiefVenster || bezigMetWisselen) return; // plein staat stil tijdens een spel of winkel (scheelt rekenkracht)
   const dt = Math.min(klok.getDelta(), 0.05);
   tijd += dt;
 
@@ -444,8 +538,12 @@ function frame() {
       hud.toonWolkje(tekst.replace('{naam}', dichtsteMeester.info.naam));
     } else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
+    } else if (poort.afstandTot(speler.positie) < 5.5) {
+      hud.toonWolkje(poort.open ? VOETBAL.wolkjeOpen : VOETBAL.wolkjeDicht.replace('{nog}', nogTekst()));
     } else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
+  poort.update(dt);
+  if (besturing.aan && poort.isInOpening(speler.positie)) naarVoetbal();
   kinderen.update(dt, speler);
   meesters.update(dt, speler);
   for (const k of alleKramen) k.update(dt, tijd, speler.positie);
@@ -480,7 +578,24 @@ toonStartscherm(uiLaag, () => {
   startOpen = false;
   besturing.aan = true;
   geluid.plop();
+  // Al alle stempels (bijv. van vóór de Voetbalwereld)? Dan gaat de poort nu open.
+  if (voortgang.aantal === KRAAM_AANTAL && !poort.open) setTimeout(openPoortMetMelding, 1200);
 });
+
+/* Geheime testtoets F9: alle stempels (uitzetten in src/data/oefeningen.js bij TEST). */
+if (TEST.geheimeToetsF9) {
+  window.addEventListener('keydown', (e) => {
+    if (e.code !== 'F9' || startOpen || voetbal) return;
+    e.preventDefault();
+    for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
+    stempelkaart.ververs();
+    zetKraamSterren();
+    werkPoortBordjeBij();
+    hud.toonMelding('🧪 Testtoets: alle stempels gegeven');
+    if (!voortgang.kampioen) setTimeout(startFeest, 600);
+    else setTimeout(openPoortMetMelding, 600);
+  });
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -489,4 +604,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
