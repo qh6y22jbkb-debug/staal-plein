@@ -175,6 +175,22 @@ Krijgt een teamgenoot de bal (bijvoorbeeld na jouw pass), dan bestuur je hem met
 Wedstrijdduur, de computerspelers van De Bunders en de drie tegenstanders (snelheid, schieten, keeper,
 afpakken, passen) staan in `src/data/oefeningen.js` bij `VOETBAL_WEDSTRIJD` en `VOETBAL_TEAMS`.
 
+### Munten en voetbalspullen
+
+| In de Voetbalwereld | Munten |
+|---|---|
+| Doelpunt van De Bunders | +5 |
+| Gelijkspel | +10 |
+| Winst tegen De Slakken / De Wervelwinden / De Bliksems | +20 / +30 / +40 |
+| De eerste keer de Bunders Beker | +100 |
+| Verlies | kost nooit munten |
+
+Na elke wedstrijd zie je een overzicht met de uitslag, je doelpunten en de verdiende munten.
+In De Bunders Boetiek staat onder **⚽ Voetbal**: oranje en neongroene voetbalschoenen, keepershandschoenen,
+een aanvoerdersband en een **gouden bal** (alleen te koop na het winnen van de Bunders Beker).
+In de Voetbalwereld draag je het teamshirt, maar je eigen hoofddeksel, schoenen en extra's houd je aan.
+Alle bedragen staan in `src/data/oefeningen.js` bij `VOETBAL_MUNTEN` en `winstMunten` per team.
+
 ### Testen met F9 (voor de leerkracht)
 
 Druk op **F9** om meteen alle stempels te krijgen; daarna komen het feest, de oorkonde en gaat de poort open.
@@ -198,8 +214,9 @@ Doorgerekend met een simulatie (`MUNTEN`, `KLEDING` en `MEESTER_VRAAG` in het da
 ## Wat wordt er bewaard?
 
 Alles wordt bewaard in de browser (localStorage) van het apparaat. Zie `src/opslag.js` voor de lijst:
-stempels en niveaus, munten, gekochte en aangetrokken kleding, gevonden muntjes van vandaag, de vragen
-van de meesters, het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
+stempels en niveaus, munten, gekochte en aangetrokken kleding (ook de voetbalspullen), gevonden muntjes
+van vandaag, de vragen van de meesters, of de poort open is, welke tegenstanders verslagen zijn, of de
+Bunders Beker gewonnen is, het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
 
 - Oudere opgeslagen voortgang (van vóór de munten) blijft gewoon werken.
 - **↺ Opnieuw beginnen** wist na bevestiging alles, behalve de instellingen voor geluid en voorlezen.
@@ -283,3 +300,4 @@ src/
 - [x] Niveaus: 1, 2 of 3 sterren per spel
 - [x] Stap 4: stempelkaart, geluid, voorlezen en afwerking
 - [x] Munten, verstopte muntjes, De Bunders Boetiek, kledingkast en de meesters
+- [x] De Voetbalwereld: poort, stadion, wedstrijd 4 tegen 4, toernooi, Bunders Beker, munten en voetbalspullen

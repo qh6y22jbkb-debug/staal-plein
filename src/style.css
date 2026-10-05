@@ -702,3 +702,8 @@ body.in-voetbal .springknop { display: none !important; }
 .vb-beker-icoon { font-size: 110px; line-height: 1; animation: bekerHop 1.2s ease-in-out infinite alternate; filter: drop-shadow(0 6px 10px rgba(230,168,0,.6)); }
 @keyframes bekerHop { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-12px) rotate(4deg); } }
 .vb-nieuw { background: #fff3bf; border: 3px solid #fab005; border-radius: 14px; padding: 6px 10px; font-weight: bold; }
+.vb-munten-overzicht { display: block; background: #fff; border: 3px solid #e9ecef; border-radius: 16px; padding: 6px 14px; margin: 6px auto; max-width: 440px; text-align: left; }
+.vb-munt-rij { display: flex; justify-content: space-between; gap: 10px; font-size: 18px; padding: 3px 0; border-bottom: 1px dashed #e9ecef; }
+.vb-munt-rij:last-child { border-bottom: none; }
+.vb-munt-rij b { color: #e67700; display: inline-flex; align-items: center; gap: 6px; }
+.vb-munt-rij.totaal { font-size: 20px; font-weight: bold; padding-top: 6px; }

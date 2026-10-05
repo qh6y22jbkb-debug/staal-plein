@@ -14,7 +14,8 @@ export function alleIds(uitrusting) {
 function onthoudOrigineel(speler) {
   if (speler._origineel) return;
   const d = speler.delen;
-  const alle = [d.lijf, ...d.mouwen, ...d.broeken, ...d.schoenen, ...d.pet, ...d.rugzak];
+  const handen = speler.armen.map((a) => a.children[1]).filter(Boolean);
+  const alle = [d.lijf, ...d.mouwen, ...d.broeken, ...d.schoenen, ...d.pet, ...d.rugzak, ...handen];
   speler._origineel = alle.map((m) => ({ m, materiaal: m.material, schaal: m.scale.clone(), pos: m.position.clone() }));
   speler.kledingStukken = [];
 }
@@ -182,6 +183,13 @@ const BOUWERS = {
         m.scale.set(1.05, 2.4, 1);
         m.position.y = -0.6;
       }
+      if (item.model === 'voetbalschoen') {
+        // Noppen onder de schoen.
+        const noppen = new THREE.Group();
+        for (const z of [-0.08, 0.05, 0.18]) for (const x of [-0.07, 0.07]) cilinder(0.025, 0.05, 0xffffff, x, -0.77, z, noppen, 5);
+        doos(0.27, 0.03, 0.39, 0xffffff, 0, -0.62, 0.05, noppen); // witte streep
+        voegToe(speler, noppen, m.parent);
+      }
     });
   },
 
@@ -209,6 +217,38 @@ const BOUWERS = {
       case 'rugzak':
         d.rugzak.forEach((m, i) => { m.material = mat(i === 0 ? k : new THREE.Color(k).multiplyScalar(0.8).getHex()); });
         break;
+      case 'handschoenen':
+        speler.armen.forEach((arm) => {
+          const hand = arm.children[1];
+          if (!hand) return;
+          hand.material = mat(k);
+          hand.scale.setScalar(1.45);
+        });
+        break;
+      case 'aanvoerdersband': {
+        const arm = speler.armen[0];
+        const band = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.04, 6, 16), mat(k));
+        band.rotation.x = Math.PI / 2;
+        band.position.y = -0.12;
+        const c = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.12), new THREE.MeshLambertMaterial({
+          map: canvasTextuur(64, 64, (ctx) => {
+            ctx.fillStyle = '#fab005'; ctx.fillRect(0, 0, 64, 64);
+            ctx.fillStyle = '#1d2b4f'; ctx.font = 'bold 52px sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('C', 32, 35);
+          }),
+        }));
+        c.position.set(-0.15, -0.12, 0);
+        c.rotation.y = -Math.PI / 2;
+        const g = new THREE.Group();
+        g.add(band, c);
+        voegToe(speler, g, arm);
+        break;
+      }
+      case 'gouden-bal': {
+        const bal = bol(0.2, glim(k), 0, -0.72, 0.16, null, 2);
+        voegToe(speler, bal, speler.armen[1]);
+        break;
+      }
       case 'cape': {
         d.rugzak.forEach((m) => { m.visible = false; });
         const scharnier = new THREE.Group();

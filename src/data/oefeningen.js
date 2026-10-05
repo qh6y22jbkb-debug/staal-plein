@@ -138,7 +138,7 @@ export const TEKSTEN = {
   startTitel: 'Staal Plein',
   startOndertitel: 'Taalfeest op het schoolplein van De Bunders · Staal blok 2',
   startUitleg: 'Loop over het plein en praat met de karakters achter de kramen. Speel hun spel en verzamel 6 stempels! Een stempel krijg je als je bij een kraam alle 3 de niveaus haalt.',
-  startExtra: '🪙 Verdien munten, zoek verstopte muntjes, beantwoord de vragen van de meesters en koop coole kleding in De Bunders Boetiek!',
+  startExtra: '🪙 Verdien munten, zoek verstopte muntjes, beantwoord de vragen van de meesters en koop coole kleding in De Bunders Boetiek! En… wat zit er achter de poort met het slot?',
   startVerder: 'Welkom terug! Je hebt al {aantal} van de 6 stempels.',
   startKnop: 'Spelen',
   startKnopVerder: 'Verder spelen',
@@ -149,7 +149,7 @@ export const TEKSTEN = {
   geluidAan: 'Geluid staat aan',
   geluidUit: 'Geluid staat uit',
   opnieuwKnop: 'Opnieuw beginnen',
-  opnieuwVraag: 'Weet je het zeker? Al je stempels, munten en kleding worden gewist.',
+  opnieuwVraag: 'Weet je het zeker? Al je stempels, munten, kleding en voetbalprijzen worden gewist.',
   opnieuwJa: 'Ja, opnieuw beginnen',
   opnieuwNee: 'Nee, toch niet',
 
@@ -492,6 +492,12 @@ export const KLEDING = [
   { id: 'vlinderdas', categorie: 'extra', naam: 'Vlinderdas', icoon: '🎀', kleur: 0xe64980, model: 'vlinderdas', prijs: 40 },
   { id: 'rugzak-paars', categorie: 'extra', naam: 'Paarse rugzak', icoon: '🎒', kleur: 0x7048e8, model: 'rugzak', prijs: 35 },
   { id: 'cape', categorie: 'extra', naam: 'Heldencape', icoon: '🦸', kleur: 0xe03131, model: 'cape', prijs: 250 },
+  // Voetbal (groep: 'voetbal' = eigen knopje in de winkel)
+  { id: 'voetbalschoenen-oranje', categorie: 'schoenen', groep: 'voetbal', naam: 'Oranje voetbalschoenen', icoon: '👟', kleur: 0xff7a00, model: 'voetbalschoen', prijs: 45 },
+  { id: 'voetbalschoenen-groen', categorie: 'schoenen', groep: 'voetbal', naam: 'Neongroene voetbalschoenen', icoon: '👟', kleur: 0x7cfc00, model: 'voetbalschoen', prijs: 45 },
+  { id: 'keepershandschoenen', categorie: 'extra', groep: 'voetbal', naam: 'Keepershandschoenen', icoon: '🧤', kleur: 0x40c057, model: 'handschoenen', prijs: 60 },
+  { id: 'aanvoerdersband', categorie: 'extra', groep: 'voetbal', naam: 'Aanvoerdersband', icoon: '©️', kleur: 0xfab005, model: 'aanvoerdersband', prijs: 80 },
+  { id: 'gouden-bal', categorie: 'extra', groep: 'voetbal', naam: 'Gouden bal', icoon: '⚽', kleur: 0xffc929, model: 'gouden-bal', prijs: 250, vereist: 'beker' },
 ];
 
 export const WINKEL = {
@@ -499,7 +505,8 @@ export const WINKEL = {
   verkoper: 'Bo Boetiek',
   welkom: 'Welkom bij De Bunders Boetiek! Ik ben Bo. Kijk maar rond en pas gerust iets aan!',
   tabKleding: 'Kleding',
-  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra' },
+  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal' },
+  vereistBeker: '🔒 Win eerst de Bunders Beker',
   openToets: 'Druk op E om de winkel te openen',
   openTik: 'Tik hier om de winkel te openen',
   pasAan: 'Pas aan',
@@ -511,7 +518,7 @@ export const WINKEL = {
   zekerVraag: 'Weet je het zeker? Je koopt: {naam} voor {prijs} munten.',
   ja: 'Ja, kopen!',
   nee: 'Nee, toch niet',
-  bedankt: 'Gekocht! {naam} staat je super!',
+  bedankt: 'Gekocht: {naam}! Je ziet er super uit!',
   sluiten: 'Sluiten',
   kast: 'Kledingkast',
   kastLeeg: 'Je kast is nog leeg. Koop kleding in De Bunders Boetiek!',
@@ -643,6 +650,12 @@ export const VOETBAL = {
   bekerKnop: 'Hoera!',
   bekerOpPlein: '🏆 De Bunders Beker staat nu midden op het schoolplein!',
   bekerBord: 'BUNDERS BEKER',
+  overzichtDoelpunten: '⚽ Doelpunten: {aantal} × {per} munten',
+  overzichtWinst: '🏆 Winst tegen {team}',
+  overzichtGelijk: '🤝 Gelijkspel',
+  overzichtBeker: '🥇 Bunders Beker',
+  overzichtVerlies: 'Verlies kost geen munten. Probeer het nog eens!',
+  overzichtTotaal: 'Verdiend: {aantal} munten',
 };
 
 /*
@@ -662,21 +675,29 @@ export const VOETBAL_WEDSTRIJD = {
   kindAfpakken: 2, // hoe makkelijk het kind de bal afpakt (per seconde naast de balbezitter)
 };
 
+/** Munten in de Voetbalwereld. Verlies kost nooit munten. */
+export const VOETBAL_MUNTEN = {
+  doelpunt: 5, // per doelpunt van De Bunders
+  gelijk: 10, // gelijkspel
+  beker: 100, // de eerste keer de Bunders Beker winnen
+  // Winst per tegenstander staat hieronder bij elk team (winstMunten).
+};
+
 export const VOETBAL_TEAMS = [
   {
     id: 'slakken', naam: 'De Slakken', kort: 'SLAKKEN', niveau: 'makkelijk',
     tenue: { shirt: '#82c91e', streep: '#5c940d', broek: 0x2b8a3e },
-    snelheid: 4.2, schot: 0.3, keeper: 0.35, afpakken: 0.5, passen: 0.3,
+    snelheid: 4.2, schot: 0.3, keeper: 0.35, afpakken: 0.5, passen: 0.3, winstMunten: 20,
   },
   {
     id: 'wervelwinden', naam: 'De Wervelwinden', kort: 'WERVELWINDEN', niveau: 'gemiddeld',
     tenue: { shirt: '#ae3ec9', streep: '#ffffff', broek: 0x5f3dc4 },
-    snelheid: 5.4, schot: 0.55, keeper: 0.6, afpakken: 1.2, passen: 0.55,
+    snelheid: 5.4, schot: 0.55, keeper: 0.6, afpakken: 1.2, passen: 0.55, winstMunten: 30,
   },
   {
     id: 'bliksems', naam: 'De Bliksems', kort: 'BLIKSEMS', niveau: 'moeilijk',
     tenue: { shirt: '#fab005', streep: '#212529', broek: 0x212529 },
-    snelheid: 6.4, schot: 0.8, keeper: 0.85, afpakken: 2.0, passen: 0.75,
+    snelheid: 6.4, schot: 0.8, keeper: 0.85, afpakken: 2.0, passen: 0.75, winstMunten: 40,
   },
 ];
 

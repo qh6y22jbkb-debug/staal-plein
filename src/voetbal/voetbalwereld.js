@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Speler } from '../speler.js';
 import { Botsing } from '../wereld/botsing.js';
 import { Poort } from '../poort.js';
-import { VOETBAL, VOETBAL_TEAMS } from '../data/oefeningen.js';
+import { VOETBAL, VOETBAL_TEAMS, VOETBAL_MUNTEN } from '../data/oefeningen.js';
 import { Wedstrijd } from './wedstrijd.js';
 import { toernooi, Toernooibord } from './toernooi.js';
 import { Vuurwerk } from '../wereld/vuurwerk.js';
@@ -37,7 +37,9 @@ const TOETSEN = {
  * Zonder wedstrijd: vrij oefenen op een leeg doel. Met de startknop begint een wedstrijd van 4 tegen 4.
  */
 export class VoetbalWereld {
-  constructor({ camera, besturing, uiLaag, geluid, kleding, opTerug, toonWolkje }) {
+  constructor({ camera, besturing, uiLaag, geluid, kleding, opTerug, toonWolkje, beloon, muntenTotaal }) {
+    this.beloon = beloon; // (aantal, vanElement, label): munten naar de teller
+    this.muntenTotaal = muntenTotaal;
     this.camera = camera;
     this.besturing = besturing;
     this.geluid = geluid;
@@ -120,13 +122,18 @@ export class VoetbalWereld {
     this.hud.verbergEinde();
     this.hud.zetStartKnop(null);
     this.goalTimer = 0;
+    this.doelpuntenDezeWedstrijd = 0;
     this.wedstrijd = new Wedstrijd({
       scene: this.scene, bal: this.bal, botsing: this.botsing, eigenFiguur: this.speler,
       tegenstander, scorebord: this.stadion.scorebord, hud: this.hud, publiek: this.stadion.publiek, geluid: this.geluid,
       opGoal: (eigen, team) => {
         this.hud.toonGoal(eigen ? VOETBAL.goal : VOETBAL.goalTegen.replace('{team}', team.naam));
         this.geluid?.juichen?.();
-        if (eigen) confetti(150);
+        if (eigen) {
+          confetti(150);
+          this.doelpuntenDezeWedstrijd++;
+          this.beloon?.(VOETBAL_MUNTEN.doelpunt, this.hud.goal, `+${VOETBAL_MUNTEN.doelpunt}`);
+        }
       },
       opEinde: (uitslag) => this.toonEinde(uitslag),
     });
@@ -137,21 +144,45 @@ export class VoetbalWereld {
     const resultaat = gewonnen ? VOETBAL.gewonnen : thuis === uit ? VOETBAL.gelijk : VOETBAL.verloren;
     const regels = [resultaat];
     let beker = false;
+    let nieuwVrij = null;
     if (gewonnen) {
       confetti(200);
       this.geluid?.klaar?.();
       const winst = toernooi.registreerWinst(tegenstander);
       this.bord.teken();
-      if (winst.nieuwVrij) regels.push(`<span class="vb-nieuw">${VOETBAL.nieuwVrij.replace('{team}', winst.nieuwVrij.naam)}</span>`);
+      nieuwVrij = winst.nieuwVrij;
       beker = winst.beker;
     }
+
+    // Munten: doelpunten (al gekregen tijdens de wedstrijd) + uitslag + eventueel de beker.
+    const M = VOETBAL_MUNTEN;
+    const doelpuntMunten = this.doelpuntenDezeWedstrijd * M.doelpunt;
+    const uitslagMunten = gewonnen ? (tegenstander.winstMunten ?? 20) : thuis === uit ? M.gelijk : 0;
+    const bekerMunten = beker ? M.beker : 0;
+    const rij = (tekst, munten) => `<span class="vb-munt-rij"><span>${tekst}</span><b>${munten ? `+${munten}` : '–'}</b></span>`;
+    const overzicht = [];
+    if (this.doelpuntenDezeWedstrijd) overzicht.push(rij(VOETBAL.overzichtDoelpunten.replace('{aantal}', this.doelpuntenDezeWedstrijd).replace('{per}', M.doelpunt), doelpuntMunten));
+    if (gewonnen) overzicht.push(rij(VOETBAL.overzichtWinst.replace('{team}', tegenstander.naam), uitslagMunten));
+    else if (thuis === uit) overzicht.push(rij(VOETBAL.overzichtGelijk, uitslagMunten));
+    if (bekerMunten) overzicht.push(rij(VOETBAL.overzichtBeker, bekerMunten));
+    const totaal = doelpuntMunten + uitslagMunten + bekerMunten;
+    const totaalNa = (this.muntenTotaal?.() ?? 0) + uitslagMunten + bekerMunten;
+    regels.push(`<span class="vb-munten-overzicht">${overzicht.join('')}${totaal
+      ? `<span class="vb-munt-rij totaal"><span>💰 ${VOETBAL.overzichtTotaal.replace('{aantal}', totaal)}</span><b><span class="munt klein"></span> ${totaalNa}</b></span>`
+      : `<span class="vb-munt-rij"><span>${VOETBAL.overzichtVerlies}</span></span>`}</span>`);
+    if (nieuwVrij) regels.push(`<span class="vb-nieuw">${VOETBAL.nieuwVrij.replace('{team}', nieuwVrij.naam)}</span>`);
+    const geefMunten = () => {
+      const plek = document.querySelector('.vb-munten-overzicht') ?? null;
+      if (uitslagMunten) this.beloon?.(uitslagMunten, plek, `+${uitslagMunten}`);
+      if (bekerMunten) setTimeout(() => this.beloon?.(bekerMunten, plek, `+${bekerMunten}`), 600);
+    };
     const eindscherm = () => this.hud.toonEinde(VOETBAL.eindeTitel, `De Bunders ${thuis} - ${uit} ${tegenstander.naam}`, regels, [
       { tekst: `↻ ${VOETBAL.nogEenKeer}`, actie: () => this.startWedstrijd(tegenstander), hoofd: !gewonnen },
       { tekst: `⚽ ${VOETBAL.andereTegenstander}`, actie: () => this.openKeuze(), hoofd: gewonnen },
       { tekst: `🏫 ${VOETBAL.terugSchoolplein}`, actie: () => this.terugNaarSchoolplein() },
     ]);
-    if (beker) this.vierBeker(eindscherm);
-    else eindscherm();
+    if (beker) this.vierBeker(() => { eindscherm(); geefMunten(); });
+    else { eindscherm(); geefMunten(); }
   }
 
   /** Alle drie de teams verslagen: de Bunders Beker! Vuurwerk boven het stadion. */

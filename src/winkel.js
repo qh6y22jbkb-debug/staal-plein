@@ -2,6 +2,7 @@ import { KLEDING, WINKEL } from './data/oefeningen.js';
 import { CATEGORIEEN, itemMetId } from './kleding.js';
 import { kledingkast } from './kledingkast.js';
 import { munten } from './munten.js';
+import { voetbalstand } from './voetbal/voetbalstand.js';
 import { Paspop } from './ui/paspop.js';
 
 const hex = (k) => `#${k.toString(16).padStart(6, '0')}`;
@@ -66,7 +67,7 @@ export class Winkel {
 
   kiesTab(tab) {
     this.tab = tab;
-    this.categorieEl.innerHTML = CATEGORIEEN.map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
+    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
     this.categorieEl.onclick = (e) => {
       const knop = e.target.closest('button[data-cat]');
       if (!knop) return;
@@ -78,12 +79,16 @@ export class Winkel {
 
   tekenItems() {
     if (this.tab !== 'kleding') return;
-    const items = KLEDING.filter((k) => k.categorie === this.categorie);
+    // Het knopje "Voetbal" toont de voetbalitems; de andere knopjes de gewone kleding.
+    const items = this.categorie === 'voetbal'
+      ? KLEDING.filter((k) => k.groep === 'voetbal')
+      : KLEDING.filter((k) => k.categorie === this.categorie && !k.groep);
     this.itemsEl.innerHTML = '';
     for (const item of items) {
       const heeft = kledingkast.heeft(item.id);
       const aan = kledingkast.heeftAan(item.id);
       const tekort = item.prijs - munten.totaal;
+      const opSlot = item.vereist === 'beker' && !voetbalstand.beker;
       const kaart = document.createElement('div');
       kaart.className = `wk-item${this.pasId === item.id ? ' past' : ''}${heeft ? ' heeft' : ''}`;
       kaart.innerHTML = `
@@ -94,7 +99,9 @@ export class Winkel {
           <button type="button" class="wk-pas">👀 ${WINKEL.pasAan}</button>
           ${heeft
             ? `<button type="button" class="wk-draag${aan ? ' aan' : ''}">${aan ? WINKEL.aan : WINKEL.aantrekken}</button>`
-            : `<button type="button" class="wk-koop" ${tekort > 0 ? 'disabled' : ''}>${tekort > 0 ? WINKEL.nogNodig.replace('{aantal}', tekort) : `🛒 ${WINKEL.kopen}`}</button>`}
+            : opSlot
+              ? `<button type="button" class="wk-koop" disabled>${WINKEL.vereistBeker}</button>`
+              : `<button type="button" class="wk-koop" ${tekort > 0 ? 'disabled' : ''}>${tekort > 0 ? WINKEL.nogNodig.replace('{aantal}', tekort) : `🛒 ${WINKEL.kopen}`}</button>`}
         </div>`;
       kaart.querySelector('.wk-pas').addEventListener('click', () => this.pas(item.id));
       kaart.querySelector('.wk-koop')?.addEventListener('click', () => this.vraagKopen(item));

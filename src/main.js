@@ -298,6 +298,8 @@ async function naarVoetbal() {
     kleding: kledingkast.aan,
     opTerug: naarPlein,
     toonWolkje: (t) => hud.toonWolkje(t),
+    beloon: (a, v, l) => muntenteller.beloon(a, v, l),
+    muntenTotaal: () => munten.totaal,
   });
   document.body.classList.add('in-voetbal');
   klok.update();
