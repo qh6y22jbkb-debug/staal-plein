@@ -724,3 +724,88 @@ body.in-voetbal .springknop { display: none !important; }
 }
 .ss-code-uitslag { font-weight: bold; color: #c92a2a; min-height: 22px; }
 .ss-code-uitslag.goed { color: #2b8a3e; }
+
+/* ---------- Leeskraam: vragenkaartjes (Spot aan!) ---------- */
+.winkel.lees { border-color: #c92a2a; background: #fffaf0; width: min(900px, 100%); }
+.winkel.lees .wk-kop h2 { color: #c92a2a; }
+.lees-inhoud { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 2px 0; }
+.lees-vraag-titel { margin: 6px 0 2px; font-size: 30px; color: var(--donker); text-align: center; }
+.lees-soorten { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.lees-soort {
+  flex: 1 1 260px; max-width: 360px; min-height: 170px;
+  font: inherit; font-weight: bold; font-size: 30px; cursor: pointer; color: #fff;
+  border: none; border-radius: 26px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 6px 0 rgba(0,0,0,.25);
+}
+.lees-soort span { font-size: 64px; }
+.lees-soort.verhaal { background: #c92a2a; }
+.lees-soort.info { background: #138a8a; }
+.lees-categorieen { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; width: 100%; }
+.lees-categorie {
+  font: inherit; font-weight: bold; font-size: 26px; cursor: pointer; min-height: 84px;
+  border: none; border-radius: 20px; padding: 10px 14px; box-shadow: 0 5px 0 rgba(0,0,0,.25);
+}
+.lees-categorie.groot { min-height: 120px; font-size: 30px; }
+.lees-categorie.verras { grid-column: 1 / -1; background: #fff; color: var(--donker); border: 4px dashed #c92a2a; box-shadow: none; }
+.lees-soort:active, .lees-categorie:active, .lees-volgend:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.lees-soort:focus-visible, .lees-categorie:focus-visible, .lees-knoppen button:focus-visible, .lees-terug:focus-visible { outline: 5px solid #ffd43b; outline-offset: 3px; }
+.lees-onder { width: 100%; display: flex; justify-content: center; }
+.lees-terug {
+  font: inherit; font-weight: bold; font-size: 22px; cursor: pointer; color: var(--donker);
+  background: #fff; border: 3px solid var(--donker); border-radius: 16px; padding: 10px 18px;
+}
+.lees-beurt {
+  font-size: 26px; font-weight: bold; border-radius: 999px; padding: 6px 22px; color: #fff;
+}
+.lees-beurt.beurt-a { background: #1c5fa8; }
+.lees-beurt.beurt-b { background: #a61e4d; }
+
+.lees-kaart-plek { perspective: 1400px; width: min(780px, 100%, calc((100vh - 350px) * 1.65)); }
+.lees-kaart {
+  position: relative; width: 100%; aspect-ratio: 16 / 10; min-height: 230px;
+  transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3,.7,.3,1.15);
+  transform: rotateY(180deg);
+}
+.lees-kaart.omgedraaid { transform: rotateY(0deg); }
+.lees-kant {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 24px; overflow: hidden; box-shadow: 0 8px 0 rgba(0,0,0,.18);
+}
+.lees-achter {
+  transform: rotateY(180deg);
+  background: repeating-linear-gradient(45deg, #c92a2a 0 22px, #a61e1e 22px 44px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  color: #fff; border: 8px solid #ffd43b;
+}
+.lees-achter span { font-size: 80px; }
+.lees-achter b { font-size: 44px; text-shadow: 0 3px 0 rgba(0,0,0,.3); }
+.lees-voor {
+  background: #fff; border: 6px solid var(--kaartkleur);
+  display: flex; flex-direction: column;
+}
+.lees-balk {
+  background: var(--kaartkleur); color: var(--balktekst);
+  font-size: 30px; font-weight: bold; text-align: center; padding: 10px 16px;
+}
+.lees-tekst {
+  flex: 1; margin: 0; padding: 12px 34px; display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: clamp(24px, min(4.2vw, 5.4vh), 42px); line-height: 1.3; font-weight: bold; color: #1d2b4f;
+}
+.lees-spot { display: flex; justify-content: center; padding-bottom: 10px; }
+.lees-spot svg { width: 64px; height: 48px; }
+.lees-knoppen { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.lees-luid {
+  font-size: 30px; width: 64px; height: 64px; cursor: pointer;
+  background: #fff; border: 3px solid var(--donker); border-radius: 50%;
+}
+.lees-volgend {
+  font: inherit; font-weight: bold; font-size: 26px; cursor: pointer; color: #fff;
+  background: #2b8a3e; border: none; border-radius: 18px; padding: 14px 26px; box-shadow: 0 5px 0 #1e6b2f;
+}
+@media (prefers-reduced-motion: reduce) { .lees-kaart { transition: none; } }
+@media (max-width: 600px) {
+  .lees-soort { min-height: 120px; font-size: 24px; }
+  .lees-categorie { font-size: 22px; min-height: 64px; }
+  .lees-tekst { padding: 10px 16px; }
+  .lees-balk { font-size: 22px; }
+}

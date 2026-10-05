@@ -19,6 +19,20 @@ export const LEESKRAAM = {
     { tekst: 'Maatje A leest een stukje voor. Maatje B pakt een kaartje en stelt de vraag. Daarna wissel je om.' },
   ],
   knopKaartjes: 'Kaartjes pakken',
+
+  // Teksten in het kaartjesvenster.
+  kiesBoek: 'Wat voor boek lees je?',
+  kiesCategorie: 'Kies een soort vraag',
+  kiesInfo: 'Pak een kaartje over je informatieboek',
+  verrasMe: 'Verras me!',
+  pakKaartje: 'Kaartje pakken',
+  anderBoek: 'Ander boek',
+  volgend: 'Volgend kaartje',
+  andereCategorie: 'Andere categorie',
+  klaar: 'Klaar',
+  voorlezen: 'Lees de vraag voor',
+  beurtA: 'Maatje A stelt de vraag',
+  beurtB: 'Maatje B stelt de vraag',
 };
 
 /*

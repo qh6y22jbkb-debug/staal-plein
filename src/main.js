@@ -10,6 +10,7 @@ import { Dialoog } from './ui/dialoog.js';
 import { bouwKramen, bouwBoetiek, bouwLeeskraam } from './wereld/kramen.js';
 import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
+import { Leesvenster } from './ui/leesvenster.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
 import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST, LEERKRACHT, KLEDING, VOETBAL_TEAMS } from './data/oefeningen.js';
@@ -139,7 +140,15 @@ function startGesprek(kraam) {
 /* ---------- Leeskraam: vragenkaartjes voor maatjeslezen ---------- */
 
 function pakKaartjes() {
-  dialoog.zeg('De kaartjes worden nog geschud. Kom straks terug!'); // stap 2: kaartjes kiezen
+  dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
+  dialoog.sluit();
+  actiefVenster = leesvenster;
+  leesvenster.opSluiten = () => {
+    actiefVenster = null;
+    klok.update(); // geen sprong in de tijd
+    terugNaarPlein();
+  };
+  leesvenster.toon();
 }
 
 function terugNaarPlein() {
@@ -152,6 +161,7 @@ function terugNaarPlein() {
 
 const winkel = new Winkel(uiLaag, { geluid, voorlezen });
 const kastvenster = new Kastvenster(uiLaag, { geluid });
+const leesvenster = new Leesvenster(uiLaag, { geluid, voorlezen, beloon: (a, v, l) => muntenteller.beloon(a, v, l) });
 let actiefVenster = null;
 
 function openVenster(venster) {
@@ -679,4 +689,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { leeskraam, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { leeskraam, leesvenster, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
