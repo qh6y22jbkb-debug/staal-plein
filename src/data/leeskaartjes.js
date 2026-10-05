@@ -20,6 +20,11 @@ export const LEESKRAAM = {
   ],
   knopKaartjes: 'Kaartjes pakken',
 
+  // Melding vóórdat je met Lotte praat (bij elke keer E).
+  eerstVragen: 'Ga pas naar deze kraam als Meester Jop het heeft gezegd.',
+  eerstVragenJa: 'Meester Jop heeft het gezegd',
+  eerstVragenNee: 'Terug naar het plein',
+
   // Teksten in het kaartjesvenster.
   kiesBoek: 'Wat voor boek lees je?',
   kiesCategorie: 'Kies een soort vraag',

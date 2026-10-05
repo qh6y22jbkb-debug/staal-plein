@@ -225,3 +225,52 @@ export class Leesvenster {
     this.beloon(aantal, this.inhoud.querySelector('.lees-kaart'), `+${aantal}`);
   }
 }
+
+/** Korte melding vóór de Leeskraam: "Ga pas naar deze kraam als Meester Jop het heeft gezegd." */
+export class LeesMelding {
+  constructor(laag, { geluid }) {
+    this.laag = laag;
+    this.geluid = geluid;
+    this.el = null;
+    this.opSluiten = null;
+    this.opJa = null;
+    this.toetsen = (e) => {
+      if (e.code === 'Escape') { e.preventDefault(); this.sluit(false); }
+    };
+  }
+
+  get open() { return !!this.el; }
+
+  toon() {
+    if (this.el) return;
+    this.el = document.createElement('div');
+    this.el.className = 'winkel-achtergrond';
+    this.el.innerHTML = `
+      <div class="winkel lees lees-melding" role="alertdialog" aria-label="${T.kraamNaam}">
+        <div class="lees-melding-icoon">✋</div>
+        <p class="lees-melding-tekst">${T.eerstVragen}</p>
+        <div class="lees-knoppen">
+          <button type="button" class="lees-volgend" data-ja>✓ ${T.eerstVragenJa}</button>
+          <button type="button" class="lees-terug" data-nee>${T.eerstVragenNee}</button>
+        </div>
+      </div>`;
+    this.laag.appendChild(this.el);
+    document.body.classList.add('venster-open');
+    this.el.querySelector('[data-ja]').addEventListener('click', () => this.sluit(true));
+    this.el.querySelector('[data-nee]').addEventListener('click', () => this.sluit(false));
+    // Even wachten, anders telt de E-toets of klik waarmee je hier kwam meteen mee.
+    setTimeout(() => window.addEventListener('keydown', this.toetsen), 50);
+    this.geluid?.plop();
+    this.el.querySelector('[data-nee]').focus({ preventScroll: true });
+  }
+
+  sluit(ja) {
+    if (!this.el) return;
+    window.removeEventListener('keydown', this.toetsen);
+    this.el.remove();
+    this.el = null;
+    document.body.classList.remove('venster-open');
+    this.opSluiten?.();
+    if (ja) this.opJa?.();
+  }
+}
