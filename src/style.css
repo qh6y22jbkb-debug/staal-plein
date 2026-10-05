@@ -559,3 +559,4 @@ body.venster-open .hulp, body.venster-open .stempelkaart, body.venster-open .tit
 .dialoog-knoppen .mv-bedankt { background: #b2f2bb; flex: 1 1 200px; }
 .tekstballon.meester { border-color: #5f3dc4; }
 .tekstballon.meester b { color: #5f3dc4; }
+.ss-extra { font-size: 18px !important; background: #fff9db; border-radius: 14px; padding: 6px 12px; }

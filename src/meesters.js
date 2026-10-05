@@ -3,10 +3,20 @@ import { Kind } from './kinderen.js';
 import { MEESTERS, MEESTER_VRAAG } from './data/oefeningen.js';
 import { mat, doos, bol, cilinder, canvasTextuur } from './wereld/helpers.js';
 
-const SLEUTEL = 'staal-blok2-meesters'; // wanneer elke meester weer een vraag heeft
+const SLEUTEL = 'staal-blok2-meesters'; // per meester: { wachttot, datum, aantal }
 
-function leesWachttijden() {
-  try { return JSON.parse(localStorage.getItem(SLEUTEL)) ?? {}; } catch { return {}; }
+function vandaag() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function leesStand() {
+  try {
+    const data = JSON.parse(localStorage.getItem(SLEUTEL)) ?? {};
+    // Oudere opslag bewaarde alleen een tijdstip per meester.
+    for (const [id, w] of Object.entries(data)) if (typeof w === 'number') data[id] = { wachttot: w, datum: vandaag(), aantal: 1 };
+    return data;
+  } catch { return {}; }
 }
 
 /** Een meester: loopt rond zoals de kinderen, maar is groter en stelt een vraag. */
@@ -101,7 +111,7 @@ export class Meesters {
   constructor(scene, botsing, uiLaag, camera, voorlezen) {
     this.camera = camera;
     this.voorlezen = voorlezen;
-    this.wachttot = leesWachttijden();
+    this.stand = leesStand();
     const starts = [[-14, 20], [16, 6], [-4, -12]];
     this.lijst = MEESTERS.map((info, i) => {
       const [x, z] = starts[i % starts.length];
@@ -115,16 +125,26 @@ export class Meesters {
     this._v = new THREE.Vector3();
   }
 
-  heeftVraag(m) { return (this.wachttot[m.info.id] ?? 0) <= Date.now(); }
+  /** Stand van een meester voor vandaag (een nieuwe dag begint weer bij 0 vragen). */
+  standVan(m) {
+    const st = this.stand[m.info.id];
+    if (!st || st.datum !== vandaag()) return { wachttot: 0, datum: vandaag(), aantal: 0 };
+    return st;
+  }
 
-  /** Na een vraag: even pauze voor deze meester. */
+  genoegVandaag(m) { return this.standVan(m).aantal >= MEESTER_VRAAG.maxPerDag; }
+
+  heeftVraag(m) { return !this.genoegVandaag(m) && this.standVan(m).wachttot <= Date.now(); }
+
+  /** Na een vraag: even pauze voor deze meester, en één vraag minder voor vandaag. */
   startWachttijd(m) {
-    this.wachttot[m.info.id] = Date.now() + MEESTER_VRAAG.wachtMinuten * 60000;
-    try { localStorage.setItem(SLEUTEL, JSON.stringify(this.wachttot)); } catch { /* geen opslag */ }
+    const st = this.standVan(m);
+    this.stand[m.info.id] = { wachttot: Date.now() + MEESTER_VRAAG.wachtMinuten * 60000, datum: vandaag(), aantal: st.aantal + 1 };
+    try { localStorage.setItem(SLEUTEL, JSON.stringify(this.stand)); } catch { /* geen opslag */ }
   }
 
   minutenTeGaan(m) {
-    return Math.max(1, Math.ceil(((this.wachttot[m.info.id] ?? 0) - Date.now()) / 60000));
+    return Math.max(1, Math.ceil((this.standVan(m).wachttot - Date.now()) / 60000));
   }
 
   dichtsteBij(p, max) {
@@ -153,7 +173,7 @@ export class Meesters {
   }
 
   wis() {
-    this.wachttot = {};
+    this.stand = {};
     try { localStorage.removeItem(SLEUTEL); } catch { /* geen opslag */ }
   }
 

@@ -12,6 +12,7 @@ export function toonStartscherm(laag, opStart) {
       <h1>${TEKSTEN.startTitel}</h1>
       <p class="ss-sub">${TEKSTEN.startOndertitel}</p>
       <p>${TEKSTEN.startUitleg}</p>
+      <p class="ss-extra">${TEKSTEN.startExtra}</p>
       ${verder ? `<p class="ss-verder">${TEKSTEN.startVerder.replace('{aantal}', voortgang.aantal)}</p>` : ''}
       <button type="button" class="ss-knop">${verder ? TEKSTEN.startKnopVerder : TEKSTEN.startKnop} ▶</button>
     </div>`;

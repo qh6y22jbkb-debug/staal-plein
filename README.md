@@ -130,10 +130,34 @@ geel **vraagteken** boven zijn hoofd? Dan heeft hij een vraag voor je over een v
 
 - Druk op **E** (of klik/tik op de meester) en typ het antwoord.
 - Goed in één keer: **20 munten**. Bij de tweede poging: 10 munten. Twee keer fout? Dan legt de meester het uit.
-- Daarna heeft die meester **3 minuten** pauze voordat hij een nieuwe vraag heeft.
+- Daarna heeft die meester **5 minuten** pauze. Elke meester stelt **maximaal 5 vragen per dag**.
 - De vragen komen uit de oefeningen van de minispellen (tot en met 2 sterren).
 
 Bedragen, wachttijd en teksten staan in `src/data/oefeningen.js` bij `MEESTERS` en `MEESTER_VRAAG`.
+
+## Balans van de munten
+
+Doorgerekend met een simulatie (`MUNTEN`, `KLEDING` en `MEESTER_VRAAG` in het databestand):
+
+| Speler | Munten per ronde ★ / ★★ / ★★★ | Les van 45 minuten | Alle kleding (1690 munten) |
+|---|---|---|---|
+| Sterk | ~61 / 86 / 111 | ~1300 | na ~1,3 les |
+| Gemiddeld | ~50 / 65 / 82 | ~1000 | na ~1,6 les |
+| Zwakker | ~38 / 48 / 59 | ~775 | na ~2,2 lessen |
+
+- Ongeveer een vijfde van de munten komt van de meesters (max. 5 vragen per meester per dag, 5 minuten pauze),
+  de rest van het oefenen bij de kramen.
+- Wil je dat kinderen langer sparen? Verhoog dan de prijzen in `KLEDING`, of verlaag `perNiveau` bij `MUNTEN`.
+
+## Wat wordt er bewaard?
+
+Alles wordt bewaard in de browser (localStorage) van het apparaat. Zie `src/opslag.js` voor de lijst:
+stempels en niveaus, munten, gekochte en aangetrokken kleding, gevonden muntjes van vandaag, de vragen
+van de meesters, het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
+
+- Oudere opgeslagen voortgang (van vóór de munten) blijft gewoon werken.
+- **↺ Opnieuw beginnen** wist na bevestiging alles, behalve de instellingen voor geluid en voorlezen.
+- Op gedeelde Chromebooks met hetzelfde account delen kinderen dus dezelfde voortgang.
 
 ## Stempelkaart, geluid en voorlezen
 
@@ -175,6 +199,7 @@ src/
   wereld/pleinmuntjes.js  de 15 verstopte muntjes op het plein
   meesters.js          Meester Jop, Bram en Koen (rondlopen, vraagteken, wachttijd)
   meestervragen.js     maakt een vraag uit de oefeningen
+  opslag.js            lijst van alles wat in de browser bewaard wordt
   ui/meestervraag.js   het vraagvenster van een meester
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt
@@ -198,3 +223,4 @@ src/
 - [x] Stap 3: de zes minispellen + kinderen op het plein
 - [x] Niveaus: 1, 2 of 3 sterren per spel
 - [x] Stap 4: stempelkaart, geluid, voorlezen en afwerking
+- [x] Munten, verstopte muntjes, De Bunders Boetiek, kledingkast en de meesters

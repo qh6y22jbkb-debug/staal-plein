@@ -138,6 +138,7 @@ export const TEKSTEN = {
   startTitel: 'Staal Plein',
   startOndertitel: 'Taalfeest op het schoolplein van De Bunders · Staal blok 2',
   startUitleg: 'Loop over het plein en praat met de karakters achter de kramen. Speel hun spel en verzamel 6 stempels! Een stempel krijg je als je bij een kraam alle 3 de niveaus haalt.',
+  startExtra: '🪙 Verdien munten, zoek verstopte muntjes, beantwoord de vragen van de meesters en koop coole kleding in De Bunders Boetiek!',
   startVerder: 'Welkom terug! Je hebt al {aantal} van de 6 stempels.',
   startKnop: 'Spelen',
   startKnopVerder: 'Verder spelen',
@@ -407,7 +408,6 @@ export const SPEL_TEKSTEN = {
   goed: ['Goed zo!', 'Super!', 'Helemaal goed!', 'Knap gedaan!', 'Top!', 'Yes, goed!'],
   bijna: 'Bijna!',
   stoppen: 'Stoppen',
-  vraag: 'Vraag',
   klaarTitel: 'Ronde gehaald!',
   kiesNiveau: 'Kies je niveau',
   niveauOpSlot: 'Op slot. Haal eerst een ronde met {sterren}.',
@@ -415,9 +415,6 @@ export const SPEL_TEKSTEN = {
   anderNiveau: 'Ander niveau',
   controleer: 'Controleer',
   typHier: 'Typ hier…',
-  typPersoonsvorm: 'persoonsvorm',
-  typOnderwerp: 'onderwerp',
-  typWerkwoorden: 'werkwoorden',
   klaarKnop: 'Klaar!',
   klaarTekst: 'Je hebt alle 8 vragen gedaan. {aantal} keer had je het in één keer goed!',
   opnieuw: 'Nog een keer',
@@ -506,7 +503,6 @@ export const WINKEL = {
   pasAan: 'Pas aan',
   uitproberen: 'Je past nu: {naam}',
   kopen: 'Kopen',
-  gekocht: 'Gekocht ✓',
   aantrekken: 'Aantrekken',
   aan: 'Heb je aan ✓',
   nogNodig: 'Nog {aantal} munten nodig',
@@ -553,7 +549,8 @@ export const MEESTERS = [
 export const MEESTER_VRAAG = {
   beloning: 20, // munten voor een goed antwoord in één keer
   tweedePoging: 10, // munten als het bij de tweede poging goed is
-  wachtMinuten: 3, // daarna heeft die meester even geen nieuwe vraag
+  wachtMinuten: 5, // daarna heeft die meester even geen nieuwe vraag
+  maxPerDag: 5, // zoveel vragen stelt elke meester per dag (dan blijven de kramen het belangrijkst)
   onderwerpen: {
     kofschip: { intro: "Mijn vraag gaat over 't kofschip-x.", hint: "Haal -en van het hele werkwoord af. Zit de laatste letter in 't kofschip-x? Dan -te, anders -de." },
     taarten: { intro: 'Mijn vraag gaat over werkwoorden met -te en -ten.', hint: 'Eindigt de ik-vorm al op een t? Dan komt er nog -te achter: twee keer t!' },
@@ -573,6 +570,7 @@ export const MEESTER_VRAAG = {
   nogEens: 'Bijna! Probeer het nog één keer.',
   helaas: 'Jammer! Het goede antwoord is: {antwoord}. Volgende keer beter!',
   wachten: 'Ik heb zo weer een nieuwe vraag! Kom over {minuten} terug.',
+  genoegVandaag: 'Voor vandaag heb ik genoeg vragen gesteld. Morgen heb ik weer nieuwe! Oefen maar lekker bij de kramen.',
   controleer: 'Controleer',
   doei: 'Doei!',
   bedankt: 'Bedankt, meester!',

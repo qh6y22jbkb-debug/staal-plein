@@ -75,7 +75,8 @@ export class Muntenteller {
   }
 
   punt(van) {
-    if (!van) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    // Geen startpunt, of het element staat niet meer in beeld: vanuit het midden.
+    if (!van || (van instanceof Element && !van.isConnected)) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     if ('x' in van && 'y' in van && !(van instanceof Element)) return van;
     const r = van.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };

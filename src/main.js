@@ -25,6 +25,7 @@ import { Oorkonde } from './ui/oorkonde.js';
 import { toonStartscherm } from './ui/startscherm.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
+import { wisSpelOpslag } from './opslag.js';
 import { munten } from './munten.js';
 import { Muntenteller } from './ui/muntenteller.js';
 import { PleinMuntjes } from './wereld/pleinmuntjes.js';
@@ -265,11 +266,13 @@ function toonBanner(tekst) {
 /* ---------- Opnieuw beginnen ---------- */
 
 hud.opOpnieuw = () => {
+  // Eerst de modules (die houden ook dingen in het geheugen bij), dan alle opslag.
   voortgang.wis();
   munten.wis();
   pleinMuntjes.wis();
   kledingkast.wis();
   meesters.wis();
+  wisSpelOpslag();
   stempelkaart.ververs();
   zetKraamSterren();
   speler.positie.copy(STARTPLEK);
@@ -294,6 +297,10 @@ let dichtsteMeester = null;
 function spreekMeesterAan(m) {
   if (!m || dialoog.open || actiefSpel || actiefVenster || meestervraag.open || startOpen) return;
   speler.richting = Math.atan2(m.positie.x - speler.positie.x, m.positie.z - speler.positie.z);
+  if (meesters.genoegVandaag(m)) {
+    meesters.zeg(m, MEESTER_VRAAG.genoegVandaag, speler.positie);
+    return;
+  }
   if (!meesters.heeftVraag(m)) {
     meesters.zeg(m, MEESTER_VRAAG.wachten.replace('{minuten}', meesters.minutenTeGaan(m) === 1 ? '1 minuut' : `${meesters.minutenTeGaan(m)} minuten`), speler.positie);
     return;
