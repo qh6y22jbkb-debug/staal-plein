@@ -1,0 +1,350 @@
+/* ============ Minispellen: gedeeld venster ============ */
+.minispel {
+  --kraamkleur: var(--blauw);
+  position: fixed; inset: 0;
+  background: rgba(20, 35, 60, .55);
+  display: grid; place-items: center;
+  padding: 14px;
+  z-index: 20;
+  animation: msIn .25s ease-out;
+}
+@keyframes msIn { from { opacity: 0; } to { opacity: 1; } }
+
+.ms-kaart {
+  width: min(1000px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: #fffdf7;
+  border: 6px solid var(--kraamkleur);
+  border-radius: 30px;
+  padding: 16px 26px 22px;
+  box-shadow: 0 10px 0 rgba(0,0,0,.2), 0 20px 50px rgba(0,0,0,.3);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ms-kop { display: flex; align-items: center; gap: 12px; }
+.ms-icoon {
+  font-size: 34px; width: 56px; height: 56px; flex: none;
+  display: grid; place-items: center;
+  background: var(--kraamkleur); border-radius: 50%;
+}
+.ms-kop h2 { margin: 0; font-size: 28px; flex: 1; }
+.ms-stop {
+  font: inherit; font-weight: bold; font-size: 18px;
+  background: #fff; color: var(--donker);
+  border: 3px solid var(--donker); border-radius: 14px;
+  padding: 6px 14px; cursor: pointer;
+}
+.ms-voortgang { display: flex; gap: 10px; justify-content: center; }
+.ms-voortgang span {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #e9ecef; border: 3px solid #ced4da;
+  transition: transform .2s, background .2s;
+}
+.ms-voortgang span.nu { border-color: var(--kraamkleur); transform: scale(1.2); }
+.ms-voortgang span.goed { background: #51cf66; border-color: #2b8a3e; }
+.ms-voortgang span.goed::after { content: '✓'; display: block; text-align: center; color: #fff; font-weight: bold; font-size: 16px; line-height: 20px; }
+.ms-opdracht { margin: 0; text-align: center; font-size: 23px; font-weight: bold; }
+.ms-inhoud { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 6px 0; }
+
+.ms-feedback {
+  min-height: 64px;
+  border-radius: 18px;
+  padding: 12px 18px;
+  font-size: 23px; line-height: 1.4;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+  text-align: center;
+}
+.ms-feedback mark { background: #ffe066; color: var(--donker); border-radius: 6px; padding: 0 4px; font-weight: bold; }
+.ms-feedback mark.ow { background: #a5d8ff; }
+.ms-goed { background: #d3f9d8; border: 3px solid #51cf66; }
+.ms-bijna { background: #fff4e6; border: 3px solid #ffa94d; }
+.ms-wiebel { animation: zachtWiebel .4s; }
+.ms-volgende {
+  font: inherit; font-size: 22px; font-weight: bold;
+  background: #51cf66; color: #fff;
+  border: 4px solid #2b8a3e; border-radius: 16px;
+  padding: 8px 22px; cursor: pointer;
+  box-shadow: 0 4px 0 #2b8a3e;
+}
+.ms-volgende:active { transform: translateY(3px); box-shadow: 0 1px 0 #2b8a3e; }
+
+@keyframes zachtWiebel {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.wiebel { animation: zachtWiebel .35s; }
+
+/* Gedeelde knopstijl voor antwoorden */
+.kof-kist, .taart-knop, .vv-blok, .pof-blok, .ijs-woord {
+  font: inherit; color: var(--donker); cursor: pointer;
+}
+.kof-kist:focus-visible, .taart-knop:focus-visible, .vv-blok:focus-visible, .pof-blok:focus-visible,
+.ijs-woord:focus-visible, .ms-volgende:focus-visible, .ms-klaar button:focus-visible {
+  outline: 4px solid #ffd43b; outline-offset: 3px;
+}
+.minispel .sneltoets { font-size: 14px; }
+
+/* Klaar-scherm */
+.ms-klaar { text-align: center; padding: 10px 0 4px; }
+.ms-klaar-icoon { font-size: 80px; animation: hop 1s ease-in-out infinite alternate; }
+@keyframes hop { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.ms-klaar h3 { font-size: 40px; margin: 6px 0; color: #2b8a3e; }
+.ms-klaar p { font-size: 24px; margin: 0 0 18px; }
+.ms-klaar-knoppen { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.ms-klaar button {
+  font: inherit; font-size: 22px; font-weight: bold;
+  border: 4px solid var(--donker); border-radius: 18px;
+  padding: 12px 22px; cursor: pointer; color: var(--donker);
+  box-shadow: 0 4px 0 var(--donker);
+}
+.ms-opnieuw { background: #e7f5ff; }
+.ms-terug { background: #b2f2bb; }
+
+/* ============ 1. Kapitein Kofschip ============ */
+.kof-woord {
+  font-size: 64px; font-weight: bold;
+  background: #fff; border: 4px dashed #c08a3e; border-radius: 20px;
+  padding: 6px 34px;
+}
+.kof-ezelsbrug { font-size: 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.kof-ezelsbrug span {
+  background: #fff3bf; border: 2px solid #f2c230; border-radius: 8px;
+  padding: 0 8px; font-weight: bold;
+}
+.kof-kisten { display: flex; gap: 50px; justify-content: center; flex-wrap: wrap; }
+.kof-kist {
+  position: relative; width: 190px; height: 170px;
+  background: none; border: none; padding: 0;
+}
+.kof-deksel {
+  position: absolute; left: 10px; right: 10px; top: 18px; height: 50px;
+  background: #8b5a2b; border: 5px solid #5c3a1a; border-radius: 60px 60px 8px 8px;
+  transform-origin: 50% 100%; transition: transform .35s;
+}
+.kof-bak {
+  position: absolute; left: 10px; right: 10px; top: 66px; height: 80px;
+  background: #7a4a24; border: 5px solid #5c3a1a; border-radius: 8px;
+  box-shadow: inset 0 -10px 0 rgba(0,0,0,.15);
+}
+.kof-slot {
+  position: absolute; left: 50%; top: -8px; width: 26px; height: 30px; margin-left: -13px;
+  background: #f2c230; border: 3px solid #b8860b; border-radius: 6px;
+}
+.kof-label {
+  position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+  background: #fff; border: 4px solid var(--donker); border-radius: 14px;
+  font-size: 34px; font-weight: bold; padding: 0 16px;
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.kof-kist:hover .kof-deksel { transform: rotate(-6deg); }
+.kof-kist.open .kof-deksel { transform: translateY(-14px) rotate(-28deg); }
+.kof-kist.open .kof-bak { box-shadow: inset 0 22px 0 #f2c230, inset 0 -10px 0 rgba(0,0,0,.15); }
+.kof-kist.open .kof-label { background: #51cf66; color: #fff; }
+.kof-kist:disabled { cursor: default; }
+
+/* ============ 2. Tante Tessa ============ */
+.taart-zin, .vv-zin {
+  font-size: 38px; font-weight: bold; text-align: center; line-height: 1.6;
+  background: #fff; border: 4px solid #f3d9e3; border-radius: 20px; padding: 10px 26px;
+}
+.taart-gat, .vv-gat {
+  display: inline-block; min-width: 90px; margin: 0 4px;
+  border-bottom: 5px dashed var(--kraamkleur);
+  color: #adb5bd; text-align: center;
+}
+.taart-gat.gevuld, .vv-gat.gevuld { color: #2b8a3e; border-bottom-style: solid; border-color: #51cf66; }
+.taart-knoppen { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+.taart-knop {
+  position: relative; width: 150px; height: 120px;
+  background: linear-gradient(#fff0f6 0 30%, #f783ac 30% 62%, #fff 62% 70%, #e64980 70%);
+  border: 4px solid #a61e4d; border-radius: 22px 22px 14px 14px;
+  font-size: 32px; font-weight: bold;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;
+  box-shadow: 0 5px 0 #a61e4d;
+}
+.taart-tekst { background: #fff; border-radius: 12px; padding: 0 10px; }
+.taart-kers {
+  position: absolute; top: -16px; left: 50%; margin-left: -12px;
+  width: 24px; height: 24px; border-radius: 50%; background: #e03131; border: 3px solid #a61e1e;
+}
+.taart-knop .sneltoets { position: absolute; top: 6px; right: 8px; }
+.taart-knop:active { transform: translateY(4px); box-shadow: 0 1px 0 #a61e4d; }
+.taart-knop.gekozen { outline: 6px solid #51cf66; }
+
+/* ============ 3. Dirk de Drummer ============ */
+.drum-veld {
+  position: relative; width: 100%; height: min(52vh, 440px);
+  background: linear-gradient(#d0ebff, #e7f5ff 70%, #c3fae8);
+  border: 4px solid #74c0fc; border-radius: 20px;
+  overflow: hidden; touch-action: none; cursor: pointer;
+}
+.drum-woord {
+  position: absolute; top: 0;
+  background: #fff; border: 4px solid var(--donker); border-radius: 16px;
+  font-size: 28px; font-weight: bold; padding: 4px 16px;
+  white-space: nowrap; pointer-events: none;
+  box-shadow: 0 4px 0 rgba(0,0,0,.15);
+}
+.drum-trommel {
+  position: absolute; bottom: 0; width: 150px; height: 74px;
+  transform: translateX(-50%); pointer-events: none;
+}
+.drum-vel {
+  position: absolute; left: 0; right: 0; top: 0; height: 26px;
+  background: #f8f9fa; border: 4px solid #868e96; border-radius: 50%; z-index: 1;
+}
+.drum-romp {
+  position: absolute; left: 0; right: 0; top: 12px; bottom: 0;
+  background: repeating-linear-gradient(90deg, #e03131 0 18px, #c92a2a 18px 22px);
+  border: 4px solid #862e2e; border-radius: 0 0 30px 30px;
+}
+.drum-trommel.boem { animation: boem .25s; }
+@keyframes boem { 50% { transform: translateX(-50%) scale(1.12, .9); } }
+.drum-tip { margin: 0; font-size: 18px; color: #495057; text-align: center; }
+.ms-feedback s { color: #c92a2a; }
+
+/* ============ 4. Vera Voorvoegsel ============ */
+.vv-zin { border-color: #e5dbff; }
+.vv-opties { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.vv-blok {
+  font-size: 32px; font-weight: bold;
+  background: #f3f0ff; border: 4px solid #7048e8; border-radius: 16px;
+  padding: 14px 24px; box-shadow: 0 5px 0 #5f3dc4;
+  display: flex; align-items: center; gap: 10px;
+}
+.vv-blok:active { transform: translateY(4px); box-shadow: 0 1px 0 #5f3dc4; }
+.vv-blok.gekozen { background: #d3f9d8; border-color: #2b8a3e; box-shadow: 0 5px 0 #2b8a3e; }
+
+/* ============ 5. Peter & Olga ============ */
+.pof-stap { color: #fff; border-radius: 10px; padding: 0 10px; margin-right: 6px; }
+.pof-stap.pv { background: #e8590c; }
+.pof-stap.ow { background: #1c7ed6; }
+.pof-zin { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; padding-top: 22px; }
+.pof-blok {
+  position: relative;
+  font-size: 32px; font-weight: bold;
+  background: #fff4e6; border: 4px solid #d9480f; border-radius: 40px;
+  padding: 12px 24px; box-shadow: 0 5px 0 #d9480f;
+}
+.pof-blok:active { transform: translateY(4px); box-shadow: 0 1px 0 #d9480f; }
+.pof-label {
+  position: absolute; left: 50%; top: -26px; transform: translateX(-50%);
+  font-size: 15px; color: #fff; border-radius: 8px; padding: 1px 8px; white-space: nowrap;
+}
+.pof-label:empty { display: none; }
+.pof-blok.is-pv { background: #ff922b; color: #fff; }
+.pof-blok.is-pv .pof-label { background: #e8590c; }
+.pof-blok.is-ow { background: #74c0fc; border-color: #1864ab; box-shadow: 0 5px 0 #1864ab; color: #fff; }
+.pof-blok.is-ow .pof-label { background: #1c7ed6; }
+.pof-blok:disabled { cursor: default; }
+.pof-pan {
+  width: 220px; height: 34px; background: #343a40; border-radius: 0 0 60px 60px;
+  display: flex; justify-content: center; gap: 8px; padding-top: 4px;
+}
+.pof-pan span { width: 24px; height: 14px; border-radius: 50%; background: #e0a85a; }
+
+/* ============ 6. Gijs Gezegde ============ */
+.ijs-opstelling { display: flex; gap: 30px; align-items: flex-end; justify-content: center; flex-wrap: wrap; width: 100%; }
+.ijs-zin { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 680px; }
+.ijs-woord {
+  font-size: 30px; font-weight: bold;
+  background: #fff; border: 4px solid #12b886; border-radius: 14px;
+  padding: 8px 16px; box-shadow: 0 4px 0 #087f5b;
+}
+.ijs-woord:active { transform: translateY(3px); box-shadow: 0 1px 0 #087f5b; }
+.ijs-woord.gevonden { background: #c3fae8; opacity: .6; cursor: default; }
+.ijs-hoorntje { display: flex; flex-direction: column; align-items: center; width: 170px; }
+.ijs-bollen { display: flex; flex-direction: column-reverse; align-items: center; }
+.ijs-bol {
+  width: 132px; height: 70px; margin-top: -18px;
+  border-radius: 50%; border: 4px solid rgba(0,0,0,.18);
+  display: grid; place-items: center;
+  font-size: 20px; font-weight: bold;
+  animation: bolErop .35s ease-out;
+}
+@keyframes bolErop { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.ijs-hoorn {
+  width: 0; height: 0; margin-top: -6px;
+  border-left: 56px solid transparent; border-right: 56px solid transparent;
+  border-top: 110px solid #e0a85a;
+}
+.ijs-teller { font-size: 20px; font-weight: bold; color: #087f5b; min-height: 24px; }
+
+/* Confetti boven alles */
+canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; }
+
+@media (max-width: 700px), (max-height: 620px) {
+  .ms-kaart { padding: 12px 14px 16px; gap: 8px; }
+  .ms-kop h2 { font-size: 21px; }
+  .ms-icoon { width: 44px; height: 44px; font-size: 26px; }
+  .ms-opdracht { font-size: 19px; }
+  .kof-woord { font-size: 46px; }
+  .kof-kist { width: 150px; height: 140px; }
+  .kof-kisten { gap: 24px; }
+  .taart-zin, .vv-zin { font-size: 27px; }
+  .taart-knop { width: 120px; height: 100px; font-size: 26px; }
+  .vv-blok, .pof-blok { font-size: 24px; padding: 10px 16px; }
+  .ijs-woord { font-size: 23px; }
+  .ms-feedback { font-size: 19px; }
+  .drum-woord { font-size: 22px; }
+}
+
+/* ============ Niveaukeuze ============ */
+.ms-niveaus { display: flex; flex-direction: column; gap: 14px; width: min(640px, 100%); }
+.ms-niveau {
+  font: inherit; color: var(--donker); cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 18px;
+  background: #fff; border: 4px solid var(--donker); border-radius: 20px;
+  padding: 12px 20px; box-shadow: 0 5px 0 var(--donker);
+}
+.ms-niveau:hover { background: #fff9db; }
+.ms-niveau:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--donker); }
+.ms-niveau:focus-visible { outline: 4px solid #ffd43b; outline-offset: 3px; }
+.ms-niveau.vorige { border-color: var(--kraamkleur); box-shadow: 0 5px 0 var(--kraamkleur); }
+.ms-sterren { font-size: 38px; color: #fab005; letter-spacing: 2px; white-space: nowrap; text-shadow: 0 2px 0 #e67700; }
+.ms-niveau-tekst { font-size: 20px; flex: 1; }
+.ms-kop-sterren { color: #fab005; font-size: 22px; white-space: nowrap; }
+
+/* ============ Typen (3 sterren) ============ */
+.ms-invoer-rij { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.ms-invoer {
+  font: inherit; font-size: 34px; font-weight: bold; color: var(--donker);
+  width: 200px; text-align: center;
+  border: 4px solid var(--kraamkleur); border-radius: 16px; padding: 8px 12px;
+  background: #fff;
+}
+.ms-invoer.breed { width: 320px; }
+.ms-invoer:focus { outline: 4px solid #ffd43b; outline-offset: 2px; }
+.ms-controleer {
+  font: inherit; font-size: 24px; font-weight: bold; cursor: pointer;
+  background: #b2f2bb; color: var(--donker);
+  border: 4px solid var(--donker); border-radius: 16px; padding: 8px 22px;
+  box-shadow: 0 4px 0 var(--donker);
+}
+.ms-controleer:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--donker); }
+.ms-controleer:disabled, .ms-invoer:disabled { opacity: .6; cursor: default; }
+.ms-ander { background: #fff9db; }
+@media (max-width: 700px), (max-height: 620px) {
+  .ms-sterren { font-size: 28px; }
+  .ms-niveau-tekst { font-size: 17px; }
+  .ms-invoer { font-size: 26px; width: 160px; }
+  .ms-invoer.breed { width: 240px; }
+}
+
+/* Voorlees-knop en stempelbericht */
+.ms-lees {
+  font-size: 22px; width: 46px; height: 42px; flex: none;
+  background: #fff; border: 3px solid var(--donker); border-radius: 14px; cursor: pointer;
+}
+.ms-stempel-bericht {
+  background: #fff3bf; border: 3px solid #fab005; border-radius: 14px;
+  padding: 6px 12px; font-weight: bold;
+}
+
+/* Niveau op slot */
+.ms-niveau.op-slot { background: #f1f3f5; border-color: #adb5bd; box-shadow: 0 5px 0 #adb5bd; color: #868e96; cursor: not-allowed; }
+.ms-niveau.op-slot:hover { background: #f1f3f5; }
+.ms-niveau.op-slot:active { transform: none; box-shadow: 0 5px 0 #adb5bd; }
+.ms-niveau.op-slot .ms-sterren { color: #ced4da; text-shadow: none; }
+.ms-slot { font-size: 30px; }

@@ -1,0 +1,5 @@
+node_modules
+dist
+.DS_Store
+# Foto's van het echte plein: groot en niet nodig voor het spel
+IMG_*.JPG
