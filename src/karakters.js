@@ -14,6 +14,7 @@ export const STIJLEN = {
   olga: { huid: 0xd99a6c, shirt: 0xfd7e14, haar: 0x3b2314, kapsel: 'staartjes', extra: ['strik'] },
   gijs: { huid: 0xf2c29b, shirt: 0x12b886, haar: 0xe0a33a, hoed: 'ijsmuts', extra: ['vlinderdas'] },
   bo: { huid: 0xe8b48f, shirt: 0xf06595, haar: 0xe8590c, kapsel: 'knot', extra: ['bril', 'meetlint', 'bloem'] },
+  lotte: { huid: 0xf2c29b, shirt: 0xc92a2a, haar: 0xf2c230, kapsel: 'staartjes', extra: ['zaklamp', 'strik'] },
 };
 
 export class Karakter {
@@ -49,6 +50,16 @@ export class Karakter {
       if (s.extra?.includes('stokken')) {
         const stok = cilinder(0.025, 0.7, 0xf1d6a0, 0, -0.62, 0.3, schouder, 5);
         stok.rotation.x = Math.PI / 2;
+      }
+      if (x > 0 && s.extra?.includes('zaklamp')) {
+        // Zaklamp in de hand, met de lamp naar voren.
+        const lamp = new THREE.Group();
+        lamp.position.set(0, -0.62, 0.12);
+        lamp.rotation.x = Math.PI / 2;
+        schouder.add(lamp);
+        cilinder(0.06, 0.34, 0x343a40, 0, 0, 0, lamp, 10);
+        cilinder(0.1, 0.1, 0xfab005, 0, 0.2, 0, lamp, 12);
+        cilinder(0.085, 0.02, 0xfff9db, 0, 0.26, 0, lamp, 12).material = mat(0xfff3bf, { emissive: 0xffe066 });
       }
       g.add(schouder);
       return schouder;

@@ -7,7 +7,7 @@ function opmaak(tekst) {
 
 /**
  * Het gespreksvenster met een karakter.
- * Knoppen: "Leg het nog eens uit", "Ik wil spelen!" en "Doei!".
+ * Knoppen: "Leg het nog eens uit", "Ik wil spelen!" (of bv. "Kaartjes pakken") en "Doei!".
  */
 export class Dialoog {
   constructor(laag, { voorlezen, geluid } = {}) {
@@ -33,6 +33,7 @@ export class Dialoog {
     this.naam = this.el.querySelector('.dialoog-naam');
     this.tekst = this.el.querySelector('.dialoog-tekst');
     this.knopUitleg = this.el.querySelector('[data-knop="uitleg"]');
+    this.knopSpelen = this.el.querySelector('[data-knop="spelen"]');
     this.luidspreker = this.el.querySelector('.dialoog-luidspreker');
     this.luidspreker.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -72,6 +73,7 @@ export class Dialoog {
     this.pagina = -1;
     this.zetTekst(kraam.data.karakterNaam, opmaak(kraam.data.begroeting));
     this.knopUitleg.lastChild.textContent = TEKSTEN.knopUitleg;
+    this.knopSpelen.lastChild.textContent = kraam.data.knopSpelen ?? TEKSTEN.knopSpelen;
     this.el.classList.add('zichtbaar');
     this.zetLuidspreker();
     this.geluid?.plop();

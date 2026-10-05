@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mat, doos, cilinder, kegel, bol, canvasTextuur, tekstTextuur } from './helpers.js';
 import { KRAMEN, WINKEL } from '../data/oefeningen.js';
 import { Karakter, STIJLEN } from '../karakters.js';
+import { LEESKRAAM } from '../data/leeskaartjes.js';
 
 // Uiterlijk per kraam (kleuren, karakters, versiering).
 const UITERLIJK = {
@@ -40,6 +41,23 @@ export function bouwBoetiek(scene, botsing) {
   };
   const kraam = bouwKraam(scene, botsing, data, stijl, x, z, draai);
   kraam.isWinkel = true;
+  return kraam;
+}
+
+/** De Leeskraam (Spot aan!): links bij de ingang, tegenover de Boetiek. Telt niet mee voor stempels. */
+export function bouwLeeskraam(scene, botsing) {
+  const x = -14, z = 12;
+  const draai = Math.atan2(2 - x, 20 - z); // voorkant richting de ingang
+  const data = { id: 'leeskraam', ...LEESKRAAM, knopSpelen: LEESKRAAM.knopKaartjes };
+  const stijl = {
+    kleur: 0x7a1f1f, luifel: ['#c92a2a', '#ffd43b'], bord: '#c92a2a', stem: 1.2,
+    karakters: ['lotte'], versier: versierLeeskraam,
+  };
+  const kraam = bouwKraam(scene, botsing, data, stijl, x, z, draai);
+  kraam.isLeeskraam = true;
+  // Op het podium kun je stappen.
+  const p = new THREE.Vector3(0, 0, PODIUM.z).applyEuler(kraam.groep.rotation).add(kraam.groep.position);
+  botsing.voegCirkelToe(p.x, p.z, PODIUM.r, PODIUM.top);
   return kraam;
 }
 
@@ -169,6 +187,93 @@ function versierBoetiek(g) {
 }
 
 const BLAD = 1.13; // hoogte van het toonbankblad
+
+function gordijnTextuur() {
+  return canvasTextuur(128, 256, (ctx, w, h) => {
+    // Rode plooien: lichte en donkere banen.
+    for (let i = 0; i < 8; i++) {
+      const grad = ctx.createLinearGradient((i * w) / 8, 0, ((i + 1) * w) / 8, 0);
+      grad.addColorStop(0, '#9b1c1c'); grad.addColorStop(0.5, '#e03131'); grad.addColorStop(1, '#9b1c1c');
+      ctx.fillStyle = grad;
+      ctx.fillRect((i * w) / 8, 0, w / 8 + 1, h);
+    }
+    ctx.fillStyle = '#f2c230'; // gouden zoom onderaan
+    ctx.fillRect(0, h - 14, w, 14);
+  });
+}
+
+const PODIUM = { r: 1.25, z: 2.35, top: 0.25 };
+
+function versierLeeskraam(g) {
+  // Klein rond podium vóór de kraam (hier sta je als je met Lotte praat), met een gouden randje.
+  cilinder(PODIUM.r + 0.05, 0.08, 0xf2c230, 0, 0.04, PODIUM.z, g, 28);
+  cilinder(PODIUM.r, 0.25, 0x8a4b1f, 0, 0.125, PODIUM.z, g, 28);
+  // Rode gordijnen aan beide kanten, opgebonden met een gouden koord, en een rode strook bovenaan.
+  const stof = new THREE.MeshLambertMaterial({ map: gordijnTextuur(), side: THREE.DoubleSide });
+  for (const k of [-1, 1]) {
+    const gordijn = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 2.85), stof);
+    gordijn.position.set(k * 1.68, 1.6, 1.22);
+    g.add(gordijn);
+    const koord = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.035, 6, 14), mat(0xf2c230));
+    koord.position.set(k * 1.68, 1.45, 1.24);
+    koord.scale.y = 0.5;
+    g.add(koord);
+  }
+  const strook = new THREE.Mesh(new THREE.PlaneGeometry(3.9, 0.45), stof);
+  strook.position.set(0, 2.82, 1.23);
+  g.add(strook);
+
+  // Boeken op de toonbank: een stapel en een open boek.
+  [0x2e75b6, 0x3a9d5d, 0xe07b1f, 0x7b4fb0].forEach((k, i) => {
+    doos(0.5, 0.09, 0.36, k, -1.15, BLAD + 0.045 + i * 0.09, 0.7, g).rotation.y = (i % 2 ? 0.15 : -0.1);
+  });
+  for (const k of [-1, 1]) {
+    const blad = doos(0.32, 0.02, 0.42, 0xfffdf5, k * 0.17, BLAD + 0.05, 0.72, g);
+    blad.rotation.z = -k * 0.12;
+  }
+  doos(0.68, 0.03, 0.44, 0xd6457a, 0, BLAD + 0.02, 0.72, g);
+  // Stapeltje vragenkaartjes in de kleuren van de categorieën.
+  [0x2e75b6, 0x3a9d5d, 0xe07b1f, 0x7b4fb0, 0xd6457a, 0xe8a800, 0x138a8a].forEach((k, i) => {
+    doos(0.34, 0.025, 0.24, k, 1.1 + (i % 2) * 0.02, BLAD + 0.015 + i * 0.025, 0.72, g).rotation.y = i * 0.08;
+  });
+
+  // Spotlight op een paal naast de kraam. De bundel staat stil: geen flikkering, geen verduistering.
+  const paal = new THREE.Group();
+  paal.position.set(3.2, 0, 3.6);
+  g.add(paal);
+  cilinder(0.3, 0.08, 0x343a40, 0, 0.04, 0, paal, 12);
+  cilinder(0.05, 3.0, 0x495057, 0, 1.5, 0, paal, 8);
+  const lamp = new THREE.Group();
+  lamp.position.set(0, 3.05, 0);
+  paal.add(lamp);
+  // Lamp schijnt op de toonbank en Lotte.
+  const doel = new THREE.Vector3(0, 1.6, 0.3).sub(new THREE.Vector3(3.2, 3.05, 3.6));
+  lamp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), doel.clone().normalize());
+  const kop = new THREE.Group(); // lamp wijst langs +z na lookAt
+  lamp.add(kop);
+  const huis = cilinder(0.22, 0.45, 0x212529, 0, 0, 0, kop, 14);
+  huis.rotation.x = Math.PI / 2;
+  const glas = cilinder(0.19, 0.03, 0xfff3bf, 0, 0, 0.23, kop, 14);
+  glas.rotation.x = Math.PI / 2;
+  glas.material = mat(0xfff3bf, { emissive: 0xffe066 });
+  // Lichtbundel: een doorzichtige kegel die op de kraam schijnt.
+  const lengte = doel.length() - 0.5;
+  const bundel = new THREE.Mesh(
+    new THREE.ConeGeometry(0.85, lengte, 24, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xfff3bf, transparent: true, opacity: 0.26, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  bundel.rotation.x = -Math.PI / 2; // punt bij de lamp, wijd bij de kraam
+  bundel.position.z = 0.25 + lengte / 2;
+  bundel.castShadow = false;
+  bundel.receiveShadow = false;
+  kop.add(bundel);
+  // Lichte vlek op de toonbank.
+  const vlek = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24),
+    new THREE.MeshBasicMaterial({ color: 0xfff3bf, transparent: true, opacity: 0.25, depthWrite: false }));
+  vlek.rotation.x = -Math.PI / 2;
+  vlek.position.set(0, BLAD + 0.07, 0.45);
+  g.add(vlek);
+}
 
 function versierPiraat(g) {
   for (const [x, schaal] of [[-1.1, 1], [1.1, 0.8]]) {

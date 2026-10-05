@@ -7,7 +7,7 @@ import { VolgCamera } from './camera.js';
 import { Besturing } from './besturing.js';
 import { Hud } from './ui/hud.js';
 import { Dialoog } from './ui/dialoog.js';
-import { bouwKramen, bouwBoetiek } from './wereld/kramen.js';
+import { bouwKramen, bouwBoetiek, bouwLeeskraam } from './wereld/kramen.js';
 import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
 import { kledingkast } from './kledingkast.js';
@@ -64,7 +64,8 @@ const botsing = new Botsing(PLEIN);
 const wereld = bouwSchoolplein(scene, botsing);
 const kramen = bouwKramen(scene, botsing);
 const boetiek = bouwBoetiek(scene, botsing);
-const alleKramen = [...kramen, boetiek]; // de 6 leerkramen + de winkel
+const leeskraam = bouwLeeskraam(scene, botsing); // telt niet mee voor stempels en poort
+const alleKramen = [...kramen, boetiek, leeskraam]; // de 6 leerkramen + de winkel + de Leeskraam
 
 // Poort naar de Voetbalwereld in het oostelijke hek. Gaat open bij alle 6 stempels.
 const poort = new Poort(scene, { x: 40, z: 0, draai: 0, bord: VOETBAL.poortBord, open: voetbalstand.poortOpen, botsing });
@@ -132,7 +133,13 @@ function startGesprek(kraam) {
   volgCam.draaiNaar(Math.atan2(-dx, -dz), 0.38);
   volgCam.zetGesprek(kraam.groep);
 
-  dialoog.toon(kraam, { opSpelen: speelMinispel, opSluiten: terugNaarPlein });
+  dialoog.toon(kraam, { opSpelen: kraam.isLeeskraam ? pakKaartjes : speelMinispel, opSluiten: terugNaarPlein });
+}
+
+/* ---------- Leeskraam: vragenkaartjes voor maatjeslezen ---------- */
+
+function pakKaartjes() {
+  dialoog.zeg('De kaartjes worden nog geschud. Kom straks terug!'); // stap 2: kaartjes kiezen
 }
 
 function terugNaarPlein() {
@@ -672,4 +679,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { leeskraam, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
