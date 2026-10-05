@@ -271,6 +271,7 @@ scene.add(doelRing);
 /* ---------- Spellus ---------- */
 
 const klok = new THREE.Timer();
+const DRAAISNELHEID = 2.6; // radialen per seconde bij ← → / A D
 let tijd = 0;
 let vastTijd = 0;
 
@@ -285,11 +286,24 @@ function frame() {
   if (cam.zoom) volgCam.zoom(cam.zoom);
 
   volgKind();
-  let beweging = besturing.beweging(volgCam.yaw);
-  if (beweging.actief) besturing.doel = null;
-  else if (besturing.doel) beweging = naarDoel(besturing.doel);
+  // Toetsen/joystick: vooruit lopen en draaien. De camera draait vanzelf mee.
+  const invoer = besturing.beweging();
+  let beweging = { x: 0, z: 0 };
+  let achteruit = false;
+  if (invoer.actief) {
+    besturing.doel = null;
+    speler.richting -= invoer.draai * DRAAISNELHEID * dt;
+    achteruit = invoer.vooruit < 0;
+    const v = invoer.vooruit * (achteruit ? 0.6 : 1);
+    beweging = { x: Math.sin(speler.richting) * v, z: Math.cos(speler.richting) * v };
+  } else if (besturing.doel) {
+    beweging = naarDoel(besturing.doel);
+  }
 
-  const afgelegd = speler.update(dt, beweging, besturing.neemSprong(), botsing);
+  const afgelegd = speler.update(dt, beweging, besturing.neemSprong(), botsing, { draaiMee: !invoer.actief });
+  if (!achteruit && (afgelegd > 0.002 || invoer.draai)) {
+    volgCam.volgAchter(speler.richting + Math.PI, dt, invoer.draai ? 5 : 2.5);
+  }
 
   // Loopt de speler tegen iets aan op weg naar het doel? Dan stoppen.
   if (besturing.doel) {

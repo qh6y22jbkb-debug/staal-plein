@@ -16,6 +16,7 @@ export class VolgCamera {
     this.gesprek = false;
     this.laatsteGesprek = null;
     this.meng = 0;
+    this.handmatig = 0;
     this.kijk = new THREE.Vector3();
   }
 
@@ -25,8 +26,22 @@ export class VolgCamera {
     this.doelPitch = pitch;
   }
 
+  /**
+   * Camera draait vanzelf rustig achter de speler aan (voor kinderen zonder muis).
+   * @param doelYaw  de kijkrichting van de speler + 180°
+   * @param snelheid hoe snel de camera bijdraait
+   */
+  volgAchter(doelYaw, dt, snelheid = 3) {
+    if (this.handmatig > 0 || this.doelYaw != null || this.gesprek) return;
+    const verschil = Math.atan2(Math.sin(doelYaw - this.yaw), Math.cos(doelYaw - this.yaw));
+    this.yaw += verschil * Math.min(1, dt * snelheid);
+  }
+
   draai(dx, dy) {
-    if (dx || dy) this.doelYaw = this.doelPitch = null; // zelf draaien gaat voor
+    if (dx || dy) {
+      this.doelYaw = this.doelPitch = null; // zelf draaien gaat voor
+      this.handmatig = 2.5; // even niet automatisch meedraaien
+    }
     this.yaw -= dx * 0.006;
     this.pitch = THREE.MathUtils.clamp(this.pitch + dy * 0.004, 0.12, 1.15);
   }
@@ -44,6 +59,7 @@ export class VolgCamera {
       this.focus.lerp(gewenstFocus, Math.min(1, dt * 8));
     }
 
+    if (this.handmatig > 0) this.handmatig -= dt;
     const k = Math.min(1, dt * 4);
     if (this.doelYaw != null) {
       this.yaw += (this.doelYaw - this.yaw) * k;

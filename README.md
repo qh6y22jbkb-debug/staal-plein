@@ -41,10 +41,12 @@ Dit bouwt het spel en zet het op de `gh-pages`-tak. Na een minuutje staat de nie
 
 | Actie | Toetsenbord / muis | Tablet / digibord |
 |---|---|---|
-| Lopen | WASD of pijltjes | joystick linksonder |
+| Vooruit lopen | ↑ of W | joystick omhoog |
+| Draaien | ← → of A D | joystick naar links/rechts |
+| Achteruit | ↓ of S | joystick omlaag |
 | Ergens heen lopen | klik op de grond | tik op de grond |
 | Springen | spatie | Spring-knop |
-| Camera draaien | slepen met de muis | slepen met je vinger |
+| Camera | draait vanzelf mee achter de speler (slepen mag ook) | idem |
 | Zoomen | scrollwiel | – |
 | Praten met een karakter of kind | E (of klik op de kraam/het kind) | tik op het wolkje, de kraam of het kind |
 | Keuzes in een gesprek | 1, 2, 3 of Esc | tik op de knop |

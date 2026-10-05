@@ -20,11 +20,12 @@ export class Hud {
         <div class="hulp">
           <h2>Zo speel je</h2>
           <ul>
-            ${isTouch ? '<li>🕹️ Lopen: <b>joystick</b></li>' : '<li>🚶 Lopen: <b>WASD</b> of <b>pijltjes</b></li>'}
+            ${isTouch
+              ? '<li>🕹️ Lopen en draaien: <b>joystick</b></li>'
+              : '<li>🚶 Lopen: <b>↑</b> of <b>W</b> (terug: <b>↓</b>)</li><li>↪️ Draaien: <b>← →</b> of <b>A D</b></li>'}
             <li>⬆️ Springen: <b>${isTouch ? 'Spring-knop' : 'spatie'}</b></li>
             <li>💬 Praten: <b>${isTouch ? 'tik op het wolkje' : 'E'}</b></li>
             <li>👆 ${isTouch ? 'Tik' : 'Klik'} op de grond: loop erheen</li>
-            <li>🔄 Slepen: draai de camera</li>
           </ul>
         </div>
       </div>

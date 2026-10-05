@@ -144,20 +144,19 @@ export class Besturing {
     uiLaag.appendChild(spring);
   }
 
-  /** Bewegingsrichting in de wereld, gezien vanuit de camera. */
-  beweging(yaw) {
-    if (!this.aan) return { x: 0, z: 0, actief: false };
+  /**
+   * Besturing zonder muis: vooruit/achteruit en draaien.
+   * ↑/W (of joystick omhoog) = vooruit, ←/→ of A/D (joystick opzij) = draaien.
+   */
+  beweging() {
+    if (!this.aan) return { vooruit: 0, draai: 0, actief: false };
     const k = (lijst) => lijst.some((c) => this.ingedrukt.has(c));
-    let vooruit = (k(TOETSEN.vooruit) ? 1 : 0) - (k(TOETSEN.achteruit) ? 1 : 0) - this.joystick.y;
-    let opzij = (k(TOETSEN.rechts) ? 1 : 0) - (k(TOETSEN.links) ? 1 : 0) + this.joystick.x;
-    const l = Math.hypot(vooruit, opzij);
-    if (l > 1) { vooruit /= l; opzij /= l; }
-    const sin = Math.sin(yaw), cos = Math.cos(yaw);
-    return {
-      x: -sin * vooruit + cos * opzij,
-      z: -cos * vooruit - sin * opzij,
-      actief: l > 0.1,
-    };
+    const vooruit = THREE.MathUtils.clamp((k(TOETSEN.vooruit) ? 1 : 0) - (k(TOETSEN.achteruit) ? 1 : 0) - this.joystick.y, -1, 1);
+    const draai = THREE.MathUtils.clamp((k(TOETSEN.rechts) ? 1 : 0) - (k(TOETSEN.links) ? 1 : 0) + this.joystick.x, -1, 1);
+    // Kleine bewegingen van de joystick negeren.
+    const v = Math.abs(vooruit) > 0.15 ? vooruit : 0;
+    const d = Math.abs(draai) > 0.15 ? draai : 0;
+    return { vooruit: v, draai: d, actief: v !== 0 || d !== 0 };
   }
 
   neemSprong() { const s = this.sprong; this.sprong = false; return s; }

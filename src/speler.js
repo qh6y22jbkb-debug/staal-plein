@@ -122,7 +122,7 @@ export class Speler {
    * @param beweging {x, z} in wereldrichting, lengte 0..1
    * @returns afgelegde afstand (handig om te zien of de speler vastzit)
    */
-  update(dt, beweging, springen, botsing) {
+  update(dt, beweging, springen, botsing, { draaiMee = true } = {}) {
     const pos = this.positie;
     const oudX = pos.x, oudZ = pos.z;
     const sterkte = Math.min(1, Math.hypot(beweging.x, beweging.z));
@@ -130,10 +130,13 @@ export class Speler {
     if (sterkte > 0.05) {
       pos.x += beweging.x * this.uiterlijk.snelheid * dt;
       pos.z += beweging.z * this.uiterlijk.snelheid * dt;
-      const doelRichting = Math.atan2(beweging.x, beweging.z);
-      let verschil = doelRichting - this.richting;
-      verschil = Math.atan2(Math.sin(verschil), Math.cos(verschil));
-      this.richting += verschil * Math.min(1, dt * 12);
+      if (draaiMee) {
+        // Draai in de looprichting (bij klikken op de grond of bij de kinderen).
+        const doelRichting = Math.atan2(beweging.x, beweging.z);
+        let verschil = doelRichting - this.richting;
+        verschil = Math.atan2(Math.sin(verschil), Math.cos(verschil));
+        this.richting += verschil * Math.min(1, dt * 12);
+      }
     }
 
     if (springen && this.opGrond) {
