@@ -86,7 +86,9 @@ export class PoffertjesSpel extends Minispel {
 
     // Onderwerp
     const ow = schoon(this.delen[v.ow]);
-    if (getypt === ow) {
+    // Spaties tellen niet mee: "peter en olga", "Peter  en Olga" en "peteren olga" zijn allemaal goed.
+    const zonder = (t) => t.replace(/\s/g, '');
+    if (zonder(getypt) === zonder(ow)) {
       this.fase = 'klaar';
       this.markeer(v.ow, 'is-ow', 'onderwerp');
       this.invoer.invoer.disabled = true;
@@ -97,9 +99,9 @@ export class PoffertjesSpel extends Minispel {
     this.wiebelInvoer();
     if (getypt === schoon(this.pvTekst)) {
       this.fout('Dat is de persoonsvorm al. Typ nu het <b>onderwerp</b>.');
-    } else if (getypt && ow.includes(getypt)) {
-      this.fout('Bijna! Het onderwerp is langer. Welke woorden horen er nog bij?');
-    } else if (getypt.includes(ow)) {
+    } else if (getypt && zonder(ow).includes(zonder(getypt))) {
+      this.fout('Het onderwerp is langer. Welke woorden horen er nog bij?');
+    } else if (zonder(getypt).includes(zonder(ow))) {
       this.fout('Je hebt te veel woorden getypt. Typ alleen het onderwerp.');
     } else {
       this.fout(`Vraag het jezelf: <b>${this.wieOfWat}</b> Het antwoord is het onderwerp.`);

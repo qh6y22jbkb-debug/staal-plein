@@ -43,6 +43,9 @@ export class Besturing {
   }
 
   toetsOmlaag(e) {
+    // Typt een kind in een invulvak? Dan zijn spatie en pijltjes gewoon voor het vak (niet lopen of springen).
+    const tag = e.target?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
     if (!this.aan) return;
     this.ingedrukt.add(e.code);
