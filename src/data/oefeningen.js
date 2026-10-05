@@ -598,6 +598,18 @@ export const VOETBAL = {
   poortOpenUitleg: 'De poort naar de Voetbalwereld bij het hek is open!',
   welkom: 'Welkom in de Voetbalwereld!',
   wolkjeTerug: '🏫 Loop door de poort terug naar het schoolplein',
+  uitlegLopen: 'WASD of pijltjes: lopen',
+  uitlegSprint: 'Shift: sprinten',
+  uitlegSchiet: 'Spatie vasthouden: harder schieten',
+  uitlegJoystick: 'Joystick: lopen',
+  uitlegSchietKnop: 'Schiet: vasthouden en loslaten',
+  uitlegSprintKnop: 'Sprint: vasthouden',
+  kracht: 'Kracht',
+  knopSprint: 'Sprint',
+  knopSchiet: 'Schiet',
+  oefenen: 'OEFENEN',
+  goal: 'GOAL!',
+  thuisTeam: 'DE BUNDERS',
 };
 
 /*

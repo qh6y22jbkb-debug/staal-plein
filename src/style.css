@@ -578,3 +578,55 @@ body.in-voetbal [data-knop="kast"], body.in-voetbal .tekstballon { display: none
   background: #2f9e44; color: #fff; border: 4px solid #1d6b2f; border-radius: 18px;
   padding: 8px 16px; font-size: 22px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.2);
 }
+
+/* ---------- Voetbalwereld: schermdelen ---------- */
+body.in-voetbal .springknop { display: none !important; }
+.voetbal-hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.voetbal-hud > * { pointer-events: auto; }
+.vb-uitleg {
+  position: absolute; left: 14px; top: 72px;
+  background: rgba(255,255,255,.92); border: 3px solid #1d6b2f; border-radius: 14px;
+  padding: 8px 12px; font-size: 17px; line-height: 1.5; font-weight: bold;
+}
+.vb-energie, .vb-kracht {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.92); border: 3px solid var(--donker); border-radius: 16px;
+  padding: 4px 12px; font-weight: bold; font-size: 18px;
+}
+.vb-energie { bottom: 18px; }
+.vb-kracht { bottom: 66px; opacity: 0; transition: opacity .15s; }
+.vb-kracht.zichtbaar { opacity: 1; }
+.vb-balk { width: 180px; height: 16px; background: #dee2e6; border-radius: 8px; overflow: hidden; }
+.vb-vulling { height: 100%; width: 100%; background: linear-gradient(90deg, #40c057, #94d82d); border-radius: 8px; transition: width .08s linear; }
+.vb-vulling.laag { background: #fa5252; }
+.vb-kracht .vb-vulling { background: linear-gradient(90deg, #fab005, #fd7e14, #e03131); width: 0; }
+.vb-goal {
+  position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%) scale(.2);
+  font-size: 110px; font-weight: 900; color: #ffd43b; letter-spacing: 4px;
+  text-shadow: 0 6px 0 #e67700, 0 0 30px rgba(0,0,0,.35);
+  -webkit-text-stroke: 4px #1d2b4f; opacity: 0; pointer-events: none; white-space: nowrap;
+}
+.vb-goal.zichtbaar { animation: goalIn 2s ease-out forwards; }
+@keyframes goalIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  25% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+.vb-knoppen { position: absolute; right: 22px; bottom: 26px; display: flex; gap: 14px; align-items: flex-end; }
+.vb-knoppen button {
+  width: 92px; height: 92px; border-radius: 50%;
+  font: inherit; font-size: 30px; font-weight: bold; color: var(--donker);
+  background: #fff9db; border: 4px solid var(--donker); touch-action: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+}
+.vb-knoppen button small { font-size: 14px; margin-top: 4px; }
+.vb-knoppen button.groot { width: 116px; height: 116px; background: #b2f2bb; font-size: 40px; }
+.vb-knoppen button.in { transform: scale(.93); filter: brightness(.95); }
+@media (max-width: 700px) {
+  .vb-uitleg { font-size: 14px; }
+  .vb-balk { width: 120px; }
+  .vb-goal { font-size: 64px; }
+}

@@ -147,7 +147,7 @@ const kastvenster = new Kastvenster(uiLaag, { geluid });
 let actiefVenster = null;
 
 function openVenster(venster) {
-  if (actiefVenster || dialoog.open || actiefSpel || startOpen) return;
+  if (actiefVenster || dialoog.open || actiefSpel || startOpen || voetbal) return;
   besturing.aan = false;
   besturing.doel = null;
   besturing.ingedrukt.clear();
@@ -415,6 +415,7 @@ function praatMetFiguur(f) {
 }
 
 function praatMetDichtste() {
+  if (voetbal) return; // op het voetbalveld is E iets anders
   if (dichtsteKraam) startGesprek(dichtsteKraam);
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);

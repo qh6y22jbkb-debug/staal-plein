@@ -148,7 +148,17 @@ In het hek aan de oostkant van het plein (naast de klimtoren) staat een grote po
   naar het schoolplein. Je kunt altijd heen en weer.
 - De Voetbalwereld wordt pas geladen als je erheen gaat. Zolang je daar bent, staat het schoolplein stil
   (dat houdt het spel soepel op een Chromebook).
-- *In aanbouw:* het stadion, de wedstrijd en het toernooi volgen in de volgende stappen.
+- In de Voetbalwereld staat een stadion met tribunes, juichend publiek, lichtmasten, reclameborden
+  (zonder echte merken) en een groot scorebord. Je speelt in het blauw-gele tenue van **De Bunders**;
+  je gekochte hoofddeksel, schoenen en extra's houd je aan.
+- *In aanbouw:* teamgenoten, tegenstanders, de wedstrijd en het toernooi volgen in de volgende stappen.
+
+| Actie in de Voetbalwereld | Toetsenbord | Touchscreen |
+|---|---|---|
+| Lopen | WASD of pijltjes (W = naar het doel van de tegenstander) | joystick |
+| Sprinten | Shift (energiebalk onderin) | knop Sprint |
+| Schieten | spatie vasthouden (krachtbalkje) en loslaten | knop Schiet vasthouden |
+| Dribbelen | loop tegen de bal: hij blijft voor je voeten | idem |
 
 ### Testen met F9 (voor de leerkracht)
 
@@ -223,6 +233,10 @@ src/
   opslag.js            lijst van alles wat in de browser bewaard wordt
   poort.js             de poort (dicht/open, slot, glinsterend licht)
   voetbal/voetbalwereld.js  de Voetbalwereld (wordt pas geladen bij de poort)
+  voetbal/stadion.js   veld, doelen, tribunes met publiek, scorebord, lichtmasten
+  voetbal/bal.js       de bal met eigen natuurkunde (rollen, stuiteren, palen, net)
+  voetbal/tenue.js     het tenue van De Bunders
+  voetbal/voetbalhud.js  sprint- en krachtbalk, GOAL!, touchknoppen
   voetbal/voetbalstand.js   voortgang in de Voetbalwereld (bewaard in de browser)
   ui/overgang.js       witte overgang tussen de werelden
   ui/meestervraag.js   het vraagvenster van een meester

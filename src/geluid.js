@@ -116,6 +116,20 @@ export const geluid = {
     [72, 76, 79, 84, 88].forEach((n, i) => toon(NOOT(n), 0.7 + i * 0.1, 0.35, { type: 'triangle', volume: 0.25 }));
   },
 
+  /** Trap tegen de bal: doffe plof, harder bij meer kracht. */
+  trap(kracht = 0.5) {
+    if (!aan) return;
+    toon(180 + kracht * 60, 0, 0.12, { type: 'sine', volume: 0.35 + kracht * 0.25, glijNaar: 70 });
+    ruis(0, 0.06, { volume: 0.3 + kracht * 0.3, filter: 900 });
+  },
+
+  /** Juichend publiek (ruis die aanzwelt) met een toeter. */
+  juichen() {
+    if (!aan) return;
+    for (let i = 0; i < 6; i++) ruis(i * 0.25, 0.5, { volume: 0.18, filter: 1500 + i * 200 });
+    [67, 72, 76, 79].forEach((n, i) => toon(NOOT(n), 0.2 + i * 0.12, 0.3, { type: 'square', volume: 0.12 }));
+  },
+
   /** Zacht "woesj" bij de overgang naar een andere wereld. */
   woesj() {
     if (!aan) return;
