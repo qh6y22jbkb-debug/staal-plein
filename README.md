@@ -58,6 +58,8 @@ Alle uitleg, begroetingen, knopteksten, **alle vragen van de minispellen** en wa
 op het plein zeggen staan in **`src/data/oefeningen.js`**. Bovenaan elk onderdeel staat uitgelegd hoe je
 een vraag toevoegt. Per ronde kiest het spel willekeurig 8 vragen; zet er dus minstens 8 in.
 Tussen `**sterretjes**` wordt een stukje tekst geel gemarkeerd, bijvoorbeeld `ik werk**te**`.
+Gebruik bij de verleden tijd alleen **zwakke** werkwoorden (die volgen 't kofschip-x). Sterke werkwoorden
+zoals zwemmen (zwom) of lopen (liep) horen niet in deze oefeningen.
 
 ## De minispellen
 

@@ -173,6 +173,8 @@ export const TEKSTEN = {
  * ============================================================
  *  Per ronde kiest het spel willekeurig 8 vragen uit de lijst.
  *  Zorg dat er per spel minstens 8 vragen in staan.
+ *  LET OP: gebruik bij de verleden tijd alleen ZWAKKE werkwoorden ('t kofschip-x).
+ *  Sterke werkwoorden veranderen van klank (zwemmen → zwom, lopen → liep) en horen hier niet.
  * ============================================================
  */
 export const SPELLEN = {
@@ -210,7 +212,7 @@ export const SPELLEN = {
       { hele: 'branden', ik: 'brand', uitgang: 'de', niveau: 3 },
       { hele: 'horen', ik: 'hoor', uitgang: 'de', niveau: 1 },
       { hele: 'bellen', ik: 'bel', uitgang: 'de', niveau: 2 },
-      { hele: 'zwemmen', ik: 'zwem', uitgang: 'de', niveau: 2 },
+      { hele: 'kammen', ik: 'kam', uitgang: 'de', niveau: 2 },
       { hele: 'leven', ik: 'leef', uitgang: 'de', niveau: 3 },
       { hele: 'reizen', ik: 'reis', uitgang: 'de', niveau: 3 },
       { hele: 'blaffen', ik: 'blaf', uitgang: 'te', niveau: 2 },
@@ -279,7 +281,7 @@ export const SPELLEN = {
       { hele: 'rennen', ik: 'ren', niveau: 2 },
       { hele: 'horen', ik: 'hoor', niveau: 2 },
       { hele: 'bellen', ik: 'bel', niveau: 2 },
-      { hele: 'zwemmen', ik: 'zwem', niveau: 2 },
+      { hele: 'trommelen', ik: 'trommel', niveau: 2 },
       { hele: 'schilderen', ik: 'schilder', niveau: 2 },
       { hele: 'branden', ik: 'brand', niveau: 3 },
       { hele: 'landen', ik: 'land', niveau: 3 },
