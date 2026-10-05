@@ -151,10 +151,14 @@ In het hek aan de oostkant van het plein (naast de klimtoren) staat een grote po
 - In de Voetbalwereld staat een stadion met tribunes, juichend publiek, lichtmasten, reclameborden
   (zonder echte merken) en een groot scorebord. Je speelt in het blauw-gele tenue van **De Bunders**;
   je gekochte hoofddeksel, schoenen en extra's houd je aan.
-- Met de knop **Start wedstrijd** (of Enter) speel je een wedstrijd van **4 tegen 4**: een keeper en drie
+- Bij het bord **Kies je tegenstander** naast het veld (druk op E, of op de knop onderin) kies je een team.
+  Daarna speel je een wedstrijd van **4 tegen 4**: een keeper en drie
   veldspelers per team. Jij bestuurt één veldspeler (geel ringetje); de rest doet de computer.
   Een wedstrijd duurt 3 minuten. Bal uit? Dan legt de computer hem terug (ingooi, hoekschop of doelschop).
-- *In aanbouw:* het keuzebord met drie tegenstanders en de Bunders Beker volgen in de volgende stap.
+- **Toernooi:** drie tegenstanders, van makkelijk naar moeilijk: **De Slakken**, **De Wervelwinden** en
+  **De Bliksems**. Het tweede team gaat open als je van het eerste wint, het derde na winst op het tweede.
+- Win je van alle drie, dan krijg je de **Bunders Beker**: een gouden beker in beeld, vuurwerk boven het
+  stadion, en de beker komt op een sokkel midden tussen de kramen op het schoolplein te staan.
 
 | Actie in de Voetbalwereld | Toetsenbord | Touchscreen |
 |---|---|---|
@@ -251,6 +255,8 @@ src/
   voetbal/wedstrijd.js  de wedstrijd: balbezit, afpakken, uitballen, doelpunten, aftrap, tijd
   voetbal/voetbalai.js  de computerspelers en keepers
   voetbal/voetbalspeler.js  een speler in de wedstrijd (team, rol, plek)
+  voetbal/toernooi.js  het toernooi (welke teams open zijn) en het bord "Kies je tegenstander"
+  wereld/beker.js      de Bunders Beker op zijn sokkel
   voetbal/voetbalstand.js   voortgang in de Voetbalwereld (bewaard in de browser)
   ui/overgang.js       witte overgang tussen de werelden
   ui/meestervraag.js   het vraagvenster van een meester

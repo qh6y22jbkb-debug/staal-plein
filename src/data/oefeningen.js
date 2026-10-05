@@ -627,6 +627,22 @@ export const VOETBAL = {
   nogEenKeer: 'Nog een keer',
   terugVeld: 'Terug naar het veld',
   stoppen: 'Stoppen',
+  kiesTegenstander: 'Kies je tegenstander',
+  bordWolkje: 'Druk op E om een tegenstander te kiezen',
+  bordTik: 'Tik hier om een tegenstander te kiezen',
+  opSlot: 'Win eerst van {team}',
+  verslagen: 'Verslagen ✓',
+  spelen: 'Spelen!',
+  niveaus: { makkelijk: 'Makkelijk', gemiddeld: 'Gemiddeld', moeilijk: 'Moeilijk' },
+  nieuwVrij: '🔓 Nieuwe tegenstander: {team}!',
+  andereTegenstander: 'Andere tegenstander',
+  terugSchoolplein: 'Terug naar het schoolplein',
+  sluiten: 'Sluiten',
+  bekerTitel: 'De Bunders Beker!',
+  bekerTekst: 'Je hebt van alle drie de teams gewonnen! De beker staat nu op het schoolplein.',
+  bekerKnop: 'Hoera!',
+  bekerOpPlein: '🏆 De Bunders Beker staat nu midden op het schoolplein!',
+  bekerBord: 'BUNDERS BEKER',
 };
 
 /*

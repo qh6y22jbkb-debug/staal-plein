@@ -679,3 +679,26 @@ body.in-voetbal .springknop { display: none !important; }
 }
 .vb-stop.zichtbaar { display: block; }
 @media (max-width: 700px) { .vb-stop { top: 110px; } }
+.vb-keuze-lijst { display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
+.vb-team-kaart {
+  font: inherit; color: var(--donker); cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 14px;
+  background: #fff; border: 4px solid var(--donker); border-radius: 18px; padding: 10px 14px; box-shadow: 0 4px 0 var(--donker);
+}
+.vb-team-kaart:focus-visible { outline: 4px solid #ffd43b; outline-offset: 3px; }
+.vb-team-kaart.op-slot { opacity: .55; cursor: not-allowed; box-shadow: none; }
+.vb-team-kaart.verslagen { background: #ebfbee; }
+.vb-shirtje {
+  width: 52px; height: 52px; border-radius: 12px; flex: none;
+  background: linear-gradient(var(--shirt) 0 40%, var(--streep) 40% 60%, var(--shirt) 60%);
+  border: 3px solid rgba(0,0,0,.2);
+}
+.vb-team-info { flex: 1; display: flex; flex-direction: column; }
+.vb-team-info b { font-size: 22px; }
+.vb-team-info small { font-size: 16px; color: #868e96; }
+.vb-team-status { font-weight: bold; font-size: 17px; white-space: nowrap; }
+.vb-beker { border-color: #e6a800; background: #fffbea; }
+.vb-beker h2 { color: #c58b00; font-size: 40px; }
+.vb-beker-icoon { font-size: 110px; line-height: 1; animation: bekerHop 1.2s ease-in-out infinite alternate; filter: drop-shadow(0 6px 10px rgba(230,168,0,.6)); }
+@keyframes bekerHop { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-12px) rotate(4deg); } }
+.vb-nieuw { background: #fff3bf; border: 3px solid #fab005; border-radius: 14px; padding: 6px 10px; font-weight: bold; }

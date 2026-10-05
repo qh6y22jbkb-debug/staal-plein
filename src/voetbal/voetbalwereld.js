@@ -4,6 +4,8 @@ import { Botsing } from '../wereld/botsing.js';
 import { Poort } from '../poort.js';
 import { VOETBAL, VOETBAL_TEAMS } from '../data/oefeningen.js';
 import { Wedstrijd } from './wedstrijd.js';
+import { toernooi, Toernooibord } from './toernooi.js';
+import { Vuurwerk } from '../wereld/vuurwerk.js';
 import { confetti } from '../ui/confetti.js';
 import { bouwStadion, HALF_L } from './stadion.js';
 import { Bal, BAL_STRAAL } from './bal.js';
@@ -62,6 +64,11 @@ export class VoetbalWereld {
 
     this.bal = new Bal(this.scene, GRENZEN);
 
+    // Bord "Kies je tegenstander" naast het veld.
+    this.bord = new Toernooibord(this.scene, -8, -14.6);
+    this.botsing.voegDoosToe(-10.7, -5.3, -14.9, -14.3, 5);
+    this.vuurwerk = new Vuurwerk(this.scene, geluid);
+
     this.speler = new Speler(this.scene, { snelheid: LOOPSNELHEID });
     trekTenueAan(this.speler, TENUES.bunders, kleding);
     this.speler.positie.set(-6, 0, 0);
@@ -79,10 +86,22 @@ export class VoetbalWereld {
     this.weg = false;
     this.wedstrijd = null;
     this.vorigeToets = {};
-    this.tegenstander = VOETBAL_TEAMS[0]; // stap 4: hier komt het keuzebord
-    this.hud.opStart = () => this.startWedstrijd(this.tegenstander);
+    this.tegenstander = toernooi.volgendeTeam();
+    this.hud.opStart = () => this.openKeuze();
     this.hud.opStop = () => this.stopWedstrijd(true);
-    this.hud.zetStartKnop(VOETBAL.startWedstrijd.replace('{team}', this.tegenstander.naam));
+    this.hud.zetStartKnop(VOETBAL.kiesTegenstander);
+  }
+
+  /** Keuzescherm met de drie tegenstanders (van makkelijk naar moeilijk). */
+  openKeuze() {
+    if (this.wedstrijd) this.stopWedstrijd(true);
+    const teams = VOETBAL_TEAMS.map((team, i) => ({
+      team,
+      open: toernooi.isOpen(i),
+      verslagen: toernooi.isVerslagen(team),
+      slotTekst: i > 0 ? VOETBAL.opSlot.replace('{team}', VOETBAL_TEAMS[i - 1].naam) : '',
+    }));
+    this.hud.toonKeuze(teams, (team) => this.startWedstrijd(team));
   }
 
   /** Toets net ingedrukt (niet vastgehouden)? */
@@ -96,6 +115,7 @@ export class VoetbalWereld {
   /* ---------- Wedstrijd ---------- */
 
   startWedstrijd(tegenstander) {
+    this.tegenstander = tegenstander;
     this.stopWedstrijd();
     this.hud.verbergEinde();
     this.hud.zetStartKnop(null);
@@ -113,12 +133,47 @@ export class VoetbalWereld {
   }
 
   toonEinde({ thuis, uit, tegenstander }) {
-    const resultaat = thuis > uit ? VOETBAL.gewonnen : thuis === uit ? VOETBAL.gelijk : VOETBAL.verloren;
-    if (thuis > uit) { confetti(200); this.geluid?.klaar?.(); }
-    this.hud.toonEinde(VOETBAL.eindeTitel, `De Bunders ${thuis} - ${uit} ${tegenstander.naam}`, [resultaat], [
-      { tekst: `↻ ${VOETBAL.nogEenKeer}`, actie: () => this.startWedstrijd(tegenstander), hoofd: true },
-      { tekst: VOETBAL.terugVeld, actie: () => this.stopWedstrijd(true) },
+    const gewonnen = thuis > uit;
+    const resultaat = gewonnen ? VOETBAL.gewonnen : thuis === uit ? VOETBAL.gelijk : VOETBAL.verloren;
+    const regels = [resultaat];
+    let beker = false;
+    if (gewonnen) {
+      confetti(200);
+      this.geluid?.klaar?.();
+      const winst = toernooi.registreerWinst(tegenstander);
+      this.bord.teken();
+      if (winst.nieuwVrij) regels.push(`<span class="vb-nieuw">${VOETBAL.nieuwVrij.replace('{team}', winst.nieuwVrij.naam)}</span>`);
+      beker = winst.beker;
+    }
+    const eindscherm = () => this.hud.toonEinde(VOETBAL.eindeTitel, `De Bunders ${thuis} - ${uit} ${tegenstander.naam}`, regels, [
+      { tekst: `↻ ${VOETBAL.nogEenKeer}`, actie: () => this.startWedstrijd(tegenstander), hoofd: !gewonnen },
+      { tekst: `⚽ ${VOETBAL.andereTegenstander}`, actie: () => this.openKeuze(), hoofd: gewonnen },
+      { tekst: `🏫 ${VOETBAL.terugSchoolplein}`, actie: () => this.terugNaarSchoolplein() },
     ]);
+    if (beker) this.vierBeker(eindscherm);
+    else eindscherm();
+  }
+
+  /** Alle drie de teams verslagen: de Bunders Beker! Vuurwerk boven het stadion. */
+  vierBeker(daarna) {
+    this.hud.toonBeker(daarna);
+    this.vuurwerk.richting = new THREE.Vector3(1, 0, 0);
+    this.vuurwerk.start(14, new THREE.Vector3(this.camFocus.x - 4, 0, 0));
+    this.stadion.publiek.juich(12);
+    this.geluid?.feestmuziek?.();
+    confetti(250);
+  }
+
+  /** Tikken op het tekstwolkje (touchscreen): bij het bord het keuzescherm openen. */
+  wolkjeKlik() {
+    if (!this.wedstrijd && !this.hud.eindeOpen && this.bord.afstandTot(this.speler.positie) < 4.5) this.openKeuze();
+  }
+
+  terugNaarSchoolplein() {
+    this.stopWedstrijd(true);
+    this.hud.verbergEinde();
+    this.weg = true;
+    this.opTerug?.();
   }
 
   /** Terug naar vrij oefenen. */
@@ -134,7 +189,7 @@ export class VoetbalWereld {
       this.bal.zetOp(0, 0);
       this.stadion.scorebord.zet({ thuis: VOETBAL.thuisTeam, uit: VOETBAL.oefenen, scoreThuis: 0, scoreUit: 0, tijd: '--:--' });
       this.hud.zetStand(null);
-      this.hud.zetStartKnop(VOETBAL.startWedstrijd.replace('{team}', this.tegenstander.naam));
+      this.hud.zetStartKnop(VOETBAL.kiesTegenstander);
     }
   }
 
@@ -158,11 +213,18 @@ export class VoetbalWereld {
     this.tijd += dt;
     this.besturing.neemSprong(); // spatie is hier schieten, niet springen
     this.besturing.neemCamera();
+    this.vuurwerk.update(dt);
     if (this.wedstrijd) { this.updateWedstrijd(dt); return; }
-    if (this.netIngedrukt('start') && !this.hud.eindeOpen) { this.startWedstrijd(this.tegenstander); return; }
+    const bijBord = this.bord.afstandTot(this.speler.positie) < 4.5;
+    const eKnop = this.netIngedrukt('wissel');
+    if (this.hud.eindeOpen) {
+      if (this.besturing.ingedrukt.has('Escape') && !this.wedstrijd) this.hud.verbergEinde();
+    } else if (this.netIngedrukt('start') || (bijBord && eKnop)) {
+      this.openKeuze();
+    }
 
     // Lopen en sprinten.
-    const inv = this.besturing.aan ? this.invoer() : { x: 0, z: 0, actief: false };
+    const inv = this.besturing.aan && !this.hud.eindeOpen ? this.invoer() : { x: 0, z: 0, actief: false };
     const wilSprinten = this.toets('sprint') && inv.actief && this.energie > 0.02;
     this.energie = THREE.MathUtils.clamp(this.energie + (wilSprinten ? -ENERGIE_OP : ENERGIE_BIJ) * dt, 0, 1);
     const factor = wilSprinten ? SPRINT_FACTOR : 1;
@@ -184,7 +246,10 @@ export class VoetbalWereld {
     this.zon.position.set(this.camFocus.x + 20, 40, this.camFocus.z + 18);
     this.zon.target.position.copy(this.camFocus);
 
-    this.toonWolkje?.(this.poort.afstandTot(this.speler.positie) < 6 ? VOETBAL.wolkjeTerug : null);
+    const bordTekst = this.besturing.isTouch ? VOETBAL.bordTik : VOETBAL.bordWolkje;
+    this.toonWolkje?.(this.hud.eindeOpen ? null
+      : this.bord.afstandTot(this.speler.positie) < 4.5 ? bordTekst
+        : this.poort.afstandTot(this.speler.positie) < 6 ? VOETBAL.wolkjeTerug : null);
     if (this.poort.isInOpening(this.speler.positie)) {
       this.weg = true;
       this.opTerug?.();

@@ -29,6 +29,7 @@ import { wisSpelOpslag } from './opslag.js';
 import { Poort } from './poort.js';
 import { voetbalstand } from './voetbal/voetbalstand.js';
 import { naarWit, vanWit } from './ui/overgang.js';
+import { bouwBeker } from './wereld/beker.js';
 import { munten } from './munten.js';
 import { Muntenteller } from './ui/muntenteller.js';
 import { PleinMuntjes } from './wereld/pleinmuntjes.js';
@@ -254,6 +255,26 @@ function openPoortMetMelding() {
   voorlezen.zeg(`${VOETBAL.poortOpen} ${VOETBAL.poortOpenUitleg}`);
 }
 
+/* ---------- De Bunders Beker op het schoolplein (na het winnen van het toernooi) ---------- */
+
+let bekerOpPlein = null;
+let bekerBotsing = null;
+function zetBekerOpPlein() {
+  if (bekerOpPlein || !voetbalstand.beker) return false;
+  bekerOpPlein = bouwBeker(VOETBAL.bekerBord);
+  bekerOpPlein.position.set(0, 0, 4); // midden tussen de kramen
+  scene.add(bekerOpPlein);
+  if (bekerBotsing) bekerBotsing.top = 3;
+  else { botsing.voegCirkelToe(0, 4, 1.0, 3); bekerBotsing = botsing.cirkels[botsing.cirkels.length - 1]; }
+  return true;
+}
+function haalBekerWeg() {
+  bekerOpPlein?.removeFromParent();
+  bekerOpPlein = null;
+  if (bekerBotsing) bekerBotsing.top = 0;
+}
+zetBekerOpPlein();
+
 /* ---------- Wisselen tussen schoolplein en Voetbalwereld ---------- */
 
 let voetbal = null; // de Voetbalwereld (alleen als je er bent)
@@ -304,9 +325,11 @@ async function naarPlein() {
   volgCam.yaw = speler.richting + Math.PI;
   volgCam.doelYaw = volgCam.doelPitch = null;
   volgCam.eersteKeer = true;
+  const nieuweBeker = zetBekerOpPlein();
   klok.update();
   besturing.aan = true;
   await vanWit();
+  if (nieuweBeker) { hud.toonMelding(VOETBAL.bekerOpPlein); voorlezen.zeg(VOETBAL.bekerOpPlein); }
   bezigMetWisselen = false;
 }
 
@@ -361,6 +384,7 @@ hud.opOpnieuw = () => {
   zetKraamSterren();
   voetbalstand.wis();
   poort.zetDicht();
+  haalBekerWeg();
   werkPoortBordjeBij();
   speler.positie.copy(STARTPLEK);
   speler.richting = Math.PI;
@@ -422,7 +446,7 @@ function praatMetDichtste() {
 }
 
 besturing.opPraten = praatMetDichtste;
-hud.opWolkjeKlik = praatMetDichtste;
+hud.opWolkjeKlik = () => (voetbal ? voetbal.wolkjeKlik?.() : praatMetDichtste());
 besturing.opKlikKind = (kind) => {
   const d = Math.hypot(kind.positie.x - speler.positie.x, kind.positie.z - speler.positie.z);
   if (d < 3.5) praatMetFiguur(kind);
@@ -544,6 +568,7 @@ function frame() {
     } else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
   poort.update(dt);
+  if (bekerOpPlein) bekerOpPlein.userData.beker.rotation.y += dt * 0.6;
   if (besturing.aan && poort.isInOpening(speler.positie)) naarVoetbal();
   kinderen.update(dt, speler);
   meesters.update(dt, speler);

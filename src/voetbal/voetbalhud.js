@@ -112,6 +112,7 @@ export class VoetbalHud {
 
   /** Eindscherm na de wedstrijd. knoppen = [{ tekst, actie, hoofd }] */
   toonEinde(titel, uitslag, regels, knoppen) {
+    this.stopKnop.classList.remove('zichtbaar');
     this.eindeEl.innerHTML = `
       <div class="vb-einde-kaart">
         <h2>${titel}</h2>
@@ -122,6 +123,48 @@ export class VoetbalHud {
     this.eindeEl.classList.add('zichtbaar');
     this.eindeEl.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => knoppen[Number(b.dataset.i)].actie()));
     this.eindeEl.querySelector('button.hoofd, button')?.focus({ preventScroll: true });
+  }
+
+  /**
+   * Keuzescherm "Kies je tegenstander".
+   * teams = [{ team, open, verslagen, slotTekst }]
+   */
+  toonKeuze(teams, opKies) {
+    this.stopKnop.classList.remove('zichtbaar');
+    const hex = (k) => k;
+    this.eindeEl.innerHTML = `
+      <div class="vb-einde-kaart vb-keuze">
+        <h2>⚽ ${VOETBAL.kiesTegenstander}</h2>
+        <div class="vb-keuze-lijst">
+          ${teams.map((t, i) => `
+            <button type="button" data-i="${i}" class="vb-team-kaart${t.open ? '' : ' op-slot'}${t.verslagen ? ' verslagen' : ''}" ${t.open ? '' : 'disabled'}>
+              <span class="vb-shirtje" style="--shirt:${hex(t.team.tenue.shirt)};--streep:${hex(t.team.tenue.streep)}"></span>
+              <span class="vb-team-info"><b>${i + 1}. ${t.team.naam}</b><small>${VOETBAL.niveaus[t.team.niveau] ?? ''}</small></span>
+              <span class="vb-team-status">${t.verslagen ? VOETBAL.verslagen : t.open ? `▶ ${VOETBAL.spelen}` : `🔒 ${t.slotTekst}`}</span>
+            </button>`).join('')}
+        </div>
+        <div class="vb-einde-knoppen"><button type="button" class="vb-keuze-sluit">${VOETBAL.sluiten}</button></div>
+      </div>`;
+    this.eindeEl.classList.add('zichtbaar');
+    this.eindeEl.querySelectorAll('.vb-team-kaart').forEach((b) => b.addEventListener('click', () => opKies(teams[Number(b.dataset.i)].team)));
+    this.eindeEl.querySelector('.vb-keuze-sluit').addEventListener('click', () => this.verbergEinde());
+    (this.eindeEl.querySelector('.vb-team-kaart:not([disabled]):not(.verslagen)') ?? this.eindeEl.querySelector('.vb-team-kaart:not([disabled])'))?.focus({ preventScroll: true });
+  }
+
+  /** De Bunders Beker in beeld. */
+  toonBeker(opSluit) {
+    this.stopKnop.classList.remove('zichtbaar');
+    this.eindeEl.innerHTML = `
+      <div class="vb-einde-kaart vb-beker">
+        <div class="vb-beker-icoon">🏆</div>
+        <h2>${VOETBAL.bekerTitel}</h2>
+        <p>${VOETBAL.bekerTekst}</p>
+        <div class="vb-einde-knoppen"><button type="button" class="hoofd">${VOETBAL.bekerKnop}</button></div>
+      </div>`;
+    this.eindeEl.classList.add('zichtbaar');
+    const knop = this.eindeEl.querySelector('button');
+    knop.addEventListener('click', () => opSluit());
+    knop.focus({ preventScroll: true });
   }
 
   verbergEinde() { this.eindeEl.classList.remove('zichtbaar'); this.eindeEl.innerHTML = ''; }
