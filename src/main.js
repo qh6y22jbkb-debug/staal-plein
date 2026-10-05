@@ -8,7 +8,7 @@ import { Besturing } from './besturing.js';
 import { Hud } from './ui/hud.js';
 import { Dialoog } from './ui/dialoog.js';
 import { bouwKramen } from './wereld/kramen.js';
-import { TEKSTEN } from './data/oefeningen.js';
+import { TEKSTEN, MUNTEN, MUNT_TEKSTEN } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
 import { geluid } from './geluid.js';
@@ -21,6 +21,7 @@ import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
 import { munten } from './munten.js';
 import { Muntenteller } from './ui/muntenteller.js';
+import { PleinMuntjes } from './wereld/pleinmuntjes.js';
 
 /* ---------- Renderer, scène en licht ---------- */
 
@@ -65,6 +66,14 @@ const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) 
 const oorkonde = new Oorkonde(uiLaag);
 const vuurwerk = new Vuurwerk(scene, geluid);
 const muntenteller = new Muntenteller(geluid);
+
+// Verstopte muntjes op het plein: eroverheen lopen = 2 munten.
+const pleinMuntjes = new PleinMuntjes(scene);
+pleinMuntjes.opOppakken = (gevonden, totaal, punt) => {
+  muntenteller.beloon(MUNTEN.pleinMuntje, punt, `+${MUNTEN.pleinMuntje}`);
+  const tekst = gevonden === totaal ? MUNT_TEKSTEN.pleinAlles : MUNT_TEKSTEN.pleinGevonden;
+  hud.toonMelding(tekst.replace('{aantal}', gevonden).replace('{totaal}', totaal));
+};
 
 /* ---------- Praten met de karakters ---------- */
 
@@ -217,6 +226,7 @@ function toonBanner(tekst) {
 hud.opOpnieuw = () => {
   voortgang.wis();
   munten.wis();
+  pleinMuntjes.wis();
   stempelkaart.ververs();
   zetKraamSterren();
   speler.positie.copy(STARTPLEK);
@@ -345,6 +355,7 @@ function frame() {
   for (const k of kramen) k.update(dt, tijd, speler.positie);
 
   wereld.update(dt, tijd);
+  pleinMuntjes.update(dt, speler.positie, camera);
   vuurwerk.update(dt);
   for (const k of kramen) if (k.ster) k.ster.rotation.y += dt * 0.8;
   volgCam.update(dt, speler.positie);
@@ -382,4 +393,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, kinderen, dialoog, munten, muntenteller, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { speler, besturing, volgCam, hud, botsing, frame, kramen, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

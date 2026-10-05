@@ -151,7 +151,7 @@ export class Minispel {
           <button type="button" class="ms-stop">✕ ${SPEL_TEKSTEN.stoppen}</button>
         </header>
         <div class="ms-voortgang">${metVoortgang ? '<span></span>'.repeat(VRAGEN_PER_RONDE) : ''}</div>
-        <p class="ms-opdracht">${this.data.opdracht}</p>
+        <p class="ms-opdracht">${(this.niveau >= 2 && metVoortgang && this.data.opdrachtTypen) || this.data.opdracht}</p>
         <div class="ms-inhoud"></div>
         <div class="ms-feedback" aria-live="polite"></div>
       </div>`;
@@ -262,7 +262,9 @@ export class Minispel {
     this.geluid?.klaar();
     this.voorlezen?.zeg(SPEL_TEKSTEN.klaarTitel);
     confetti(160);
-    const tekst = (this.data.klaarTekst ?? SPEL_TEKSTEN.klaarTekst).replace('{aantal}', this.inEenKeer);
+    // Eigen eindtekst van een spel geldt alleen voor de klik-versie (1 ster).
+    const eigen = this.niveau >= 2 && this.data.opdrachtTypen ? null : this.data.klaarTekst;
+    const tekst = (eigen ?? SPEL_TEKSTEN.klaarTekst).replace('{aantal}', this.inEenKeer);
     this.kaart.querySelector('.ms-opdracht')?.remove();
     this.inhoud.innerHTML = `
       <div class="ms-klaar">

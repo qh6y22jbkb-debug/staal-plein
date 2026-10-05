@@ -1,10 +1,9 @@
 import { Minispel, el, kiesWillekeurig, VRAGEN_PER_RONDE } from './basis.js';
 
-const OPTIES = ['te', 'ten', 'tte', 'tten'];
 
 /**
  * 2. Tante Tessa: welk stukje (-te, -ten, -tte, -tten) hoort op de lege plek?
- * 1 ster: alleen enkelvoud, kies uit -te / -tte. 2 sterren: vier keuzes. 3 sterren: zelf typen.
+ * 1 ster: alleen enkelvoud, kies uit -te / -tte. 2 sterren: typ het stukje. 3 sterren: typ het hele woord.
  */
 export class TaartenSpel extends Minispel {
   maakVragen() {
@@ -18,20 +17,23 @@ export class TaartenSpel extends Minispel {
     this.vraag = { ...v, eindigtOpT, antwoord, woord: `${v.ik}te${v.meer ? 'n' : ''}` };
     this.beantwoord = false;
 
-    const [voor, na] = v.zin.split('__');
+    // Bij 3 sterren ontbreekt het hele woord; anders alleen het stukje erachter.
+    const heelWoord = this.niveau === 3;
+    const [voor, na] = heelWoord ? v.zin.split(/\S*__/) : v.zin.split('__');
     this.zinEl = el('div', 'taart-zin');
     this.zinEl.append(document.createTextNode(voor), el('span', 'taart-gat', '?'), document.createTextNode(na));
+    if (heelWoord) this.zinEl.append(el('span', 'ms-hint-werkwoord', ` (${v.hele})`));
     this.inhoud.appendChild(this.zinEl);
 
     this.knoppen = [];
     this.invoer = null;
-    if (this.niveau === 3) {
-      this.invoer = this.maakInvoer((tekst) => this.kies(tekst, null));
+    if (this.niveau >= 2) {
+      this.invoer = this.maakInvoer((tekst) => (heelWoord ? this.kiesWoord(tekst) : this.kies(tekst, null)), heelWoord);
       this.inhoud.appendChild(this.invoer.rij);
       return;
     }
     const taarten = el('div', 'taart-knoppen');
-    const opties = this.niveau === 1 ? ['te', 'tte'] : OPTIES;
+    const opties = ['te', 'tte'];
     this.knoppen = opties.map((optie, i) => {
       const knop = el('button', 'taart-knop', `<span class="taart-kers"></span><span class="taart-tekst">-${optie}</span><span class="sneltoets">${i + 1}</span>`);
       knop.type = 'button';
@@ -46,6 +48,20 @@ export class TaartenSpel extends Minispel {
     return this.vraag.zin.replace(/\S*__/, (stuk) => stuk.replace(/\w*__$/, '') + this.vraag.woord);
   }
 
+  /** 3 sterren: het hele woord is getypt. */
+  kiesWoord(tekst) {
+    const v = this.vraag;
+    const zichtbaar = v.eindigtOpT ? v.ik.slice(0, -1) : v.ik; // het stuk vóór -te / -tte
+    if (!tekst.startsWith(zichtbaar)) {
+      this.invoer.invoer.classList.remove('wiebel');
+      void this.invoer.invoer.offsetWidth;
+      this.invoer.invoer.classList.add('wiebel');
+      this.fout(`Begin met de ik-vorm: <b>ik ${v.ik}</b>. Wat komt erachter?`);
+      return;
+    }
+    this.kies(tekst.slice(zichtbaar.length), null);
+  }
+
   kies(optie, knop) {
     if (this.beantwoord) return;
     const v = this.vraag;
@@ -55,7 +71,7 @@ export class TaartenSpel extends Minispel {
       knop?.classList.add('gekozen');
       if (this.invoer) { this.invoer.invoer.disabled = true; this.invoer.knop.disabled = true; }
       const gat = this.zinEl.querySelector('.taart-gat');
-      gat.textContent = optie;
+      gat.textContent = this.niveau === 3 ? v.woord : optie;
       gat.classList.add('gevuld');
       this.goed(`ik ${v.ik} + te${v.meer ? 'n' : ''} = <mark>${v.woord}</mark>`);
       return;
@@ -66,7 +82,9 @@ export class TaartenSpel extends Minispel {
     doel.classList.add('wiebel');
 
     if (!/^t{1,2}en?$/.test(optie)) {
-      this.fout('Typ alleen het stukje dat op de lege plek hoort, bijvoorbeeld <b>te</b> of <b>tte</b>.');
+      this.fout(this.niveau === 3
+        ? `Het woord moet eindigen op -te, -ten, -tte of -tten. De ik-vorm is <b>ik ${v.ik}</b>.`
+        : 'Typ alleen het stukje dat op de lege plek hoort, bijvoorbeeld <b>te</b> of <b>tte</b>.');
       return;
     }
     const dubbelGekozen = optie.startsWith('tt');

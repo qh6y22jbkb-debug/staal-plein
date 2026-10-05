@@ -437,3 +437,17 @@ body.start-open .muntenteller { visibility: hidden; }
   .hud-rechts { top: 66px; }
 }
 @media print { .muntenteller { display: none; } }
+
+/* Korte melding bovenin */
+.melding {
+  position: fixed; left: 50%; top: 16px; z-index: 29;
+  transform: translate(-50%, -120%);
+  background: #fff9db; color: var(--donker);
+  border: 4px solid #fab005; border-radius: 20px;
+  padding: 8px 20px; font-size: 22px; font-weight: bold;
+  box-shadow: 0 4px 0 rgba(0,0,0,.15);
+  transition: transform .3s ease-out; pointer-events: none;
+  max-width: calc(100% - 260px); text-align: center;
+}
+.melding.zichtbaar { transform: translate(-50%, 0); }
+@media (max-width: 700px) { .melding { font-size: 17px; max-width: calc(100% - 140px); top: 70px; } }

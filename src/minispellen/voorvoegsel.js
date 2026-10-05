@@ -13,7 +13,9 @@ export class VoorvoegselSpel extends Minispel {
 
     this.knoppen = [];
     this.invoer = null;
-    if (this.niveau === 3) {
+    if (this.niveau >= 2) {
+      // 2 sterren: de ik-vorm als hulp. 3 sterren: alleen het hele werkwoord.
+      this.inhoud.appendChild(el('div', 'ms-hulpje', this.niveau === 2 ? `ik-vorm: <b>ik ${v.ik}</b>` : `werkwoord: <b>${v.hele}</b>`));
       this.invoer = this.maakInvoer((tekst) => this.kies(tekst, null), true);
       this.inhoud.appendChild(this.invoer.rij);
       return;

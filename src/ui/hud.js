@@ -104,6 +104,21 @@ export class Hud {
     el.querySelector('.nee').focus();
   }
 
+  /** Korte melding bovenin (bijv. "Muntje gevonden! 3 van de 15"). */
+  toonMelding(tekst) {
+    if (!this.melding) {
+      this.melding = document.createElement('div');
+      this.melding.className = 'melding';
+      document.body.appendChild(this.melding);
+    }
+    this.melding.textContent = tekst;
+    this.melding.classList.remove('zichtbaar');
+    void this.melding.offsetWidth;
+    this.melding.classList.add('zichtbaar');
+    clearTimeout(this.meldingTimer);
+    this.meldingTimer = setTimeout(() => this.melding.classList.remove('zichtbaar'), 2600);
+  }
+
   toonWolkje(tekst) {
     if (tekst === this.wolkjeTekst) return;
     this.wolkjeTekst = tekst;

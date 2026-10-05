@@ -375,3 +375,26 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; 
 }
 .munt.klein { width: 18px; height: 18px; border-width: 2px; }
 .munt.klein::after { font-size: 9px; }
+
+/* Typen vanaf 2 sterren */
+.ms-hulpje { font-size: 20px; background: #e7f5ff; border: 2px dashed #74c0fc; border-radius: 12px; padding: 2px 12px; }
+.kof-typrij, .ms-typrij { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.kof-gisteren { font-size: 30px; font-weight: bold; }
+.ms-hint-werkwoord { color: #868e96; font-size: .8em; }
+.pof-zin-tekst { gap: 10px; }
+.pof-stuk {
+  position: relative; font-size: 32px; font-weight: bold;
+  padding: 6px 12px; border-radius: 30px; border: 3px dashed transparent;
+}
+.pof-stuk.is-pv { background: #ff922b; color: #fff; }
+.pof-stuk.is-pv .pof-label { background: #e8590c; }
+.pof-stuk.is-ow { background: #74c0fc; color: #fff; }
+.pof-stuk.is-ow .pof-label { background: #1c7ed6; }
+@media (max-width: 700px), (max-height: 620px) { .pof-stuk { font-size: 24px; } }
+.ijs-woord-tekst { cursor: default; box-shadow: none; border-style: dashed; }
+.ijs-woord-tekst.gevonden { opacity: 1; background: #c3fae8; border-style: solid; }
+.drum-typveld { height: min(42vh, 360px); cursor: default; }
+.drum-typkaart { font-size: 32px; transition: background .2s; }
+.drum-typkaart small { font-size: 22px; color: #868e96; }
+.drum-typkaart.gevangen { background: #d3f9d8; border-color: #2b8a3e; }
+.drum-typkaart.te-laat { background: #fff4e6; border-color: #ffa94d; }

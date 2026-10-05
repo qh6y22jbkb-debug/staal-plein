@@ -19,6 +19,17 @@ export class KofschipSpel extends Minispel {
     if (this.niveau < 3) {
       this.inhoud.append(el('div', 'kof-ezelsbrug', `'t kofschip-x: ${KOFSCHIP.map((l) => `<span>${l}</span>`).join('')}`));
     }
+    this.kisten = [];
+    this.invoer = null;
+    if (this.niveau >= 2) {
+      // Zelf typen: de verleden tijd van de ik-vorm.
+      if (this.niveau === 2) this.inhoud.append(el('div', 'ms-hulpje', `ik-vorm: <b>ik ${v.ik}</b>`));
+      const rij = el('div', 'kof-typrij', '<span class="kof-gisteren">Gisteren … ik</span>');
+      this.invoer = this.maakInvoer((tekst) => this.controleerGetypt(tekst), true);
+      rij.appendChild(this.invoer.rij);
+      this.inhoud.appendChild(rij);
+      return;
+    }
     const kisten = el('div', 'kof-kisten');
     this.kisten = ['te', 'de'].map((uitgang, i) => {
       const kist = el('button', 'kof-kist', `
@@ -53,7 +64,38 @@ export class KofschipSpel extends Minispel {
     }
   }
 
+  /** 2 en 3 sterren: getypt woord nakijken. */
+  controleerGetypt(tekst) {
+    if (this.beantwoord) return;
+    const v = this.vraag;
+    const woord = tekst.replace(/^ik\s+/, '');
+    const goed = v.ik + v.uitgang;
+    if (woord === goed) {
+      this.beantwoord = true;
+      this.invoer.invoer.disabled = true;
+      this.invoer.knop.disabled = true;
+      this.goed(`ik ${v.ik}<mark>${v.uitgang}</mark> – wij ${v.ik}<mark>${v.uitgang}n</mark>`);
+      return;
+    }
+    this.wiebel(this.invoer.invoer);
+    const uitgang = woord.slice(-2);
+    if (uitgang !== 'te' && uitgang !== 'de') {
+      this.fout('In de verleden tijd eindigt het woord op <b>-te</b> of <b>-de</b>. Bijvoorbeeld: ik werk<mark>te</mark>.');
+    } else if (woord.slice(0, -2) !== v.ik) {
+      this.fout(`Kijk goed naar de ik-vorm: <b>ik ${v.ik}</b>. Schrijf die op en zet er -te of -de achter.`);
+    } else {
+      this.fout(`Haal -en eraf: <b>${v.zonderEn}</b>. De laatste letter is de <mark>${v.letter}</mark>. Zit die in 't kofschip-x?`);
+    }
+  }
+
+  wiebel(e) {
+    e.classList.remove('wiebel');
+    void e.offsetWidth;
+    e.classList.add('wiebel');
+  }
+
   toets(e) {
+    if (!this.kisten.length) return;
     const i = Minispel.cijfer(e);
     const letter = { KeyT: 0, KeyD: 1 }[e.code];
     const keuze = i >= 0 ? i : letter;

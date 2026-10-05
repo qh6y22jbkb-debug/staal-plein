@@ -78,14 +78,16 @@ Voor elk spel kies je eerst een niveau. De niveaus gaan één voor één open: e
 haal je daar een ronde, dan gaat 2 sterren open, en daarna 3 sterren. Dit geldt per kraam.
 Met **↺ Opnieuw beginnen** gaan alle niveaus weer op slot.
 
-| Spel | ★ | ★★ | ★★★ |
+Bij ★ klik je het antwoord aan. **Vanaf ★★ typ je zelf.**
+
+| Spel | ★ (klikken) | ★★ (typen) | ★★★ (typen) |
 |---|---|---|---|
-| Kofschip | gewone werkwoorden, 't kofschip-x in beeld | ook dubbele letters, ch, x | strikvragen (leven, reizen, praten…), zonder geheugensteun |
-| Tessa | alleen ik/hij/zij, kies -te of -tte | ook meervoud, vier keuzes | zelf het stukje typen |
-| Dirk | langzaam, makkelijke foute woorden | sneller, alle foute woorden | snel, veel foute woorden |
-| Vera | twee keuzes | drie keuzes | zelf het hele woord typen |
-| Peter & Olga | alleen de persoonsvorm | persoonsvorm + onderwerp, ook omgedraaide zinnen | ook vraagzinnen en lange zinnen |
-| Gijs | 1–2 werkwoorden, met teller | lastigere zinnen, met teller | 3 werkwoorden, zonder teller: zelf op Klaar drukken |
+| Kofschip | schatkist -te of -de | verleden tijd typen, ik-vorm als hulp | zonder hulp, ook strikvragen (leven, reizen…) |
+| Tessa | -te of -tte kiezen | het ontbrekende stukje typen | het hele woord typen (alleen het hele werkwoord staat erbij) |
+| Dirk | goede woorden vangen | werkwoord valt: typ de verleden tijd voor het de grond raakt | sneller, ook met wij (-den) |
+| Vera | twee woorden kiezen | woord typen, ik-vorm als hulp | woord typen, alleen het hele werkwoord als hulp |
+| Peter & Olga | persoonsvorm aanklikken | persoonsvorm en onderwerp typen | idem, met vraagzinnen en lange zinnen |
+| Gijs | werkwoorden aanklikken | werkwoorden typen, je ziet hoeveel het er zijn | werkwoorden typen zonder teller, zelf op Klaar drukken |
 
 In `src/data/oefeningen.js` heeft elke vraag een `niveau: 1, 2 of 3`. Bij 2 of 3 sterren komen
 vooral vragen van dat niveau, aangevuld met makkelijkere vragen.
@@ -103,6 +105,8 @@ Rechtsboven staat de muntenteller. Munten verdien je in de minispellen:
 - **Reeks**: elke 3 goede antwoorden op rij (in één keer goed) = +5 extra.
 - **Foutloze ronde**: +20.
 - Een fout kost **nooit** munten.
+- **Verstopte muntjes**: op het plein liggen 15 gouden muntjes verstopt (achter bomen, op de klimtoren,
+  op een balanceerpaal…). Loop of spring eroverheen: +2 munten per muntje. Elke dag liggen ze er weer.
 - Na elke ronde zie je een overzicht: goede antwoorden, munten, bonussen en je nieuwe totaal.
 
 Alle bedragen staan in `src/data/oefeningen.js` bij `MUNTEN`.
@@ -139,6 +143,7 @@ src/
   voorlezen.js         voorlezen met een Nederlandse stem (Web Speech API)
   voortgang.js         stempels bewaren in de browser
   munten.js            de munten van de speler (bewaard in de browser)
+  wereld/pleinmuntjes.js  de 15 verstopte muntjes op het plein
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt
     kramen.js          de zes marktkramen met versiering

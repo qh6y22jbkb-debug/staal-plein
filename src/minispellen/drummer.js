@@ -1,4 +1,4 @@
-import { Minispel, el, willekeurig } from './basis.js';
+import { Minispel, el, willekeurig, kiesWillekeurig } from './basis.js';
 
 /**
  * 3. Dirk de Drummer: woorden vallen uit de lucht.
@@ -18,7 +18,117 @@ export class DrummerSpel extends Minispel {
       return;
     }
     this.bolletjes.forEach((b, i) => b.classList.toggle('nu', i === this.nr));
-    if (!this.veld) this.bouwVeld();
+    if (!this.veld) {
+      if (this.niveau >= 2) this.bouwTypVeld();
+      else this.bouwVeld();
+    }
+  }
+
+  /* ---------- 2 en 3 sterren: typ de verleden tijd voordat het woord valt ---------- */
+
+  bouwTypVeld() {
+    this.veld = el('div', 'drum-veld drum-typveld');
+    this.trommel = el('div', 'drum-trommel', '<span class="drum-vel"></span><span class="drum-romp"></span>');
+    this.trommel.style.left = '50%';
+    this.veld.appendChild(this.trommel);
+    this.inhoud.appendChild(this.veld);
+    this.invoer = this.maakInvoer((tekst) => this.controleerGetypt(tekst), true);
+    this.inhoud.appendChild(this.invoer.rij);
+
+    const lijst = this.data.typWoorden.filter((w) => (w.niveau ?? 2) <= this.niveau);
+    this.typLijst = kiesWillekeurig(lijst, lijst.length);
+    this.valDuur = this.niveau === 2 ? 15 : 10; // seconden om naar beneden te vallen
+    this.tijd = 0;
+    this.laatste = performance.now();
+    this.nieuwTypWoord();
+
+    this.loopt = true;
+    const stap = (nu) => {
+      if (!this.loopt) return;
+      const dt = Math.min(0.05, (nu - this.laatste) / 1000);
+      this.laatste = nu;
+      this.updateTyp(dt);
+      this.frame = requestAnimationFrame(stap);
+    };
+    this.frame = requestAnimationFrame(stap);
+  }
+
+  nieuwTypWoord() {
+    if (!this.typLijst.length) {
+      const lijst = this.data.typWoorden.filter((w) => (w.niveau ?? 2) <= this.niveau);
+      this.typLijst = kiesWillekeurig(lijst, lijst.length);
+    }
+    const w = this.typLijst.pop();
+    // 3 sterren: soms "wij" (dan -den).
+    const wij = this.niveau === 3 && Math.random() < 0.5;
+    this.typWoord = { ...w, wij, antwoord: w.ik + (wij ? 'den' : 'de') };
+    this.typY = 0;
+    this.typKaart?.remove();
+    this.typKaart = el('div', 'drum-woord drum-typkaart', `${wij ? 'wij' : 'ik'} … <small>(${w.hele})</small>`);
+    this.typKaart.style.left = '50%';
+    this.veld.appendChild(this.typKaart);
+    this.wachtNieuw = false;
+    if (this.invoer) {
+      this.invoer.invoer.disabled = false;
+      this.invoer.knop.disabled = false;
+      this.invoer.invoer.value = '';
+      this.invoer.invoer.focus({ preventScroll: true });
+    }
+    this.voorlezen?.zeg(`${wij ? 'wij' : 'ik'}, ${w.hele}`);
+  }
+
+  updateTyp(dt) {
+    if (this.wachtNieuw || this.nr >= 8 || !this.typKaart) return;
+    const hoogte = this.veld.clientHeight;
+    if (!hoogte) return;
+    const bodem = hoogte - this.trommel.offsetHeight - this.typKaart.offsetHeight;
+    this.typY += (bodem / this.valDuur) * dt;
+    this.typKaart.style.transform = `translate(-50%, ${this.typY}px)`;
+    if (this.typY >= bodem) {
+      // Te laat: geen straf, wel het goede woord laten zien en een nieuw woord.
+      this.wachtNieuw = true;
+      this.typKaart.classList.add('te-laat');
+      this.fout(`Te laat! Het was <mark>${this.typWoord.antwoord}</mark>. Hier komt een nieuw woord.`);
+      this.pogingen = 0; // nieuw woord, nieuwe kans
+      this.foutDezeVraag = false;
+      setTimeout(() => { if (this.loopt) this.nieuwTypWoord(); }, 2200);
+    }
+  }
+
+  controleerGetypt(tekst) {
+    if (this.wachtNieuw || this.nr >= 8) return;
+    const w = this.typWoord;
+    const woord = tekst.replace(/^(ik|wij)\s+/, '');
+    if (woord === w.antwoord) {
+      this.wachtNieuw = true;
+      this.invoer.invoer.disabled = true;
+      this.typKaart.classList.add('gevangen');
+      this.typKaart.innerHTML = `${w.wij ? 'wij' : 'ik'} <b>${w.antwoord}</b>`;
+      this.trommel.classList.remove('boem');
+      void this.trommel.offsetWidth;
+      this.trommel.classList.add('boem');
+      this.goed(`<mark>${w.antwoord}</mark> is goed!`, { automatisch: true });
+      this.foutDezeVraag = false;
+      setTimeout(() => {
+        if (!this.loopt) return;
+        if (this.nr >= 8) this.volgendeVraag();
+        else { this.bolletjes.forEach((b, i) => b.classList.toggle('nu', i === this.nr)); this.nieuwTypWoord(); }
+      }, 900);
+      return;
+    }
+    this.invoer.invoer.classList.remove('wiebel');
+    void this.invoer.invoer.offsetWidth;
+    this.invoer.invoer.classList.add('wiebel');
+    const dubbel = w.ik.endsWith('d') ? ' Let op: de ik-vorm eindigt al op een d!' : '';
+    if (!woord.startsWith(w.ik)) {
+      this.fout(`Begin met de ik-vorm: <b>ik ${w.ik}</b>.`);
+    } else if (w.wij && !woord.endsWith('n')) {
+      this.fout(`Bij <b>wij</b> komt er een <mark>n</mark> achter.${dubbel}`);
+    } else if (!w.wij && woord.endsWith('n')) {
+      this.fout('Bij <b>ik</b> komt er géén n achter.');
+    } else {
+      this.fout(`De ik-vorm is <b>ik ${w.ik}</b>. Daar komt <mark>-de</mark> achter.${dubbel}`);
+    }
   }
 
   /** Snelheid en aantal foute woorden per niveau. */
@@ -70,6 +180,7 @@ export class DrummerSpel extends Minispel {
   }
 
   toets(e) {
+    if (this.niveau >= 2) return;
     if (['ArrowLeft', 'KeyA'].includes(e.code)) { this.links = true; this.doelX = null; e.preventDefault(); }
     if (['ArrowRight', 'KeyD'].includes(e.code)) { this.rechts = true; this.doelX = null; e.preventDefault(); }
   }
@@ -158,6 +269,7 @@ export class DrummerSpel extends Minispel {
 
   stopSpel() {
     this.loopt = false;
+    this.typKaart = null;
     cancelAnimationFrame(this.frame);
     if (this.toetsLos) window.removeEventListener('keyup', this.toetsLos);
     this.veld = null;

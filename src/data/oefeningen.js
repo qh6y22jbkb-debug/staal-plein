@@ -181,10 +181,11 @@ export const SPELLEN = {
   kofschip: {
     titel: 'De schatkisten van Kapitein Kofschip',
     opdracht: 'Krijgt dit werkwoord -te of -de? Kies de goede schatkist!',
+    opdrachtTypen: 'Typ de verleden tijd. Krijgt het -te of -de?',
     niveaus: [
-      'Gewone werkwoorden. De letters van \'t kofschip-x staan in beeld.',
-      'Ook werkwoorden met dubbele letters, ch en x.',
-      'Strikvragen zoals leven en reizen. Zonder geheugensteun!',
+      'Gewone werkwoorden. Kies de schatkist -te of -de.',
+      'Typ zelf de verleden tijd. De ik-vorm staat erbij als hulp.',
+      'Typ zelf de verleden tijd, zonder hulp. Ook strikvragen zoals leven en reizen!',
     ],
     vragen: [
       { hele: 'werken', ik: 'werk', uitgang: 'te', niveau: 1 },
@@ -227,28 +228,29 @@ export const SPELLEN = {
   taarten: {
     titel: 'De taartenbakkerij van Tante Tessa',
     opdracht: 'Welk stukje hoort op de lege plek?',
+    opdrachtTypen: 'Typ wat er op de lege plek hoort.',
     niveaus: [
       'Eén persoon of ding. Kies uit -te of -tte.',
-      'Ook zinnen met wij, jullie en zij. Kies uit vier stukjes.',
-      'Typ zelf het stukje dat ontbreekt.',
+      'Typ zelf het stukje dat ontbreekt. Ook met wij, jullie en zij.',
+      'Typ zelf het hele woord. Alleen het hele werkwoord staat erbij.',
     ],
     vragen: [
-      { zin: 'Gisteren werk__ ik in de tuin.', ik: 'werk', meer: false },
-      { zin: 'Wij fiets__ samen naar het bos.', ik: 'fiets', meer: true },
-      { zin: 'Mama kook__ gisteren soep.', ik: 'kook', meer: false },
-      { zin: 'De kinderen maak__ een mooie tekening.', ik: 'maak', meer: true },
-      { zin: 'Ik lach__ om de grap van Tim.', ik: 'lach', meer: false },
-      { zin: 'Oma dans__ op het feest.', ik: 'dans', meer: false },
-      { zin: 'Ik hoop__ op mooi weer.', ik: 'hoop', meer: false },
-      { zin: 'Gisteren plan__ ik een boom.', ik: 'plant', meer: false },
-      { zin: 'Wij plan__ bloemen in de tuin.', ik: 'plant', meer: true },
-      { zin: 'De juf praa__ met de directeur.', ik: 'praat', meer: false },
-      { zin: 'Na het voetballen rus__ wij even.', ik: 'rust', meer: true },
-      { zin: 'Ik wach__ op de bus.', ik: 'wacht', meer: false },
-      { zin: 'Jullie wach__ heel lang op een ijsje.', ik: 'wacht', meer: true },
-      { zin: 'Tom poets__ zijn tanden.', ik: 'poets', meer: false },
-      { zin: 'Wij poets__ de ramen van de klas.', ik: 'poets', meer: true },
-      { zin: 'Papa maak__ pannenkoeken.', ik: 'maak', meer: false },
+      { zin: 'Gisteren werk__ ik in de tuin.', hele: 'werken', ik: 'werk', meer: false },
+      { zin: 'Wij fiets__ samen naar het bos.', hele: 'fietsen', ik: 'fiets', meer: true },
+      { zin: 'Mama kook__ gisteren soep.', hele: 'koken', ik: 'kook', meer: false },
+      { zin: 'De kinderen maak__ een mooie tekening.', hele: 'maken', ik: 'maak', meer: true },
+      { zin: 'Ik lach__ om de grap van Tim.', hele: 'lachen', ik: 'lach', meer: false },
+      { zin: 'Oma dans__ op het feest.', hele: 'dansen', ik: 'dans', meer: false },
+      { zin: 'Ik hoop__ op mooi weer.', hele: 'hopen', ik: 'hoop', meer: false },
+      { zin: 'Gisteren plan__ ik een boom.', hele: 'planten', ik: 'plant', meer: false },
+      { zin: 'Wij plan__ bloemen in de tuin.', hele: 'planten', ik: 'plant', meer: true },
+      { zin: 'De juf praa__ met de directeur.', hele: 'praten', ik: 'praat', meer: false },
+      { zin: 'Na het voetballen rus__ wij even.', hele: 'rusten', ik: 'rust', meer: true },
+      { zin: 'Ik wach__ op de bus.', hele: 'wachten', ik: 'wacht', meer: false },
+      { zin: 'Jullie wach__ heel lang op een ijsje.', hele: 'wachten', ik: 'wacht', meer: true },
+      { zin: 'Tom poets__ zijn tanden.', hele: 'poetsen', ik: 'poets', meer: false },
+      { zin: 'Wij poets__ de ramen van de klas.', hele: 'poetsen', ik: 'poets', meer: true },
+      { zin: 'Papa maak__ pannenkoeken.', hele: 'maken', ik: 'maak', meer: false },
     ],
   },
 
@@ -258,12 +260,33 @@ export const SPELLEN = {
   drummer: {
     titel: 'De woordenregen van Dirk de Drummer',
     opdracht: 'Vang de goed geschreven woorden met je trommel. Ontwijk de foute!',
+    opdrachtTypen: 'Typ de verleden tijd voordat het woord de grond raakt!',
     niveaus: [
-      'De woorden vallen langzaam. Weinig foute woorden.',
-      'Iets sneller, en meer soorten foute woorden.',
-      'Snel! En veel foute woorden met dubbele d.',
+      'Vang de goed geschreven woorden met je trommel.',
+      'Er valt een werkwoord. Typ de verleden tijd voordat het de grond raakt!',
+      'Sneller! En ook met wij, jullie en zij.',
     ],
     klaarTekst: 'Je hebt 8 goede woorden gevangen. {aantal} keer zonder fout woord ertussen. Wat een ritme!',
+    // Bij 2 en 3 sterren valt er een heel werkwoord en typ je de verleden tijd.
+    // hele = het hele werkwoord, ik = de ik-vorm. niveau 3 = ook met dubbel d.
+    typWoorden: [
+      { hele: 'spelen', ik: 'speel', niveau: 2 },
+      { hele: 'wonen', ik: 'woon', niveau: 2 },
+      { hele: 'leren', ik: 'leer', niveau: 2 },
+      { hele: 'bouwen', ik: 'bouw', niveau: 2 },
+      { hele: 'huilen', ik: 'huil', niveau: 2 },
+      { hele: 'rennen', ik: 'ren', niveau: 2 },
+      { hele: 'horen', ik: 'hoor', niveau: 2 },
+      { hele: 'bellen', ik: 'bel', niveau: 2 },
+      { hele: 'zwemmen', ik: 'zwem', niveau: 2 },
+      { hele: 'schilderen', ik: 'schilder', niveau: 2 },
+      { hele: 'branden', ik: 'brand', niveau: 3 },
+      { hele: 'landen', ik: 'land', niveau: 3 },
+      { hele: 'schudden', ik: 'schud', niveau: 3 },
+      { hele: 'antwoorden', ik: 'antwoord', niveau: 3 },
+      { hele: 'leven', ik: 'leef', niveau: 3 },
+      { hele: 'reizen', ik: 'reis', niveau: 3 },
+    ],
     goed: ['speelde', 'woonde', 'leerde', 'bouwde', 'huilde', 'rende', 'brandde', 'landde', 'schudde',
       'speelden', 'bouwden', 'renden', 'brandden', 'landden', 'leerden'],
     fout: [
@@ -287,25 +310,26 @@ export const SPELLEN = {
   voorvoegsel: {
     titel: 'De letterkast van Vera Voorvoegsel',
     opdracht: 'Welk woord is goed geschreven?',
+    opdrachtTypen: 'Typ het werkwoord in de verleden tijd.',
     niveaus: [
       'Kies uit twee woorden.',
-      'Kies uit drie woorden.',
-      'Typ zelf het hele woord.',
+      'Typ zelf het woord. De ik-vorm staat erbij als hulp.',
+      'Typ zelf het woord. Alleen het hele werkwoord staat erbij.',
     ],
     vragen: [
-      { zin: 'Gisteren ___ de juf een boom.', ik: 'verplant', goed: 'verplantte', opties: ['verplante', 'verplantte', 'verplantde'] },
-      { zin: 'Oeps! De kok ___ de pannenkoek.', ik: 'verbrand', goed: 'verbrandde', opties: ['verbrande', 'verbrandde', 'verbrandden'] },
-      { zin: 'Lisa ___ een geheime gang onder de school.', ik: 'ontdek', goed: 'ontdekte', opties: ['ontdekte', 'ontdekde', 'ontdekten'] },
-      { zin: 'Wij ___ een grote doos voor ons kunstwerk.', ik: 'gebruik', goed: 'gebruikten', opties: ['gebruikte', 'gebruikten', 'gebruikden'] },
-      { zin: 'Opa ___ een spannend verhaal.', ik: 'vertel', goed: 'vertelde', opties: ['vertelde', 'vertelte', 'vertelden'] },
-      { zin: 'Ik ___ mijn juf van groep 3 meteen.', ik: 'herken', goed: 'herkende', opties: ['herkente', 'herkende', 'herkenden'] },
-      { zin: 'Mijn ouders ___ een pizza.', ik: 'bestel', goed: 'bestelden', opties: ['bestelde', 'bestelden', 'bestelten'] },
-      { zin: 'Papa ___ met zijn pinpas.', ik: 'betaal', goed: 'betaalde', opties: ['betaalte', 'betaalde', 'betaalden'] },
-      { zin: 'De hamster ___ uit zijn kooi.', ik: 'ontsnap', goed: 'ontsnapte', opties: ['ontsnapde', 'ontsnapte', 'ontsnapten'] },
-      { zin: 'Gisteren ___ ik mijn nieuwe buurmeisje.', ik: 'ontmoet', goed: 'ontmoette', opties: ['ontmoete', 'ontmoette', 'ontmoetten'] },
-      { zin: 'Niemand ___ dat het ging sneeuwen.', ik: 'verwacht', goed: 'verwachtte', opties: ['verwachte', 'verwachtte', 'verwachtten'] },
-      { zin: 'De meester ___ de uitleg nog een keer.', ik: 'herhaal', goed: 'herhaalde', opties: ['herhaalte', 'herhaalde', 'herhaalden'] },
-      { zin: 'Wat ___ er gisteren op het plein?', ik: 'gebeur', goed: 'gebeurde', opties: ['gebeurte', 'gebeurde', 'gebeurden'] },
+      { zin: 'Gisteren ___ de juf een boom.', hele: 'verplanten', ik: 'verplant', goed: 'verplantte', opties: ['verplante', 'verplantte', 'verplantde'] },
+      { zin: 'Oeps! De kok ___ de pannenkoek.', hele: 'verbranden', ik: 'verbrand', goed: 'verbrandde', opties: ['verbrande', 'verbrandde', 'verbrandden'] },
+      { zin: 'Lisa ___ een geheime gang onder de school.', hele: 'ontdekken', ik: 'ontdek', goed: 'ontdekte', opties: ['ontdekte', 'ontdekde', 'ontdekten'] },
+      { zin: 'Wij ___ een grote doos voor ons kunstwerk.', hele: 'gebruiken', ik: 'gebruik', goed: 'gebruikten', opties: ['gebruikte', 'gebruikten', 'gebruikden'] },
+      { zin: 'Opa ___ een spannend verhaal.', hele: 'vertellen', ik: 'vertel', goed: 'vertelde', opties: ['vertelde', 'vertelte', 'vertelden'] },
+      { zin: 'Ik ___ mijn juf van groep 3 meteen.', hele: 'herkennen', ik: 'herken', goed: 'herkende', opties: ['herkente', 'herkende', 'herkenden'] },
+      { zin: 'Mijn ouders ___ een pizza.', hele: 'bestellen', ik: 'bestel', goed: 'bestelden', opties: ['bestelde', 'bestelden', 'bestelten'] },
+      { zin: 'Papa ___ met zijn pinpas.', hele: 'betalen', ik: 'betaal', goed: 'betaalde', opties: ['betaalte', 'betaalde', 'betaalden'] },
+      { zin: 'De hamster ___ uit zijn kooi.', hele: 'ontsnappen', ik: 'ontsnap', goed: 'ontsnapte', opties: ['ontsnapde', 'ontsnapte', 'ontsnapten'] },
+      { zin: 'Gisteren ___ ik mijn nieuwe buurmeisje.', hele: 'ontmoeten', ik: 'ontmoet', goed: 'ontmoette', opties: ['ontmoete', 'ontmoette', 'ontmoetten'] },
+      { zin: 'Niemand ___ dat het ging sneeuwen.', hele: 'verwachten', ik: 'verwacht', goed: 'verwachtte', opties: ['verwachte', 'verwachtte', 'verwachtten'] },
+      { zin: 'De meester ___ de uitleg nog een keer.', hele: 'herhalen', ik: 'herhaal', goed: 'herhaalde', opties: ['herhaalte', 'herhaalde', 'herhaalden'] },
+      { zin: 'Wat ___ er gisteren op het plein?', hele: 'gebeuren', ik: 'gebeur', goed: 'gebeurde', opties: ['gebeurte', 'gebeurde', 'gebeurden'] },
     ],
   },
 
@@ -316,9 +340,9 @@ export const SPELLEN = {
     titel: 'Zinnen bakken met Peter en Olga',
     opdracht: 'Klik eerst op de persoonsvorm. Klik daarna op het onderwerp.',
     niveaus: [
-      'Zoek alleen de persoonsvorm. Het onderwerp staat vooraan.',
-      'Zoek de persoonsvorm én het onderwerp. Soms staat het onderwerp achteraan.',
-      'Ook vraagzinnen en lange zinnen. Goed opletten!',
+      'Klik op de persoonsvorm. Het onderwerp staat vooraan.',
+      'Typ zelf de persoonsvorm én het onderwerp. Soms staat het onderwerp achteraan.',
+      'Typ zelf de persoonsvorm en het onderwerp. Ook vraagzinnen en lange zinnen!',
     ],
     vragen: [
       { zin: 'Olga | bakt | poffertjes.', pv: 1, ow: 0, niveau: 1 },
@@ -348,10 +372,11 @@ export const SPELLEN = {
   ijs: {
     titel: 'IJsjes stapelen met Gijs',
     opdracht: 'Klik alle werkwoorden aan. Samen zijn ze het werkwoordelijk gezegde!',
+    opdrachtTypen: 'Typ alle werkwoorden uit de zin. Samen zijn ze het werkwoordelijk gezegde!',
     niveaus: [
-      'Zinnen met één of twee werkwoorden. Je ziet hoeveel je er nog moet vinden.',
-      'Iets lastigere zinnen. Je ziet hoeveel je er nog moet vinden.',
-      'Zinnen met drie werkwoorden. Druk zelf op Klaar als je ze allemaal hebt!',
+      'Klik alle werkwoorden aan. Je ziet hoeveel je er nog moet vinden.',
+      'Typ zelf alle werkwoorden. Je ziet hoeveel het er zijn.',
+      'Typ zelf alle werkwoorden, ook bij zinnen met drie. Hoeveel? Dat zoek je zelf uit!',
     ],
     vragen: [
       { zin: 'Ik *heb* een ijsje *gekocht*.', niveau: 1 },
@@ -390,6 +415,9 @@ export const SPEL_TEKSTEN = {
   anderNiveau: 'Ander niveau',
   controleer: 'Controleer',
   typHier: 'Typ hier…',
+  typPersoonsvorm: 'persoonsvorm',
+  typOnderwerp: 'onderwerp',
+  typWerkwoorden: 'werkwoorden',
   klaarKnop: 'Klaar!',
   klaarTekst: 'Je hebt alle 8 vragen gedaan. {aantal} keer had je het in één keer goed!',
   opnieuw: 'Nog een keer',
@@ -411,6 +439,7 @@ export const MUNTEN = {
   reeksLengte: 3, // elke 3 goede antwoorden op rij (in één keer goed)...
   reeksBonus: 5, // ...geven 5 extra munten
   foutloosBonus: 20, // ronde zonder één fout
+  pleinMuntje: 2, // waarde van een verstopt muntje op het plein (ze komen elke dag terug)
 };
 
 export const MUNT_TEKSTEN = {
@@ -424,6 +453,8 @@ export const MUNT_TEKSTEN = {
   foutloosBonus: 'Bonus foutloze ronde',
   totaal: 'Je hebt nu',
   munten: 'munten',
+  pleinGevonden: 'Muntje gevonden! {aantal} van de {totaal}',
+  pleinAlles: 'Alle {totaal} muntjes gevonden! Morgen liggen er weer nieuwe.',
 };
 
 /*
