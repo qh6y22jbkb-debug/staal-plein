@@ -58,7 +58,8 @@ export function el(tag, klasse, html) {
  *   toets(e)            → (optioneel) toetsenbord
  */
 export class Minispel {
-  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen, beloon, muntenTotaal }) {
+  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen, beloon, muntenTotaal, voortgang: eigenVoortgang }) {
+    this.voortgang = eigenVoortgang ?? voortgang; // rekenspellen hebben een eigen voortgang
     this.muntenTotaal = muntenTotaal;
     this.voorlezen = voorlezen;
     this.beloon = beloon; // (aantal, vanElement, label) → munten naar de teller
@@ -79,7 +80,17 @@ export class Minispel {
 
   /** Hoogste niveau dat open is: eerst 1 ster, dan 2, dan 3. */
   get hoogsteOpen() {
-    return Math.min(3, voortgang.niveau(this.kraam.data.id) + 1);
+    return Math.min(3, this.voortgang.niveau(this.kraam.data.id) + 1);
+  }
+
+  /** Hoe een niveau heet: ★★☆ (taalspellen) of bijv. 🥈 Zilver (rekenspellen). */
+  niveauTeken(n) {
+    return sterren(n);
+  }
+
+  /** Aantal vragen in een ronde. */
+  get aantalVragen() {
+    return VRAGEN_PER_RONDE;
   }
 
   toonNiveauKeuze() {
@@ -95,10 +106,10 @@ export class Minispel {
     this.niveauKnoppen = [1, 2, 3].map((n) => {
       const opSlot = n > open;
       const tekst = opSlot
-        ? SPEL_TEKSTEN.niveauOpSlot.replace('{sterren}', sterren(n - 1))
+        ? SPEL_TEKSTEN.niveauOpSlot.replace('{sterren}', this.niveauTeken(n - 1))
         : this.data.niveaus?.[n - 1] ?? '';
       const knop = el('button', `ms-niveau${n === vorige ? ' vorige' : ''}${opSlot ? ' op-slot' : ''}`, `
-        <span class="ms-sterren">${sterren(n)}</span>
+        <span class="ms-sterren">${this.niveauTeken(n)}</span>
         <span class="ms-niveau-tekst">${tekst}</span>
         ${opSlot ? '<span class="ms-slot" aria-hidden="true">🔒</span>' : `<span class="sneltoets">${n}</span>`}`);
       knop.type = 'button';
@@ -145,11 +156,11 @@ export class Minispel {
       <div class="ms-kaart ms-${this.kraam.data.id}">
         <header class="ms-kop">
           <span class="ms-icoon">${this.kraam.data.icoon}</span>
-          <h2>${this.data.titel}${metVoortgang ? ` <span class="ms-kop-sterren">${sterren(this.niveau)}</span>` : ''}</h2>
+          <h2>${this.data.titel}${metVoortgang ? ` <span class="ms-kop-sterren">${this.niveauTeken(this.niveau)}</span>` : ''}</h2>
           ${this.voorlezen?.beschikbaar ? '<button type="button" class="ms-lees" title="Lees voor" aria-label="Lees voor">🔊</button>' : ''}
           <button type="button" class="ms-stop">✕ ${SPEL_TEKSTEN.stoppen}</button>
         </header>
-        <div class="ms-voortgang">${metVoortgang ? '<span></span>'.repeat(VRAGEN_PER_RONDE) : ''}</div>
+        <div class="ms-voortgang">${metVoortgang ? '<span></span>'.repeat(this.aantalVragen) : ''}</div>
         <p class="ms-opdracht">${(this.niveau >= 2 && metVoortgang && this.data.opdrachtTypen) || this.data.opdracht}</p>
         <div class="ms-inhoud"></div>
         <div class="ms-feedback" aria-live="polite"></div>
@@ -165,7 +176,7 @@ export class Minispel {
   }
 
   volgendeVraag() {
-    if (this.nr >= VRAGEN_PER_RONDE) {
+    if (this.nr >= this.aantalVragen) {
       this.klaar();
       return;
     }
@@ -232,7 +243,7 @@ export class Minispel {
     }
     if (!automatisch) this.voorlezen?.zeg(this.feedback.querySelector('b').textContent);
     if (automatisch) return;
-    const knop = el('button', 'ms-volgende', this.nr >= VRAGEN_PER_RONDE ? 'Klaar! ▶' : 'Volgende ▶');
+    const knop = el('button', 'ms-volgende', this.nr >= this.aantalVragen ? 'Klaar! ▶' : 'Volgende ▶');
     knop.type = 'button';
     knop.addEventListener('click', () => this.volgendeVraag());
     this.feedback.appendChild(knop);
@@ -261,7 +272,7 @@ export class Minispel {
     confetti(160);
     // Eigen eindtekst van een spel geldt alleen voor de klik-versie (1 ster).
     const eigen = this.niveau >= 2 && this.data.opdrachtTypen ? null : this.data.klaarTekst;
-    const tekst = (eigen ?? SPEL_TEKSTEN.klaarTekst).replace('{aantal}', this.inEenKeer);
+    const tekst = (eigen ?? SPEL_TEKSTEN.klaarTekst).replace('{aantal}', this.inEenKeer).replace('{totaal}', this.aantalVragen);
     this.kaart.querySelector('.ms-opdracht')?.remove();
     this.inhoud.innerHTML = `
       <div class="ms-klaar">
@@ -271,8 +282,8 @@ export class Minispel {
         ${this.overzichtHtml()}
         <div class="ms-klaar-knoppen">
           <button type="button" class="ms-opnieuw">↻ ${SPEL_TEKSTEN.opnieuw}</button>
-          <button type="button" class="ms-ander">${sterren(this.niveau)} ${SPEL_TEKSTEN.anderNiveau}</button>
-          <button type="button" class="ms-terug">${SPEL_TEKSTEN.terug} ▶</button>
+          <button type="button" class="ms-ander">${this.niveauTeken(this.niveau)} ${SPEL_TEKSTEN.anderNiveau}</button>
+          <button type="button" class="ms-terug">${this.data.terugTekst ?? SPEL_TEKSTEN.terug} ▶</button>
         </div>
       </div>`;
     this.feedback.className = 'ms-feedback';
@@ -289,7 +300,7 @@ export class Minispel {
     const openVoor = this.hoogsteOpen;
     let extra = this.opKlaar?.(this.kraam, { niveau: this.niveau, inEenKeer: this.inEenKeer }) ?? '';
     if (this.hoogsteOpen > openVoor) {
-      extra = `${SPEL_TEKSTEN.niveauVrij.replace('{sterren}', sterren(this.hoogsteOpen))}${extra ? `<br>${extra}` : ''}`;
+      extra = `${SPEL_TEKSTEN.niveauVrij.replace('{sterren}', this.niveauTeken(this.hoogsteOpen))}${extra ? `<br>${extra}` : ''}`;
     }
     if (extra) this.inhoud.querySelector('.ms-klaar p').insertAdjacentHTML('afterend', `<p class="ms-stempel-bericht">${extra}</p>`);
   }
@@ -304,7 +315,7 @@ export class Minispel {
     return `
       <div class="ms-overzicht">
         <h4>${T.overzichtTitel}</h4>
-        ${rij('✅', T.goedeAntwoorden, `${VRAGEN_PER_RONDE} van ${VRAGEN_PER_RONDE}`)}
+        ${rij('✅', T.goedeAntwoorden, `${this.aantalVragen} van ${this.aantalVragen}`)}
         ${rij('⭐', T.inEenKeer, this.inEenKeer)}
         ${rij('<span class="munt klein" aria-hidden="true"></span>', T.muntenAntwoorden, `+${this.verdiendAntwoorden}`)}
         ${rij('🔥', T.reeksBonus, this.verdiendReeks ? `+${this.verdiendReeks}` : '–')}

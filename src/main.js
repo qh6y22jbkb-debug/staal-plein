@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
-import { LEERGROEP, REKEN_TEKSTEN } from './data/rekenen.js';
+import { LEERGROEP, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL } from './data/rekenen.js';
+import { rekenvoortgang } from './rekenvoortgang.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
 import { VolgCamera } from './camera.js';
@@ -147,8 +148,30 @@ function startGesprek(kraam, toestemming = false) {
 
 /* ---------- Rekenkramen in Leergroep 3 ---------- */
 
-function speelRekenspel() {
-  dialoog.zeg(REKEN_TEKSTEN.spelKomtEraan); // de rekenspellen komen in stap 3 t/m 6
+async function speelRekenspel(kraam) {
+  // De rekenspellen worden pas geladen als je er een start.
+  const { startRekenspel, heeftRekenspel } = await import('./rekenen/index.js');
+  if (!heeftRekenspel(kraam.data.id)) {
+    dialoog.zeg(REKEN_TEKSTEN.spelKomtEraan); // dit spel komt nog
+    return;
+  }
+  dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
+  dialoog.sluit();
+  actiefSpel = startRekenspel(kraam, {
+    laag: uiLaag,
+    beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
+    // Ronde gehaald: Brons, Zilver of Goud (apart van de taalstempels, telt niet mee voor de poort).
+    opKlaar: (k, { niveau }) => {
+      const nieuw = rekenvoortgang.rondeGehaald(k.data.id, niveau);
+      if (!nieuw) return '';
+      return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam);
+    },
+    opSluiten: () => {
+      actiefSpel = null;
+      klok.update();
+      terugNaarPlein();
+    },
+  });
 }
 
 /* ---------- Leeskraam: vragenkaartjes voor maatjeslezen ---------- */
@@ -493,6 +516,7 @@ hud.opOpnieuw = () => {
   ruimBinnenOp(); // opnieuw beginnen gebeurt altijd op het schoolplein
   // Eerst de modules (die houden ook dingen in het geheugen bij), dan alle opslag.
   voortgang.wis();
+  rekenvoortgang.wis();
   munten.wis();
   pleinMuntjes.wis();
   kledingkast.wis();
@@ -817,4 +841,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
