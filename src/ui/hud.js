@@ -124,6 +124,14 @@ export class Hud {
     this.meldingTimer = setTimeout(() => this.melding.classList.remove('zichtbaar'), 2600);
   }
 
+  /** Titel linksboven (bijv. "Leergroep 3"). Zonder tekst: weer de gewone titel. */
+  zetTitel(tekst) {
+    const el = document.querySelector('.titel');
+    if (!el) return;
+    this.standaardTitel ??= el.textContent;
+    el.textContent = tekst || this.standaardTitel;
+  }
+
   verbergMelding() {
     clearTimeout(this.meldingTimer);
     this.melding?.classList.remove('zichtbaar');

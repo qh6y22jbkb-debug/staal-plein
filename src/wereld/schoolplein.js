@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import {
   mat, doos, cilinder, kegel, bol, grondVlak, canvasTextuur, tekstTextuur, zaadRandom,
 } from './helpers.js';
+import { LEERGROEP } from '../data/rekenen.js';
 
 // Het plein (binnen het hek). Noord = -z (daar staat de school), zuid = +z (ingang).
 // Sfeer naar foto's van het echte plein: een natuurspeelplaats met hout, zand en groen.
 // Het midden (ongeveer x -16..16, z -8..18) blijft vrij voor de marktkramen.
 export const PLEIN = { minX: -40, maxX: 40, minZ: -30, maxZ: 30 };
 export const STARTPLEK = new THREE.Vector3(0, 0, 22);
+/** Voor de voordeur van de school (naar Leergroep 3). */
+export const SCHOOLDEUR = new THREE.Vector3(0, 0, -20.6);
 
 const KLEUR = {
   gras: 0x7fb35a, rubbergras: 0x8db37a, zand: 0xdccba3, donkerTegel: 0x6f7883,
@@ -174,10 +177,20 @@ function bouwSchool(scene, botsing, blokkers) {
     }
   }
 
-  // Ingang met luifel.
+  // Voordeur met luifel. De glazen schuifdeuren staan altijd open: daarachter is Leergroep 3.
   doos(3.2, 3.2, 0.2, 0x2f3438, 0, 1.6, voor + 0.05, g);
-  doos(1.35, 2.9, 0.24, KLEUR.glas, -0.72, 1.45, voor + 0.08, g);
-  doos(1.35, 2.9, 0.24, KLEUR.glas, 0.72, 1.45, voor + 0.08, g);
+  doos(2.7, 2.9, 0.22, 0x5b4636, 0, 1.45, voor + 0.07, g); // de hal achter de deur (warm binnenlicht)
+  doos(2.4, 0.04, 0.6, 0xd3d0c8, 0, 0.03, voor + 0.25, g); // drempel
+  doos(1.35, 2.9, 0.12, KLEUR.glas, -1.95, 1.45, voor + 0.2, g); // deur opzij geschoven
+  doos(1.35, 2.9, 0.12, KLEUR.glas, 1.95, 1.45, voor + 0.2, g);
+  // Bord "Leergroep 3 - Rekenen" boven op de luifel.
+  const deurBord = new THREE.Mesh(
+    new THREE.PlaneGeometry(5.4, 0.9),
+    new THREE.MeshLambertMaterial({ map: tekstTextuur(LEERGROEP.deurBord, { rand: '#e8590c', grootte: 110 }) }),
+  );
+  deurBord.position.set(0, 4.25, voor + 2.62);
+  g.add(deurBord);
+  for (const x of [-2.2, 2.2]) cilinder(0.04, 0.45, 0x3a3f44, x, 3.85, voor + 2.55, g, 6);
   doos(6, 0.3, 2.6, 0x3a3f44, 0, 3.6, voor + 1.3, g);
   cilinder(0.12, 3.5, 0x3a3f44, -2.7, 1.75, voor + 2.4, g);
   cilinder(0.12, 3.5, 0x3a3f44, 2.7, 1.75, voor + 2.4, g);

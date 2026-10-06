@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
-import { bouwSchoolplein, PLEIN, STARTPLEK } from './wereld/schoolplein.js';
+import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
+import { LEERGROEP } from './data/rekenen.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
 import { VolgCamera } from './camera.js';
@@ -106,7 +107,7 @@ let dichtsteKraam = null;
 
 function zoekDichtsteKraam() {
   let beste = null, besteAfstand = PRAATAFSTAND;
-  for (const k of alleKramen) {
+  for (const k of (binnen ? binnen.kramen : alleKramen)) {
     const d = Math.hypot(speler.positie.x - k.praatPunt.x, speler.positie.z - k.praatPunt.z);
     if (d < besteAfstand) { beste = k; besteAfstand = d; }
   }
@@ -359,6 +360,89 @@ async function naarPlein() {
   bezigMetWisselen = false;
 }
 
+/* ---------- Wisselen tussen schoolplein en Leergroep 3 (in de school) ---------- */
+
+let binnen = null; // Leergroep 3 (alleen als je binnen bent)
+const pleinCamera = { pitch: 0.42, afstand: 10 };
+
+function isBijSchooldeur() {
+  return Math.hypot(speler.positie.x - SCHOOLDEUR.x, speler.positie.z - SCHOOLDEUR.z) < 2.6;
+}
+
+function zetSpelerIn(doelScene) {
+  doelScene.add(speler.groep, doelRing);
+  besturing.scene = doelScene;
+}
+
+async function naarBinnen() {
+  if (bezigMetWisselen || binnen || voetbal) return;
+  bezigMetWisselen = true;
+  besturing.aan = false;
+  besturing.doel = null;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  kinderen.verbergBallon();
+  meesters.verbergBallon();
+  geluid.woesj();
+  await naarWit();
+  // Pas nu laden: Leergroep 3 wordt pas gebouwd als je naar binnen gaat. Het plein staat dan stil.
+  const { Leergroep3 } = await import('./binnen/leergroep3.js');
+  binnen = new Leergroep3();
+  zetSpelerIn(binnen.scene);
+  speler.positie.copy(binnen.startPlek);
+  speler.richting = binnen.startRichting;
+  volgCam.blokkers = binnen.blokkers;
+  Object.assign(pleinCamera, { pitch: volgCam.pitch, afstand: volgCam.afstand });
+  volgCam.pitch = 0.78; // binnen kijk je wat meer van boven, over de muren heen
+  volgCam.afstand = 8.5;
+  volgCam.yaw = speler.richting + Math.PI;
+  volgCam.doelYaw = volgCam.doelPitch = null;
+  volgCam.eersteKeer = true;
+  hud.zetTitel(LEERGROEP.naam);
+  document.body.classList.add('in-school');
+  klok.update();
+  besturing.aan = true;
+  await vanWit();
+  hud.toonMelding(LEERGROEP.welkom);
+  bezigMetWisselen = false;
+}
+
+/** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
+function ruimBinnenOp() {
+  if (!binnen) return;
+  binnen.dispose();
+  binnen = null;
+  zetSpelerIn(scene);
+  volgCam.blokkers = wereld.blokkers;
+  volgCam.pitch = pleinCamera.pitch;
+  volgCam.afstand = pleinCamera.afstand;
+  hud.zetTitel(null);
+  document.body.classList.remove('in-school');
+}
+
+async function naarBuiten() {
+  if (bezigMetWisselen || !binnen) return;
+  bezigMetWisselen = true;
+  besturing.aan = false;
+  besturing.doel = null;
+  besturing.ingedrukt.clear();
+  hud.toonWolkje(null);
+  geluid.woesj();
+  await naarWit();
+  ruimBinnenOp();
+  hud.verbergMelding();
+  // Terug op het plein, vlak voor de voordeur, met de rug naar de school.
+  speler.positie.set(SCHOOLDEUR.x, 0, SCHOOLDEUR.z + 3.4);
+  speler.richting = 0;
+  volgCam.yaw = Math.PI;
+  volgCam.doelYaw = volgCam.doelPitch = null;
+  volgCam.eersteKeer = true;
+  klok.update();
+  besturing.aan = true;
+  await vanWit();
+  bezigMetWisselen = false;
+}
+
 /* ---------- Feest bij alle 6 stempels ---------- */
 
 function startFeest() {
@@ -399,6 +483,7 @@ function toonBanner(tekst) {
 /* ---------- Opnieuw beginnen ---------- */
 
 hud.opOpnieuw = () => {
+  ruimBinnenOp(); // opnieuw beginnen gebeurt altijd op het schoolplein
   // Eerst de modules (die houden ook dingen in het geheugen bij), dan alle opslag.
   voortgang.wis();
   munten.wis();
@@ -465,10 +550,16 @@ function praatMetFiguur(f) {
 }
 
 function praatMetDichtste() {
-  if (voetbal) return; // op het voetbalveld is E iets anders
+  if (voetbal || bezigMetWisselen) return; // op het voetbalveld is E iets anders
+  if (binnen) {
+    if (dichtsteKraam) startGesprek(dichtsteKraam);
+    else if (binnen.isBijDeurTerug(speler.positie)) naarBuiten();
+    return;
+  }
   if (dichtsteKraam) startGesprek(dichtsteKraam);
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
+  else if (isBijSchooldeur()) naarBinnen();
 }
 
 besturing.opPraten = praatMetDichtste;
@@ -524,41 +615,9 @@ function frame() {
   if (actiefSpel || actiefVenster || bezigMetWisselen) return; // plein staat stil tijdens een spel of winkel (scheelt rekenkracht)
   const dt = Math.min(klok.getDelta(), 0.05);
   tijd += dt;
+  if (binnen) { frameBinnen(dt); return; }
 
-  const cam = besturing.neemCamera();
-  volgCam.draai(cam.x, cam.y);
-  if (cam.zoom) volgCam.zoom(cam.zoom);
-
-  volgKind();
-  // Toetsen/joystick: vooruit lopen en draaien. De camera draait vanzelf mee.
-  const invoer = besturing.beweging();
-  let beweging = { x: 0, z: 0 };
-  let achteruit = false;
-  if (invoer.actief) {
-    besturing.doel = null;
-    speler.richting -= invoer.draai * DRAAISNELHEID * dt;
-    achteruit = invoer.vooruit < 0;
-    const v = invoer.vooruit * (achteruit ? 0.6 : 1);
-    beweging = { x: Math.sin(speler.richting) * v, z: Math.cos(speler.richting) * v };
-  } else if (besturing.doel) {
-    beweging = naarDoel(besturing.doel);
-  }
-
-  const afgelegd = speler.update(dt, beweging, besturing.neemSprong(), botsing, { draaiMee: !invoer.actief });
-  if (!achteruit && (afgelegd > 0.002 || invoer.draai)) {
-    volgCam.volgAchter(speler.richting + Math.PI, dt, invoer.draai ? 5 : 2.5);
-  }
-
-  // Loopt de speler tegen iets aan op weg naar het doel? Dan stoppen.
-  if (besturing.doel) {
-    vastTijd = afgelegd < 0.01 ? vastTijd + dt : 0;
-    if (vastTijd > 0.4) besturing.doel = null;
-  }
-  doelRing.visible = !!besturing.doel;
-  if (besturing.doel) {
-    doelRing.position.set(besturing.doel.x, 0.05, besturing.doel.z);
-    doelRing.scale.setScalar(1 + Math.sin(tijd * 6) * 0.12);
-  }
+  beweegSpeler(dt, botsing);
 
   // De zon (en dus de schaduw) beweegt mee met de speler.
   zon.position.set(speler.positie.x + 20, 40, speler.positie.z + 18);
@@ -589,6 +648,8 @@ function frame() {
       hud.toonWolkje(tekst.replace('{naam}', dichtsteMeester.info.naam));
     } else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
+    } else if (isBijSchooldeur()) {
+      hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
     } else if (poort.afstandTot(speler.positie) < 5.5) {
       hud.toonWolkje(poort.open ? VOETBAL.wolkjeOpen : VOETBAL.wolkjeDicht.replace('{nog}', nogTekst()));
     } else hud.toonWolkje(null);
@@ -606,6 +667,59 @@ function frame() {
   for (const k of kramen) if (k.ster) k.ster.rotation.y += dt * 0.8;
   volgCam.update(dt, speler.positie);
   renderer.render(scene, camera);
+}
+
+/** Lopen, draaien en springen (plein en Leergroep 3 gebruiken hetzelfde). */
+function beweegSpeler(dt, bots) {
+  const cam = besturing.neemCamera();
+  volgCam.draai(cam.x, cam.y);
+  if (cam.zoom) volgCam.zoom(cam.zoom);
+
+  volgKind();
+  // Toetsen/joystick: vooruit lopen en draaien. De camera draait vanzelf mee.
+  const invoer = besturing.beweging();
+  let beweging = { x: 0, z: 0 };
+  let achteruit = false;
+  if (invoer.actief) {
+    besturing.doel = null;
+    speler.richting -= invoer.draai * DRAAISNELHEID * dt;
+    achteruit = invoer.vooruit < 0;
+    const v = invoer.vooruit * (achteruit ? 0.6 : 1);
+    beweging = { x: Math.sin(speler.richting) * v, z: Math.cos(speler.richting) * v };
+  } else if (besturing.doel) {
+    beweging = naarDoel(besturing.doel);
+  }
+
+  const afgelegd = speler.update(dt, beweging, besturing.neemSprong(), bots, { draaiMee: !invoer.actief });
+  if (!achteruit && (afgelegd > 0.002 || invoer.draai)) {
+    volgCam.volgAchter(speler.richting + Math.PI, dt, invoer.draai ? 5 : 2.5);
+  }
+
+  // Loopt de speler tegen iets aan op weg naar het doel? Dan stoppen.
+  if (besturing.doel) {
+    vastTijd = afgelegd < 0.01 ? vastTijd + dt : 0;
+    if (vastTijd > 0.4) besturing.doel = null;
+  }
+  doelRing.visible = !!besturing.doel;
+  if (besturing.doel) {
+    doelRing.position.set(besturing.doel.x, 0.05, besturing.doel.z);
+    doelRing.scale.setScalar(1 + Math.sin(tijd * 6) * 0.12);
+  }
+
+}
+
+/** Leergroep 3: lopen, wolkjes bij de kramen en de deur, en tekenen. Het plein staat stil. */
+function frameBinnen(dt) {
+  beweegSpeler(dt, binnen.botsing);
+  if (!dialoog.open && besturing.aan) {
+    dichtsteKraam = zoekDichtsteKraam();
+    if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
+    else if (binnen.isBijDeurTerug(speler.positie)) hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBuitenTik : LEERGROEP.naarBuitenToets);
+    else hud.toonWolkje(null);
+  } else if (!besturing.aan) hud.toonWolkje(null);
+  binnen.update(dt, tijd, speler.positie);
+  volgCam.update(dt, speler.positie);
+  renderer.render(binnen.scene, camera);
 }
 
 function naarDoel(doel) {
@@ -696,4 +810,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
