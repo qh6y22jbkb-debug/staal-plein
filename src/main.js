@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
-import { LEERGROEP } from './data/rekenen.js';
+import { LEERGROEP, REKEN_TEKSTEN } from './data/rekenen.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
 import { VolgCamera } from './camera.js';
@@ -139,9 +139,16 @@ function startGesprek(kraam, toestemming = false) {
   const dz = kraam.groep.position.z - speler.positie.z;
   speler.richting = Math.atan2(dx, dz);
   volgCam.draaiNaar(Math.atan2(-dx, -dz), 0.38);
-  volgCam.zetGesprek(kraam.groep);
+  volgCam.zetGesprek(kraam.groep, binnen ? { hoogte: 5.6 } : undefined); // binnen: over de lokaalmuur heen kijken
 
-  dialoog.toon(kraam, { opSpelen: kraam.isLeeskraam ? pakKaartjes : speelMinispel, opSluiten: terugNaarPlein });
+  const opSpelen = kraam.isLeeskraam ? pakKaartjes : kraam.isRekenkraam ? speelRekenspel : speelMinispel;
+  dialoog.toon(kraam, { opSpelen, opSluiten: terugNaarPlein });
+}
+
+/* ---------- Rekenkramen in Leergroep 3 ---------- */
+
+function speelRekenspel() {
+  dialoog.zeg(REKEN_TEKSTEN.spelKomtEraan); // de rekenspellen komen in stap 3 t/m 6
 }
 
 /* ---------- Leeskraam: vragenkaartjes voor maatjeslezen ---------- */

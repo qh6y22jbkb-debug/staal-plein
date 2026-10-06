@@ -100,7 +100,7 @@ export class VolgCamera {
   }
 
   /** Camerastandpunt voor een gesprek: schuin voor de kraam, karakter boven in beeld. */
-  zetGesprek(kraamGroep) {
+  zetGesprek(kraamGroep, { hoogte = 3.4 } = {}) {
     if (!kraamGroep) {
       this.gesprek = false;
       return;
@@ -109,7 +109,7 @@ export class VolgCamera {
     const halveHoek = Math.atan(Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)) * this.camera.aspect);
     const afstand = Math.max(8.5, 3.2 / Math.tan(halveHoek));
     const zijHoek = 0.45;
-    const lokaal = new THREE.Vector3(Math.sin(zijHoek) * afstand, 3.4, Math.cos(zijHoek) * afstand);
+    const lokaal = new THREE.Vector3(Math.sin(zijHoek) * afstand, hoogte, Math.cos(zijHoek) * afstand);
     this.laatsteGesprek = {
       positie: lokaal.applyEuler(kraamGroep.rotation).add(kraamGroep.position),
       // Iets onder het karakter richten, zodat het boven het dialoogvenster staat.

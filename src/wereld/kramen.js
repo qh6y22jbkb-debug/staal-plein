@@ -85,7 +85,7 @@ function schulpRandTextuur([a, b]) {
   });
 }
 
-function bouwKraam(scene, botsing, data, stijl, x, z, draai) {
+export function bouwKraam(scene, botsing, data, stijl, x, z, draai) {
   const g = new THREE.Group();
   g.position.set(x, 0, z);
   g.rotation.y = draai;
@@ -335,7 +335,7 @@ function versierDrums(g) {
   bekken.rotation.x = 0.2;
 }
 
-function letterTextuur(tekst, kleur) {
+export function letterTextuur(tekst, kleur) {
   return canvasTextuur(128, 128, (ctx, w, h) => {
     ctx.fillStyle = kleur;
     ctx.fillRect(0, 0, w, h);

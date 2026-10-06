@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mat, doos, cilinder, kegel, bol, canvasTextuur } from '../wereld/helpers.js';
 import { Botsing } from '../wereld/botsing.js';
 import { LEERGROEP, LOKALEN } from '../data/rekenen.js';
+import { bouwRekenkramen } from './rekenkramen.js';
 
 /*
  * Leergroep 3: de binnenwereld in de school, nagebouwd naar de foto's.
@@ -161,7 +162,7 @@ export class Leergroep3 {
     this.scene.background = new THREE.Color(0xe7edf1);
     this.botsing = new Botsing(BINNEN_GRENZEN);
     this.blokkers = []; // binnen botst de camera nergens tegen (plafonds en muren laten haar door)
-    this.kramen = []; // de rekenkramen komen in stap 2
+    this.kramen = [];
     this.eigenMaterialen = new Set();
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d2c4, 1.9));
@@ -180,6 +181,8 @@ export class Leergroep3 {
     LOKALEN.forEach((l, i) => this.bouwLokaal(l, i));
     this.bouwIngang();
     this.bouwMeubelsLeerplein();
+    // In elk lokaal één rekenkraam met een karakter erachter.
+    this.kramen = bouwRekenkramen(this.groep, this.botsing, lokaalPlek);
 
     this.groep.traverse((o) => { if (o.isMesh && !o.userData.geenSchaduw) { o.castShadow = o.castShadow ?? true; o.receiveShadow = true; } });
 
@@ -391,7 +394,7 @@ export class Leergroep3 {
     this.groep.add(wb);
     doos(3.1, 0.05, 0.12, 0x9aa3ad, wbX, 1.04, zMin + DIK / 2 + 0.09, this.groep); // pennenbakje
 
-    // Vier tafelgroepjes in de hoeken; het midden blijft vrij voor de kraam (stap 2).
+    // Vier tafelgroepjes in de hoeken; in het midden staat de kraam.
     for (const dx of [3.4, -3.0]) {
       for (const dz of [-3.3, 3.3]) this.tafelgroep(xc - kant * dx, zc + dz);
     }
@@ -625,8 +628,8 @@ export class Leergroep3 {
       o.geometry?.dispose();
       const materialen = Array.isArray(o.material) ? o.material : [o.material];
       for (const m of materialen) {
-        m?.map?.dispose();
-        if (this.eigenMaterialen.has(m)) m.dispose();
+        if (m?.map) { m.map.dispose(); m.dispose(); } // materiaal met eigen textuur is nooit gedeeld
+        else if (this.eigenMaterialen.has(m)) m.dispose();
       }
     });
     this.licht.shadow.map?.dispose();

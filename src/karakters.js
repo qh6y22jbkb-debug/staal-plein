@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mat, doos, cilinder, kegel, bol } from './wereld/helpers.js';
+import { mat, doos, cilinder, kegel, bol, canvasTextuur } from './wereld/helpers.js';
 
 /**
  * De karakters achter de kramen. Elk karakter is opgebouwd uit simpele vormen
@@ -14,6 +14,13 @@ export const STIJLEN = {
   olga: { huid: 0xd99a6c, shirt: 0xfd7e14, haar: 0x3b2314, kapsel: 'staartjes', extra: ['strik'] },
   gijs: { huid: 0xf2c29b, shirt: 0x12b886, haar: 0xe0a33a, hoed: 'ijsmuts', extra: ['vlinderdas'] },
   bo: { huid: 0xe8b48f, shirt: 0xf06595, haar: 0xe8590c, kapsel: 'knot', extra: ['bril', 'meetlint', 'bloem'] },
+  // Leergroep 3: de rekenkarakters, elk met een badge op het shirt.
+  pim: { huid: 0xf2c29b, shirt: 0x2f9e44, haar: 0x6b3e1f, hoed: 'petAchter', petKleur: 0x2f9e44, extra: ['badge'], badge: '+', badgeKleur: '#2f9e44' },
+  mila: { huid: 0xd99a6c, shirt: 0xe03131, haar: 0x2b1a10, kapsel: 'staartjes', extra: ['badge', 'strik'], badge: '−', badgeKleur: '#e03131' },
+  kees: { huid: 0xf0c09a, shirt: 0x1c7ed6, haar: 0xd9a441, extra: ['bril', 'badge'], badge: '×', badgeKleur: '#1c7ed6' },
+  dina: { huid: 0xa86b45, shirt: 0x7048e8, haar: 0x111111, kapsel: 'knot', extra: ['badge'], badge: ':', badgeKleur: '#7048e8' },
+  klaas: { huid: 0xe8b48f, shirt: 0xf59f00, haar: 0x9a9a9a, extra: ['snor', 'badge'], badge: 'klok', badgeKleur: '#e67700' },
+  tijn: { huid: 0xf2c29b, shirt: 0x0ca678, haar: 0xe8590c, hoed: 'petAchter', petKleur: 0xffd43b, extra: ['badge', 'vlinderdas'], badge: '1×1', badgeKleur: '#0ca678' },
   lotte: { huid: 0xf2c29b, shirt: 0xc92a2a, haar: 0xf2c230, kapsel: 'staartjes', extra: ['zaklamp', 'strik'] },
 };
 
@@ -207,6 +214,30 @@ export class Karakter {
       kraag.rotation.x = Math.PI / 2;
       kraag.position.y = 1.68;
       this.lijf.add(kraag);
+    }
+    if (extra.includes('badge')) {
+      // Rond buttonnetje op de borst met een rekenteken (of een klokje).
+      const teken = this.stijl.badge;
+      const kleur = this.stijl.badgeKleur ?? '#1d2b4f';
+      const tex = canvasTextuur(128, 128, (ctx, b, h) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(b / 2, h / 2, 62, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = kleur; ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.arc(b / 2, h / 2, 54, 0, Math.PI * 2); ctx.stroke();
+        if (teken === 'klok') {
+          ctx.lineWidth = 9; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(b / 2, h / 2); ctx.lineTo(b / 2, h / 2 - 34); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(b / 2, h / 2); ctx.lineTo(b / 2 + 24, h / 2 + 8); ctx.stroke();
+        } else {
+          ctx.fillStyle = kleur;
+          ctx.font = `bold ${teken.length > 1 ? 46 : 92}px "Trebuchet MS", sans-serif`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(teken, b / 2, h / 2 + (teken.length > 1 ? 3 : 6));
+        }
+      });
+      const badge = new THREE.Mesh(new THREE.CircleGeometry(0.15, 20), new THREE.MeshLambertMaterial({ map: tex }));
+      badge.position.set(0.16, 1.42, 0.405);
+      this.lijf.add(badge);
     }
     if (extra.includes('bloem')) {
       const bloem = new THREE.Group();
