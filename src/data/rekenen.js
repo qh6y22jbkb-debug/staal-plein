@@ -85,6 +85,7 @@ export const REKEN_TEKSTEN = {
  */
 export const REKEN_INSTELLINGEN = {
   sommenPerRonde: 5, // aantal sommen in één ronde
+  klokVragenPerRonde: 6, // aantal klokvragen in één ronde (Klaas Klok)
   onthoudPlek: 'boven', // 'boven' = onthoud-cijfer boven de kolom (boven de getallen), 'onder' = onder de getallen, vlak boven de streep
   onthoudVerplicht: true, // true = de onthoud-vakjes moeten ingevuld worden; false = mag leeg blijven (een fout getal is wel fout)
   // Aftrekken: in het vakje boven een kolom schrijf je het nieuwe getal na het inwisselen (bijv. 4 en 12).
@@ -134,6 +135,22 @@ export const REKEN_REGELS = {
     },
     3: { deeltal: { min: 1000, max: 9999 }, deelgetal: { min: 12, max: 39 }, rest: 'mag' },
   },
+  // Klokkijken. soorten = welke vragen er komen (door elkaar):
+  //  kiesAnaloogWoorden  klok aflezen, kiezen uit 3 tijden in woorden (bijv. kwart over drie)
+  //  versleepWoorden     zelf de wijzers verslepen naar een tijd in woorden
+  //  kiesAnaloogDigitaal klok aflezen, kiezen uit 3 digitale tijden (bijv. 3:20)
+  //  kiesDigitaalAnaloog digitale tijd, kiezen uit 3 klokken
+  //  versleepDigitaal    wijzers verslepen naar een digitale tijd
+  //  kies24Woorden       24-uurstijd (14:35) → in woorden met dagdeel (vijf over half drie 's middags)
+  //  kiesWoorden24       in woorden met dagdeel → 24-uurstijd
+  //  versleep24          wijzers verslepen naar een 24-uurstijd
+  //  tijdsduur           begintijd + hoe lang het duurt → hoe laat is het afgelopen?
+  // minuten = om de hoeveel minuten de tijden vallen; sleepStap = hoe de lange wijzer verspringt bij het slepen.
+  klok: {
+    1: { soorten: ['kiesAnaloogWoorden', 'kiesAnaloogWoorden', 'versleepWoorden'], minuten: 15, sleepStap: 5 },
+    2: { soorten: ['kiesAnaloogDigitaal', 'kiesDigitaalAnaloog', 'versleepDigitaal'], minuten: 1, sleepStap: 1 },
+    3: { soorten: ['kies24Woorden', 'kiesWoorden24', 'versleep24', 'tijdsduur', 'tijdsduur'], minuten: 5, sleepStap: 1 },
+  },
 };
 
 /* Teksten van de rekenspellen. {totaal} = aantal sommen, {aantal} = in één keer goed. */
@@ -147,6 +164,11 @@ export const REKEN_SPELLEN = {
     titel: 'Aftrekken met Mila',
     opdracht: 'Reken de som uit. Begin rechts. Wissel in als het bovenste cijfer te klein is.',
     niveaus: ['Getallen tot 1000, één keer inwisselen', 'Getallen tot 10.000, vaker inwisselen', 'Inwisselen over een nul heen'],
+  },
+  klok: {
+    titel: 'Klokkijken met Klaas',
+    opdracht: 'Lees de klok, of zet de wijzers zelf goed.',
+    niveaus: ['Hele uren, halve uren en kwartieren', 'Op de minuut, analoog en digitaal', '24-uursklok en hoe lang iets duurt'],
   },
   deel: {
     titel: 'Staartdelingen met Dina',
@@ -163,6 +185,7 @@ export const REKEN_SPELLEN = {
 export const REKEN_TEKSTEN_SPEL = {
   niveauNamen: ['🥉 Brons', '🥈 Zilver', '🥇 Goud'],
   klaarTekst: 'Je hebt alle {totaal} sommen gemaakt. {aantal} keer had je het in één keer goed!',
+  klaarTekstKlok: 'Je hebt alle {totaal} vragen gedaan. {aantal} keer had je het in één keer goed!',
   terug: 'Terug naar het lokaal',
   vulAlles: 'Vul eerst alle vakjes van het antwoord in.',
   koenTip: 'Lukt het niet? Vraag Meester Koen om hulp!',
@@ -174,6 +197,43 @@ export const REKEN_TEKSTEN_SPEL = {
   overslaanInwissel: 'Niet ingewisseld? Laat het vakje leeg: druk op de spatiebalk.',
   uitlegDeel: 'Per stap: het antwoord bovenaan, dan het keer-getal, het aftrekken en het cijfer dat naar beneden komt.',
   rest: 'rest',
+};
+
+/* Klokkijken (Klaas Klok). */
+export const KLOK_TEKSTEN = {
+  hoeLaat: 'Hoe laat is het?',
+  welkeKlok: 'Welke klok wijst {tijd} aan?',
+  zetOp: 'Zet de klok op {tijd}.',
+  inWoorden: 'Hoe zeg je {tijd} in woorden?',
+  alsDigitaal: 'Welke tijd hoort bij {tijd}?',
+  tijdsduur: '{wat} begint om {begin} en duurt {duur}. Hoe laat is {kort} afgelopen?',
+  watLijst: [
+    { wat: 'De film', kort: 'de film' },
+    { wat: 'De voetbalwedstrijd', kort: 'de wedstrijd' },
+    { wat: 'Het toneelstuk', kort: 'het toneelstuk' },
+    { wat: 'De zwemles', kort: 'de zwemles' },
+    { wat: 'Het verjaardagsfeest', kort: 'het feest' },
+    { wat: 'De busreis', kort: 'de busreis' },
+  ],
+  langeWijzer: 'Lange wijzer',
+  korteWijzer: 'Korte wijzer',
+  sleepUitleg: 'Sleep de wijzers met je muis of vinger. Of gebruik de knopjes.',
+  controleer: '✓ Controleer',
+  // Hints bij een fout.
+  foutKies: 'Kijk eerst naar de korte wijzer (de uren), dan naar de lange wijzer (de minuten).',
+  foutKies24: 'Na 12 uur tel je door: 13 uur is 1 uur \'s middags. Haal er 12 af.',
+  foutTijdsduur: 'Tel eerst de hele uren erbij op, dan de minuten. Kom je over het hele uur? Dan komt er een uur bij.',
+  foutLang: 'De lange wijzer (minuten) staat nog niet goed.',
+  foutKort: 'De korte wijzer (uren) staat nog niet goed.',
+  foutKortHalf: 'Let op: bij half, kwart voor en … voor half staat de korte wijzer al voorbij het uur, op weg naar het volgende uur.',
+  // Tips van de meesters.
+  jopRegel: 'De korte wijzer wijst de uren aan, de lange wijzer de minuten. Bij de 3 is het kwart over, bij de 6 half, bij de 9 kwart voor.',
+  jop24: 'Na 12 uur \'s middags tel je door: 13:00 is 1 uur \'s middags, 14:00 is 2 uur. Haal er dus 12 af.',
+  jopDuur: 'Tel eerst de hele uren erbij op. Tel daarna de minuten erbij: eerst tot het hele uur, dan de rest.',
+  bramLang: 'Begin met de lange wijzer: die heb ik geel gekleurd. Die wijst de minuten aan.',
+  bramKort: 'Nu de korte wijzer (geel): die wijst de uren aan.',
+  bramKies: 'Ik heb een fout antwoord weggestreept.',
+  bramKlaar: 'Beide wijzers staan goed. Druk op Controleer!',
 };
 
 /* De tips van de drie meesters. */
