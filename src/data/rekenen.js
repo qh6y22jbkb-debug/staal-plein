@@ -122,6 +122,18 @@ export const REKEN_REGELS = {
     2: { cijfersBoven: 4, cijfersOnder: 1, onthouden: { min: 1 } },
     3: { cijfersBoven: 2, cijfersOnder: 2 },
   },
+  // Delen (staartdeling): deeltal = het getal dat je deelt, deelgetal = waardoor je deelt.
+  // rest: 'nee' = er blijft niets over, 'ja' = er blijft altijd iets over, 'mag' = allebei kan.
+  deel: {
+    1: { deeltal: { min: 100, max: 999 }, deelgetal: { min: 2, max: 9 }, rest: 'nee' },
+    2: {
+      varianten: [
+        { deeltal: { min: 100, max: 999 }, deelgetal: { min: 2, max: 9 }, rest: 'ja' },
+        { deeltal: { min: 1000, max: 9999 }, deelgetal: { min: 2, max: 9 }, rest: 'ja' },
+      ],
+    },
+    3: { deeltal: { min: 1000, max: 9999 }, deelgetal: { min: 12, max: 39 }, rest: 'mag' },
+  },
 };
 
 /* Teksten van de rekenspellen. {totaal} = aantal sommen, {aantal} = in één keer goed. */
@@ -135,6 +147,11 @@ export const REKEN_SPELLEN = {
     titel: 'Aftrekken met Mila',
     opdracht: 'Reken de som uit. Begin rechts. Wissel in als het bovenste cijfer te klein is.',
     niveaus: ['Getallen tot 1000, één keer inwisselen', 'Getallen tot 10.000, vaker inwisselen', 'Inwisselen over een nul heen'],
+  },
+  deel: {
+    titel: 'Staartdelingen met Dina',
+    opdracht: 'Maak de staartdeling. Begin links en werk stap voor stap naar beneden.',
+    niveaus: ['3 cijfers gedeeld door 1 cijfer, zonder rest', '3 of 4 cijfers gedeeld door 1 cijfer, met rest', '4 cijfers gedeeld door 2 cijfers'],
   },
   keer: {
     titel: 'Keersommen met Kees',
@@ -155,6 +172,8 @@ export const REKEN_TEKSTEN_SPEL = {
   // Uitleg onder het schema.
   overslaanOnthoud: 'Niets te onthouden? Typ een 0 of druk op de spatiebalk.',
   overslaanInwissel: 'Niet ingewisseld? Laat het vakje leeg: druk op de spatiebalk.',
+  uitlegDeel: 'Per stap: het antwoord bovenaan, dan het keer-getal, het aftrekken en het cijfer dat naar beneden komt.',
+  rest: 'rest',
 };
 
 /* De tips van de drie meesters. */
@@ -178,6 +197,9 @@ export const REKEN_TIPS = {
       keerOptellenEerste: 'Tel nu de twee regels bij elkaar op. Begin rechts, bij de E!',
       keerOptellen: 'Tel de twee regels op in de {kolom}-kolom. Vergeet het onthoud-cijfer niet!',
       keerOptellenLaatste: 'Laatste kolom van het optellen ({kolom}): schrijf het hele getal op.',
+      deelEerste: 'Begin links! Pak het eerste stukje dat groot genoeg is: {stukje}. Hoe vaak past {deler} daarin?',
+      deel: 'Hoe vaak past {deler} in {stukje}? Schrijf dat bovenaan, keer terug, trek af en haal het volgende cijfer naar beneden.',
+      deelLaatste: 'Laatste stap: hoe vaak past {deler} in {stukje}? Wat je overhoudt, is de rest.',
     },
   },
   bram: { naam: 'Meester Bram', icoon: '🖍️', knop: 'Meester Bram kleurt', tekst: 'Kijk naar de gele vakjes: daar ben je nu.' },
@@ -195,4 +217,10 @@ export const REKEN_FOUT = {
   regel1: 'In de eerste regel: ',
   regel2: 'In de tweede regel: ',
   optellen: 'Bij het optellen van de regels: ',
+  // Staartdeling. {stukje} = het getal waar je mee bezig bent, {deler} = het deelgetal.
+  deelAntwoord: 'Kijk nog eens naar het cijfer bovenaan: hoe vaak past {deler} in {stukje}?',
+  deelKeer: 'Kijk naar het keer-getal: reken het cijfer bovenaan keer {deler}.',
+  deelAftrekken: 'Kijk naar het aftrekken: {stukje} min het keer-getal.',
+  deelOmlaag: 'Welk cijfer haal je naar beneden? Neem het volgende cijfer van het deeltal.',
+  deelRest: 'Kijk naar de rest: dat is wat er onderaan overblijft.',
 };

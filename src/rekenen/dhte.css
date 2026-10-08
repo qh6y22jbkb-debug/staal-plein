@@ -77,3 +77,20 @@
 .reken-tip b { display: block; font-size: 17px; color: #e67700; margin-bottom: 2px; }
 .reken-tip:empty { display: none; }
 .reken-uitleg { margin: 8px 0 0; font-size: 16px; color: #5c6b7a; text-align: center; max-width: 420px; }
+
+/* Staartdeling (Dina Deel) */
+.dhte.staart {
+  --kol: clamp(42px, min(7.5vw, 6.4vh), 66px);
+  --groot: clamp(34px, min(6.4vw, 5.4vh), 56px);
+  grid-template-columns: auto auto repeat(var(--kolommen), var(--kol)) auto auto;
+  justify-content: center; /* niet uitrekken: deelgetal en haakje vlak naast het deeltal */
+  row-gap: 2px;
+}
+.dhte.staart .dhte-cijfer { font-size: clamp(26px, min(4.6vw, 4.6vh), 42px); }
+.dhte.staart .deelgetal { padding: 0 2px 0 8px; color: #7048e8; }
+.staart-haakje { z-index: 1; font-size: clamp(34px, min(6vw, 6vh), 56px); font-weight: bold; color: #1d2b4f; line-height: 1; margin-right: 2px; }
+.dhte-lijn.dak { height: 5px; margin: 0 4px 0 0; }
+.dhte-lijn.dun { height: 3px; margin: 0 4px; }
+.staart-rest-label { z-index: 1; font-weight: bold; font-size: 22px; color: #7048e8; padding: 0 6px 0 14px; }
+.dhte-vak.omlaag { border-color: #7048e8; border-style: dashed; background: #f8f5ff; }
+.reken-rechts[hidden] { display: none; }

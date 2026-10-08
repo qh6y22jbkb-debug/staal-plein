@@ -11,7 +11,7 @@ import { cijfersVan } from './sommen.js';
  *          Elke stap weet welke vakjes erbij horen en wat Meester Koen erbij uitlegt.
  */
 
-export const TEKEN = { plus: '+', min: '−', keer: '×' };
+export const TEKEN = { plus: '+', min: '−', keer: '×', deel: ':' };
 
 export function bouwSchema(som, instellingen, kolomNamen) {
   const b = new Bouwer(som, instellingen, kolomNamen);
@@ -269,7 +269,9 @@ export function celGoed(cel, waarde) {
  * Geeft: { onvolledig, goedPerStap: [bool], cellenFout: [cel], allesGoed }
  */
 export function kijkNa(schema, waarden) {
-  const onvolledig = schema.cellen.some((c) => c.soort === 'antwoord' && c.verwacht !== '' && String(waarden(c) ?? '').trim() === '');
+  // Onvolledig: een vakje dat ingevuld moet worden is nog leeg (standaard: de cijfers van een uitkomst).
+  const verplicht = (c) => c.verplicht ?? c.soort === 'antwoord';
+  const onvolledig = schema.cellen.some((c) => verplicht(c) && c.verwacht !== '' && String(waarden(c) ?? '').trim() === '');
   const cellenFout = schema.cellen.filter((c) => !celGoed(c, waarden(c)));
   const fouteStappen = new Set(cellenFout.map((c) => c.stap));
   const goedPerStap = schema.stappen.map((s) => !fouteStappen.has(s.nr));

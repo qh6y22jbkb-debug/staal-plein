@@ -5,7 +5,7 @@ import { bouwSchema, kijkNa, TEKEN } from './schema.js';
 import { DhteSchema } from './dhte.js';
 
 const T = REKEN_TEKSTEN_SPEL;
-const GESPROKEN = { plus: 'plus', min: 'min', keer: 'keer' };
+const GESPROKEN = { plus: 'plus', min: 'min', keer: 'keer', deel: 'gedeeld door' };
 
 /** Rekentekens uitspreekbaar maken voor de voorleesstem. */
 export function spreekbaar(tekst) {
@@ -34,15 +34,21 @@ export class DhteSpel extends Minispel {
     return this.som ? this.som.getallen.join(` ${GESPROKEN[this.som.soort]} `) : '';
   }
 
+  /** Het schema als gegevens, de weergave op het scherm en de uitleg eronder (de staartdeling past dit aan). */
+  bouwModel(som) { return bouwSchema(som, REKEN_INSTELLINGEN, T.kolommen); }
+  maakWeergave(model) { return new DhteSchema(model, { kolomNamen: T.kolommen, opControleer: () => this.controleer() }); }
+  uitlegTekst(som) { return som.soort === 'min' ? T.overslaanInwissel : T.overslaanOnthoud; }
+  goedTekst(som) { return `${this.somTekst(som)} = <b>${som.antwoord}</b>`; }
+
   toonVraag(som) {
     this.som = som;
-    this.schema = bouwSchema(som, REKEN_INSTELLINGEN, T.kolommen);
+    this.schema = this.bouwModel(som);
     const wrap = el('div', 'reken-spel');
     const links = el('div', 'reken-links');
     links.appendChild(el('p', 'reken-som', `${this.somTekst(som)} = ?`));
-    this.dhte = new DhteSchema(this.schema, { kolomNamen: T.kolommen, opControleer: () => this.controleer() });
+    this.dhte = this.maakWeergave(this.schema);
     links.appendChild(this.dhte.el);
-    links.appendChild(el('p', 'reken-uitleg', som.soort === 'min' ? T.overslaanInwissel : T.overslaanOnthoud));
+    links.appendChild(el('p', 'reken-uitleg', this.uitlegTekst(som)));
     const rechts = el('div', 'reken-rechts');
     const controleer = el('button', 'reken-controleer', '✓ Controleer');
     controleer.type = 'button';
@@ -71,7 +77,7 @@ export class DhteSpel extends Minispel {
     if (kijk.allesGoed) {
       this.dhte.blokkeerAlles();
       this.rechts.hidden = true; // knoppen weg: zo staan de felicitatie en "Volgende" goed in beeld
-      this.goed(`${this.somTekst(this.som)} = <b>${this.som.antwoord}</b>`);
+      this.goed(this.goedTekst(this.som));
       this.toonFeedback();
       return;
     }
@@ -119,7 +125,7 @@ export class DhteSpel extends Minispel {
     if (!stap) { this.zetTip(meester, T.alles); return; }
     if (id === 'jop') {
       const regel = REKEN_TIPS.jop.regels[stap.regel] ?? REKEN_TIPS.jop.regels[stap.fase] ?? '';
-      this.zetTip(meester, regel.replace('{kolom}', stap.kolom));
+      this.zetTip(meester, regel.replace('{kolom}', stap.kolom).replace('{stukje}', stap.stukje).replace('{deler}', stap.deler));
     } else if (id === 'bram') {
       this.dhte.markeerStap(stap);
       this.zetTip(meester, meester.tekst);

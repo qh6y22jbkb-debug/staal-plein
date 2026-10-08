@@ -99,12 +99,32 @@ function maakKeer(r) {
   throw new Error('Geen keersom gevonden met deze regels');
 }
 
+function maakDeel(r) {
+  for (let poging = 0; poging < 5000; poging++) {
+    const d = tussen(r.deelgetal.min, r.deelgetal.max);
+    let D;
+    if (r.rest === 'nee') {
+      // Zonder rest: kies eerst het antwoord, dan is het deeltal antwoord × deelgetal.
+      const qMin = Math.ceil(r.deeltal.min / d), qMax = Math.floor(r.deeltal.max / d);
+      if (qMin > qMax) continue;
+      D = tussen(qMin, qMax) * d;
+    } else {
+      D = tussen(r.deeltal.min, r.deeltal.max);
+      if (r.rest === 'ja' && D % d === 0) continue;
+    }
+    if (D < d) continue;
+    return { soort: 'deel', getallen: [D, d], antwoord: Math.floor(D / d), rest: D % d };
+  }
+  throw new Error('Geen deelsom gevonden met deze regels');
+}
+
 /** Eén willekeurige som voor een rekenkraam en niveau. */
 export function maakSom(soort, regelsPerNiveau) {
   const r = regelsPerNiveau.varianten ? kies(regelsPerNiveau.varianten) : regelsPerNiveau;
   if (soort === 'plus') return maakPlus(r);
   if (soort === 'min') return maakMin(r);
   if (soort === 'keer') return maakKeer(r);
+  if (soort === 'deel') return maakDeel(r);
   throw new Error(`Onbekende soort som: ${soort}`);
 }
 
@@ -123,6 +143,6 @@ export function maakSommen(soort, regelsPerNiveau, n) {
 }
 
 /** Hoe de som klinkt als hij wordt voorgelezen, bijv. "348 plus 275". */
-export function somAlsTekst(som, teken = { plus: '+', min: '−', keer: '×' }) {
+export function somAlsTekst(som, teken = { plus: '+', min: '−', keer: '×', deel: ':' }) {
   return som.getallen.join(` ${teken[som.soort]} `);
 }

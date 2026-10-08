@@ -1,6 +1,7 @@
 import '../ui/minispellen.css';
 import { REKEN_SPELLEN, REKEN_TEKSTEN_SPEL } from '../data/rekenen.js';
 import { DhteSpel } from './dhtespel.js';
+import { DeelSpel } from './deelspel.js';
 import { geluid } from '../geluid.js';
 import { voorlezen } from '../voorlezen.js';
 import { munten } from '../munten.js';
@@ -11,6 +12,7 @@ const SPEL_PER_KRAAM = {
   plus: DhteSpel,
   min: DhteSpel,
   keer: DhteSpel,
+  deel: DeelSpel,
 };
 
 export function heeftRekenspel(id) {

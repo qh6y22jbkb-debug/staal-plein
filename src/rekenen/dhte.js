@@ -9,73 +9,76 @@ import './dhte.css';
  * - Op een touchscreen verschijnt een cijfertoetsenbord (inputmode="numeric").
  */
 export class DhteSchema {
-  constructor(schema, { kolomNamen, opControleer }) {
+  constructor(schema, { kolomNamen, opControleer, restTekst = 'rest' }) {
     this.schema = schema;
+    this.kolomNamen = kolomNamen;
+    this.restTekst = restTekst;
     this.opControleer = opControleer;
     this.invoer = new Map(); // cel → <input>
     this.el = document.createElement('div');
     this.el.className = 'dhte';
+    this.bouw();
+  }
+
+  /** Zet een element op een plek in het raster. */
+  zet(tag, klasse, css, tekst) {
+    const e = document.createElement(tag);
+    e.className = klasse;
+    e.style.cssText = css;
+    if (tekst != null) e.textContent = tekst;
+    this.el.appendChild(e);
+    return e;
+  }
+
+  /** Invulvakje voor een cel (zelfde gedrag in het DHTE-schema en de staartdeling). */
+  maakVak(cel, css, klasse, label) {
+    const inp = this.zet('input', `dhte-vak ${cel.klein ? 'klein' : 'groot'} ${cel.soort} ${klasse}`, css);
+    Object.assign(inp, { type: 'text', inputMode: 'numeric', autocomplete: 'off', spellcheck: false });
+    inp.setAttribute('pattern', '[0-9]*');
+    inp.setAttribute('enterkeyhint', 'done');
+    inp.maxLength = cel.soort === 'inwissel' || cel.soort === 'rest' ? 2 : 1;
+    inp.setAttribute('aria-label', label);
+    inp.addEventListener('input', () => this.bijInvoer(cel, inp));
+    inp.addEventListener('keydown', (e) => this.bijToets(e, cel, inp));
+    inp.addEventListener('focus', () => inp.select());
+    this.invoer.set(cel, inp);
+    return inp;
+  }
+
+  /** Kolomkoppen en gekleurde kolommen op de achtergrond. kolom(k) = rasterkolom, rijen = laatste rij. */
+  bouwKolommen(n, kolom, rijen) {
+    for (let k = n - 1; k >= 0; k--) {
+      this.zet('div', `dhte-kop k${k}`, `grid-row: 1; grid-column: ${kolom(k)};`, this.kolomNamen[k]);
+      const band = this.zet('div', `dhte-band k${k}`, `grid-row: 1 / ${rijen + 1}; grid-column: ${kolom(k)};`);
+      band.dataset.k = k;
+    }
+  }
+
+  bouw() {
+    const schema = this.schema;
+    const kolomNamen = this.kolomNamen;
     const n = schema.breedte;
     this.el.style.setProperty('--kolommen', n);
-
-    const kolommen = [...Array(n).keys()].reverse(); // links de grootste kolom, rechts de E
-    const plek = (rijNr, k) => `grid-row: ${rijNr}; grid-column: ${n - k + 1};`;
-
-    // Kolomkoppen.
-    kolommen.forEach((k) => {
-      const kop = document.createElement('div');
-      kop.className = `dhte-kop k${k}`;
-      kop.textContent = kolomNamen[k];
-      kop.style.cssText = plek(1, k);
-      this.el.appendChild(kop);
-    });
-    // Gekleurde kolommen op de achtergrond.
-    kolommen.forEach((k) => {
-      const band = document.createElement('div');
-      band.className = `dhte-band k${k}`;
-      band.dataset.k = k;
-      band.style.cssText = `grid-row: 1 / ${schema.rijen.length + 2}; grid-column: ${n - k + 1};`;
-      this.el.appendChild(band);
-    });
+    const kolom = (k) => n - k + 1;
+    const plek = (rijNr, k) => `grid-row: ${rijNr}; grid-column: ${kolom(k)};`;
+    this.bouwKolommen(n, kolom, schema.rijen.length + 1);
 
     schema.rijen.forEach((rij, i) => {
       const rijNr = i + 2;
-      const label = document.createElement('div');
-      label.className = `dhte-label ${rij.teken ? 'teken' : ''}`;
-      label.textContent = rij.teken || rij.label || '';
-      label.style.cssText = `grid-row: ${rijNr}; grid-column: 1;`;
-      this.el.appendChild(label);
+      this.zet('div', `dhte-label ${rij.teken ? 'teken' : ''}`, `grid-row: ${rijNr}; grid-column: 1;`, rij.teken || rij.label || '');
       if (rij.soort === 'lijn') {
-        const lijn = document.createElement('div');
-        lijn.className = 'dhte-lijn';
-        lijn.style.cssText = `grid-row: ${rijNr}; grid-column: 1 / ${n + 2};`;
-        this.el.appendChild(lijn);
+        this.zet('div', 'dhte-lijn', `grid-row: ${rijNr}; grid-column: 1 / ${n + 2};`);
         return;
       }
-      for (const k of kolommen) {
+      for (let k = n - 1; k >= 0; k--) {
         const cel = rij.cellen[k];
         if (!cel) continue;
         if (!cel.invoer) {
-          const c = document.createElement('div');
-          c.className = `dhte-cijfer${rij.soort === 'tussen' || rij.soort === 'uitkomst' ? ' vast-invul' : ''}`;
-          c.textContent = cel.waarde;
-          c.style.cssText = plek(rijNr, k);
-          this.el.appendChild(c);
+          this.zet('div', `dhte-cijfer${rij.soort === 'tussen' || rij.soort === 'uitkomst' ? ' vast-invul' : ''}`, plek(rijNr, k), cel.waarde);
           continue;
         }
-        const inp = document.createElement('input');
-        inp.className = `dhte-vak ${cel.klein ? 'klein' : 'groot'} ${cel.soort} rij-${rij.soort}`;
-        Object.assign(inp, { type: 'text', inputMode: 'numeric', autocomplete: 'off', spellcheck: false });
-        inp.setAttribute('pattern', '[0-9]*');
-        inp.setAttribute('enterkeyhint', 'done');
-        inp.maxLength = cel.soort === 'inwissel' ? 2 : 1;
-        inp.setAttribute('aria-label', `${kolomNamen[k]}-kolom, ${cel.soort === 'antwoord' ? 'cijfer' : cel.soort === 'onthoud' ? 'onthoud-cijfer' : 'nieuw getal na inwisselen'}`);
-        inp.style.cssText = plek(rijNr, k);
-        inp.addEventListener('input', () => this.bijInvoer(cel, inp));
-        inp.addEventListener('keydown', (e) => this.bijToets(e, cel, inp));
-        inp.addEventListener('focus', () => inp.select());
-        this.el.appendChild(inp);
-        this.invoer.set(cel, inp);
+        const soortNaam = cel.soort === 'antwoord' ? 'cijfer' : cel.soort === 'onthoud' ? 'onthoud-cijfer' : 'nieuw getal na inwisselen';
+        this.maakVak(cel, plek(rijNr, k), `rij-${rij.soort}`, `${kolomNamen[k]}-kolom, ${soortNaam}`);
       }
     });
   }
@@ -90,7 +93,11 @@ export class DhteSchema {
     inp.classList.remove('fout', 'mist');
     // Vol? Dan door naar het volgende vakje. Een inwisselvakje kan 2 cijfers hebben (bijv. 12):
     // na een 1 wachten we nog even, na een 2 t/m 9 kan er niets meer achter.
-    const vol = inp.value.length >= inp.maxLength || (cel.soort === 'inwissel' && inp.value.length === 1 && inp.value !== '1');
+    // Een rest kan ook 2 cijfers hebben (bij delen door een getal van 2 cijfers): daar wachten we na elk eerste cijfer.
+    const tweeMogelijk = cel.soort === 'rest' && this.schema.som.getallen[1] >= 10;
+    const vol = inp.value.length >= inp.maxLength
+      || (cel.soort === 'inwissel' && inp.value.length === 1 && inp.value !== '1')
+      || (cel.soort === 'rest' && !tweeMogelijk && inp.value.length === 1);
     if (vol) this.focusNa(cel, 1);
   }
 
@@ -99,7 +106,7 @@ export class DhteSchema {
       e.preventDefault();
       e.stopPropagation(); // anders telt dezelfde Enter ook als "Volgende"
       this.opControleer?.();
-    } else if ((e.key === ' ' || e.code === 'Space') && cel.klein) {
+    } else if ((e.key === ' ' || e.code === 'Space') && (cel.klein || cel.soort === 'aftrek')) {
       // Niets te onthouden of in te wisselen: spatiebalk = vakje leeg laten en door.
       e.preventDefault();
       this.focusNa(cel, 1);
@@ -120,7 +127,13 @@ export class DhteSchema {
     const volgorde = this.schema.volgorde;
     let i = volgorde.indexOf(cel) + richting;
     while (i >= 0 && i < volgorde.length && this.invoer.get(volgorde[i]).disabled) i += richting;
-    if (i >= 0 && i < volgorde.length) this.invoer.get(volgorde[i]).focus({ preventScroll: true });
+    if (i >= 0 && i < volgorde.length) this.focusVak(this.invoer.get(volgorde[i]));
+  }
+
+  /** Focus op een vakje en zorg dat het in beeld is (een lange staartdeling past niet altijd helemaal). */
+  focusVak(inp) {
+    inp.focus({ preventScroll: true });
+    inp.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
   focusEerste() {
@@ -146,8 +159,9 @@ export class DhteSchema {
       // Fout ingevuld: rood. Leeg maar moest wel iets in (bijv. een onthoud-cijfer): rood stippellijntje.
       this.invoer.get(c).classList.add(this.waarde(c) !== '' ? 'fout' : 'mist');
     }
-    const eerste = this.open[0];
-    if (eerste) this.invoer.get(eerste).focus({ preventScroll: true });
+    // Cursor op het eerste vakje dat nog niet klopt (in rekenvolgorde).
+    const eerste = this.open.find((c) => kijk.cellenFout.includes(c)) ?? this.open[0];
+    if (eerste) this.focusVak(this.invoer.get(eerste));
   }
 
   zetVast(cel) {
