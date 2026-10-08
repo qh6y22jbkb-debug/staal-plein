@@ -223,8 +223,8 @@ export class Minispel {
       this.reeks = 0;
     }
     this.pogingen = 0;
-    this.bolletjes[this.nr].classList.add('goed');
-    this.bolletjes[this.nr].classList.remove('nu');
+    this.bolletjes[this.nr]?.classList.add('goed');
+    this.bolletjes[this.nr]?.classList.remove('nu');
     this.nr++;
     this.geluid?.goed();
     confetti(automatisch ? 40 : 90);

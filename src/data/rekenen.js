@@ -86,6 +86,7 @@ export const REKEN_TEKSTEN = {
 export const REKEN_INSTELLINGEN = {
   sommenPerRonde: 5, // aantal sommen in één ronde
   klokVragenPerRonde: 6, // aantal klokvragen in één ronde (Klaas Klok)
+  tafelVragenPerRonde: 10, // aantal sommen in één tafelrace (Tijn Tafel): zoveel stappen tot de finish
   onthoudPlek: 'boven', // 'boven' = onthoud-cijfer boven de kolom (boven de getallen), 'onder' = onder de getallen, vlak boven de streep
   onthoudVerplicht: true, // true = de onthoud-vakjes moeten ingevuld worden; false = mag leeg blijven (een fout getal is wel fout)
   // Aftrekken: in het vakje boven een kolom schrijf je het nieuwe getal na het inwisselen (bijv. 4 en 12).
@@ -151,6 +152,13 @@ export const REKEN_REGELS = {
     2: { soorten: ['kiesAnaloogDigitaal', 'kiesDigitaalAnaloog', 'versleepDigitaal'], minuten: 1, sleepStap: 1 },
     3: { soorten: ['kies24Woorden', 'kiesWoorden24', 'versleep24', 'tijdsduur', 'tijdsduur'], minuten: 5, sleepStap: 1 },
   },
+  // Tafels (tafelrace). tafels = de tafels om uit te kiezen, doorElkaar = welke tafels bij "Alle tafels door elkaar",
+  // deelsommen = ook deelsommen (bijv. 24 : 4), deelKans = hoe vaak een deelsom (0 = nooit, 1 = altijd).
+  tafel: {
+    1: { tafels: [1, 2, 5, 10], doorElkaar: [1, 2, 5, 10], deelsommen: false, deelKans: 0 },
+    2: { tafels: [3, 4, 6], doorElkaar: [3, 4, 6], deelsommen: true, deelKans: 0.35 },
+    3: { tafels: [7, 8, 9], doorElkaar: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], deelsommen: true, deelKans: 0.4 },
+  },
 };
 
 /* Teksten van de rekenspellen. {totaal} = aantal sommen, {aantal} = in één keer goed. */
@@ -164,6 +172,11 @@ export const REKEN_SPELLEN = {
     titel: 'Aftrekken met Mila',
     opdracht: 'Reken de som uit. Begin rechts. Wissel in als het bovenste cijfer te klein is.',
     niveaus: ['Getallen tot 1000, één keer inwisselen', 'Getallen tot 10.000, vaker inwisselen', 'Inwisselen over een nul heen'],
+  },
+  tafel: {
+    titel: 'Tafelrace met Tijn',
+    opdracht: 'Typ het antwoord en druk op Enter. Elk goed antwoord laat je verder rennen!',
+    niveaus: ['Tafels van 1, 2, 5 en 10', 'Tafels van 3, 4 en 6, ook delen', 'Tafels van 7, 8 en 9, en alles door elkaar'],
   },
   klok: {
     titel: 'Klokkijken met Klaas',
@@ -234,6 +247,28 @@ export const KLOK_TEKSTEN = {
   bramKort: 'Nu de korte wijzer (geel): die wijst de uren aan.',
   bramKies: 'Ik heb een fout antwoord weggestreept.',
   bramKlaar: 'Beide wijzers staan goed. Druk op Controleer!',
+};
+
+/* Tafelrace (Tijn Tafel). */
+export const TAFEL_TEKSTEN = {
+  kiesTafel: 'Welke tafel wil je oefenen?',
+  tafelVan: 'Tafel van {tafel}',
+  alles: 'Alle tafels door elkaar',
+  jij: 'Jij',
+  tegenstander: 'Tijn',
+  teller: '{nr} van {totaal}',
+  start: 'Klaar? Af!',
+  fout: 'Nog niet goed. Probeer het nog eens! Tijn wacht even op je.',
+  foutKeer: 'Tel steeds {tafel} erbij, of begin bij een som die je al weet.',
+  foutDeel: 'Welk getal keer {tafel} is {getal}?',
+  gewonnen: '🏆 Jij wint de tafelrace!',
+  verloren: 'Tijn was net iets eerder bij de finish. Volgende keer pak je hem!',
+  klaarTekst: 'Je hebt alle {totaal} sommen goed gemaakt. {aantal} keer in één keer goed!',
+  // Tips
+  jopKeer: 'Een tafel is steeds hetzelfde getal erbij. Weet je {som} niet? Begin bij een som die je wel weet, zoals 5 × {tafel} of 10 × {tafel}.',
+  jopDeel: 'Delen is terugrekenen: welk getal keer {tafel} is {getal}? Zeg de tafel van {tafel} op tot je bij {getal} bent.',
+  bramKeer: 'Ik heb de tafel van {tafel} voor je opgeschreven. Het gele vakje is jouw antwoord.',
+  bramDeel: 'Ik heb de tafel van {tafel} opgeschreven tot {getal}. Tel hoeveel stappen het zijn!',
 };
 
 /* De tips van de drie meesters. */

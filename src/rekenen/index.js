@@ -3,6 +3,7 @@ import { REKEN_SPELLEN, REKEN_TEKSTEN_SPEL } from '../data/rekenen.js';
 import { DhteSpel } from './dhtespel.js';
 import { DeelSpel } from './deelspel.js';
 import { KlokSpel } from './klokspel.js';
+import { TafelraceSpel } from './tafelrace.js';
 import { geluid } from '../geluid.js';
 import { voorlezen } from '../voorlezen.js';
 import { munten } from '../munten.js';
@@ -15,6 +16,7 @@ const SPEL_PER_KRAAM = {
   keer: DhteSpel,
   deel: DeelSpel,
   klok: KlokSpel,
+  tafel: TafelraceSpel,
 };
 
 export function heeftRekenspel(id) {
