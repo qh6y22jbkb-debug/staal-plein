@@ -1,4 +1,5 @@
 import { KLEDING, WINKEL } from './data/oefeningen.js';
+import { rekenvoortgang } from './rekenvoortgang.js';
 import { CATEGORIEEN, itemMetId } from './kleding.js';
 import { kledingkast } from './kledingkast.js';
 import { munten } from './munten.js';
@@ -88,7 +89,9 @@ export class Winkel {
       const heeft = kledingkast.heeft(item.id);
       const aan = kledingkast.heeftAan(item.id);
       const tekort = item.prijs - munten.totaal;
-      const opSlot = item.vereist === 'beker' && !voetbalstand.beker;
+      // Sommige items gaan pas open na een prestatie: de Bunders Beker of een volle Rekenkaart.
+      const slot = { beker: [!voetbalstand.beker, WINKEL.vereistBeker], rekenkampioen: [!rekenvoortgang.kampioen, WINKEL.vereistRekenkaart] }[item.vereist];
+      const opSlot = !!slot?.[0];
       const kaart = document.createElement('div');
       kaart.className = `wk-item${this.pasId === item.id ? ' past' : ''}${heeft ? ' heeft' : ''}`;
       kaart.innerHTML = `
@@ -100,7 +103,7 @@ export class Winkel {
           ${heeft
             ? `<button type="button" class="wk-draag${aan ? ' aan' : ''}">${aan ? WINKEL.aan : WINKEL.aantrekken}</button>`
             : opSlot
-              ? `<button type="button" class="wk-koop" disabled>${WINKEL.vereistBeker}</button>`
+              ? `<button type="button" class="wk-koop" disabled>${slot[1]}</button>`
               : `<button type="button" class="wk-koop" ${tekort > 0 ? 'disabled' : ''}>${tekort > 0 ? WINKEL.nogNodig.replace('{aantal}', tekort) : `🛒 ${WINKEL.kopen}`}</button>`}
         </div>`;
       kaart.querySelector('.wk-pas').addEventListener('click', () => this.pas(item.id));

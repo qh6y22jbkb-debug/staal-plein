@@ -30,6 +30,7 @@ function zetTerug(speler) {
   for (const stuk of speler.kledingStukken) stuk.parent?.remove(stuk);
   speler.kledingStukken = [];
   speler.cape = null;
+  speler.rekenmachine = null;
 }
 
 function voegToe(speler, stuk, ouder) {
@@ -249,8 +250,24 @@ const BOUWERS = {
         voegToe(speler, bal, speler.armen[1]);
         break;
       }
+      case 'rekenrugzak': {
+        // Gouden rugzak met een rekenmachine op de achterkant.
+        d.rugzak.forEach((m, i) => { m.material = glim(i === 0 ? k : 0xe0a800); });
+        const g = new THREE.Group();
+        doos(0.32, 0.4, 0.04, 0x343a40, 0, 1.26, -0.515, g); // behuizing
+        doos(0.24, 0.08, 0.02, 0xb2f2bb, 0, 1.39, -0.54, g).material = mat(0xb2f2bb, { emissive: 0x2b8a3e }); // schermpje
+        const knopKleuren = [0xf8f9fa, 0xf8f9fa, 0xff922b];
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) doos(0.055, 0.05, 0.02, knopKleuren[c], -0.08 + c * 0.08, 1.28 - r * 0.07, -0.54, g);
+        }
+        if (speler.cape) g.visible = false; // onder de cape zie je de rugzak niet
+        voegToe(speler, g, speler.model);
+        speler.rekenmachine = g;
+        break;
+      }
       case 'cape': {
         d.rugzak.forEach((m) => { m.visible = false; });
+        if (speler.rekenmachine) speler.rekenmachine.visible = false;
         const scharnier = new THREE.Group();
         scharnier.position.set(0, 1.6, -0.3);
         const doek = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 1.2), new THREE.MeshLambertMaterial({ color: k, side: THREE.DoubleSide }));

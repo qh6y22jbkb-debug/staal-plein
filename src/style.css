@@ -819,3 +819,19 @@ body.in-voetbal .springknop { display: none !important; }
 }
 .school-slot-invoer:focus { outline: none; border-color: #1c7ed6; box-shadow: 0 0 0 4px rgba(28,126,214,.3); }
 .school-slot-fout { min-height: 24px; margin: 0; font-weight: bold; font-size: 19px; color: #e8590c; text-align: center; }
+
+/* ---------- Rekenkaart (in Leergroep 3, op de plek van de stempelkaart) ---------- */
+body:not(.in-school) .rekenkaart { display: none; }
+body.in-school .stempelkaart:not(.rekenkaart) { display: none; }
+.rekenkaart .sk-teller { color: #e67700; }
+.rekenkaart .sk-vak.brons, .rekenkaart .sk-vak.zilver, .rekenkaart .sk-vak.goud { border-style: solid; border-width: 4px; transform: rotate(-8deg); }
+.rekenkaart .sk-vak.brons { border-color: #c0793a; background: #fbe9d8; }
+.rekenkaart .sk-vak.zilver { border-color: #9aa3ad; background: #eef1f4; }
+.rekenkaart .sk-vak.goud { border-color: #e0a800; background: #fff3bf; box-shadow: 0 0 0 3px rgba(250,176,5,.35); }
+.rekenkaart .sk-vak.brons .sk-icoon, .rekenkaart .sk-vak.zilver .sk-icoon, .rekenkaart .sk-vak.goud .sk-icoon { filter: none; opacity: 1; }
+.rekenkaart .sk-sterren { font-size: 16px; text-shadow: none; background: transparent; }
+.rk-kampioen { margin-top: 12px; text-align: center; font-weight: bold; font-size: 15px; background: #ffe066; border: 3px solid var(--donker); border-radius: 12px; padding: 3px 8px; }
+.rk-kampioen[hidden] { display: none; }
+@media (max-width: 700px), (max-height: 560px) {
+  .rekenkaart .sk-sterren { font-size: 13px; }
+}

@@ -85,8 +85,23 @@ export const LOKALEN = [
 ];
 
 export const REKEN_TEKSTEN = {
-  // Tijdelijk, tot de rekenspellen klaar zijn (stap 3 t/m 6).
+  // Voor een nieuwe kraam zonder spel (alle zes de kramen hebben nu een spel).
   spelKomtEraan: 'Mijn spel is bijna klaar! Kom straks nog eens terug.',
+};
+
+/*
+ * De Rekenkaart: 6 vakjes, één per rekenkraam, met een medaille voor het hoogste niveau
+ * (Brons, Zilver of Goud). Alle zes op Goud = Rekenkampioen. Telt NIET mee voor de poort.
+ */
+export const REKENKAART = {
+  titel: 'Rekenkaart',
+  teller: '{aantal}/6 goud',
+  medailles: ['', '🥉', '🥈', '🥇'],
+  kampioenKnop: '🏆 Rekenkampioen!',
+  feestTitel: 'Rekenkampioen van Leergroep 3!',
+  feestTekst: 'Alle zes de rekenkramen op Goud! Je bent Rekenkampioen van Leergroep 3!',
+  nieuwItem: '🧮 Nieuw in De Bunders Boetiek: de gouden rekenmachine-rugzak!',
+  testtoets: '🧪 Testtoets: alle rekenstempels gegeven',
 };
 
 /*

@@ -492,6 +492,8 @@ export const KLEDING = [
   { id: 'vlinderdas', categorie: 'extra', naam: 'Vlinderdas', icoon: '🎀', kleur: 0xe64980, model: 'vlinderdas', prijs: 40 },
   { id: 'rugzak-paars', categorie: 'extra', naam: 'Paarse rugzak', icoon: '🎒', kleur: 0x7048e8, model: 'rugzak', prijs: 35 },
   { id: 'cape', categorie: 'extra', naam: 'Heldencape', icoon: '🦸', kleur: 0xe03131, model: 'cape', prijs: 250 },
+  // Alleen te koop als de hele Rekenkaart (Leergroep 3) op Goud staat.
+  { id: 'rekenrugzak', categorie: 'extra', naam: 'Gouden rekenmachine-rugzak', icoon: '🧮', kleur: 0xffc929, model: 'rekenrugzak', prijs: 150, vereist: 'rekenkampioen' },
   // Voetbal (groep: 'voetbal' = eigen knopje in de winkel)
   { id: 'voetbalschoenen-oranje', categorie: 'schoenen', groep: 'voetbal', naam: 'Oranje voetbalschoenen', icoon: '👟', kleur: 0xff7a00, model: 'voetbalschoen', prijs: 45 },
   { id: 'voetbalschoenen-groen', categorie: 'schoenen', groep: 'voetbal', naam: 'Neongroene voetbalschoenen', icoon: '👟', kleur: 0x7cfc00, model: 'voetbalschoen', prijs: 45 },
@@ -507,6 +509,7 @@ export const WINKEL = {
   tabKleding: 'Kleding',
   categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal' },
   vereistBeker: '🔒 Win eerst de Bunders Beker',
+  vereistRekenkaart: '🔒 Haal eerst de hele Rekenkaart op Goud',
   openToets: 'Druk op E om de winkel te openen',
   openTik: 'Tik hier om de winkel te openen',
   pasAan: 'Pas aan',

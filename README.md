@@ -27,6 +27,17 @@ npm run build
 
 De map `dist/` bevat dan het complete spel. Het spel gebruikt geen internet, plaatjes of externe 3D-modellen.
 
+### Rekenen controleren
+
+Heb je de regels in `src/data/rekenen.js` aangepast? Controleer dan of alle sommen en antwoorden nog kloppen:
+
+```bash
+npm test
+```
+
+Dit rekent tienduizenden willekeurige sommen na (plus, min, keer, staartdeling, klok en tafels) en controleert dat
+er geen enkel fout antwoord goed gerekend wordt. Bij een fout zie je **FOUT** met de som erbij.
+
 ### Nieuwe versie online zetten
 
 Na een aanpassing (bijvoorbeeld nieuwe vragen in `src/data/oefeningen.js`):
@@ -191,24 +202,78 @@ een aanvoerdersband en een **gouden bal** (alleen te koop na het winnen van de B
 In de Voetbalwereld draag je het teamshirt, maar je eigen hoofddeksel, schoenen en extra's houd je aan.
 Alle bedragen staan in `src/data/oefeningen.js` bij `VOETBAL_MUNTEN` en `winstMunten` per team.
 
-### De school in (Leergroep 3) – wachtwoord
+## Leergroep 3: rekenen in de school
 
-De school is nog in aanbouw. Bij de voordeur vraagt het spel daarom om een wachtwoord: **Rekenenisleuk**
-(hoofdletters maken niet uit). Is het één keer goed ingevuld, dan blijft de deur open tot de pagina opnieuw
-geladen wordt. De leerkrachtcode opent de school ook. Het wachtwoord staat in `src/data/rekenen.js` bij
-`LEERGROEP.wachtwoord`; zet het op `''` als de school klaar is, dan kan iedereen zonder wachtwoord naar binnen.
+Via de voordeur van de school (bord **Leergroep 3 - Rekenen**, druk op E) kom je in Leergroep 3, nagebouwd naar
+foto's van de echte ruimte: een lang leerplein met een lichtstraat, links drie oranje en rechts drie gele lokalen,
+en bij de ingang blauwe nissen. Binnen loop je terug naar buiten via de deur met het groene bord **Schoolplein**.
+Leergroep 3 wordt pas geladen als je naar binnen gaat; het schoolplein staat dan stil (soepel op een Chromebook).
+
+### Wachtwoord (de school is nog in aanbouw)
+
+Bij de voordeur vraagt het spel om een wachtwoord: **Rekenenisleuk** (hoofdletters maken niet uit). Is het één
+keer goed ingevuld, dan blijft de deur open tot de pagina opnieuw geladen wordt. De leerkrachtcode opent de school
+ook. Het wachtwoord staat in `src/data/rekenen.js` bij `LEERGROEP.wachtwoord`; zet het op `''` als de school klaar
+is, dan kan iedereen zonder wachtwoord naar binnen.
+
+### De zes rekenkramen
+
+In elk lokaal staat een kraam met een karakter. Praten met E, met de knoppen "Leg het nog eens uit", "Ik wil spelen!"
+en "Doei!" (de uitleg wordt voorgelezen). Elk spel heeft drie niveaus: **🥉 Brons, 🥈 Zilver en 🥇 Goud** (eerst Brons,
+dan Zilver, dan Goud). Munten werken zoals bij de taalkramen; een fout antwoord kost nooit munten.
+
+| Lokaal | Kraam | Wat oefen je? |
+|---|---|---|
+| 1 | Pim Plus | optellen onder elkaar (verkort DHTE-schema, met onthoud-cijfers) |
+| 2 | Mila Min | aftrekken onder elkaar (inwisselen, ook over een nul heen) |
+| 3 | Kees Keer | vermenigvuldigen onder elkaar (Goud: 2 × 2 cijfers met twee tussenregels) |
+| 4 | Dina Deel | de staartdeling stap voor stap (antwoord bovenaan, keer-getal, aftrekken, cijfer naar beneden, rest) |
+| 5 | Klaas Klok | klokkijken: kiezen uit 3, en zelf de wijzers verslepen (ook met een vinger); Goud: 24-uursklok en tijdsduur |
+| 6 | Tijn Tafel | tafelrace tegen Tijn: kies één tafel of "Alle tafels door elkaar"; Tijn past zijn tempo aan |
+
+- **DHTE-schema en staartdeling:** het kind vult zelf alle cijfers in, van rechts naar links (bij de staartdeling
+  van boven naar beneden). Elke kolom of stap wordt apart nagekeken: goed wordt groen, alleen het foute vakje wordt rood.
+- **Tips van de meesters:** Meester Jop noemt de regel of de eerste stap, Meester Bram kleurt waar je moet kijken
+  (of streept een fout antwoord weg), Meester Koen doet de stap samen met je (daarna minder munten voor die som,
+  nooit minder dan 0).
+- Alle sommen worden steeds willekeurig gemaakt. Ze zijn met tienduizenden sommen nagerekend: er wordt geen enkel
+  fout antwoord goed gerekend.
+
+### Regels per niveau aanpassen (voor leerkrachten)
+
+Alles staat in **`src/data/rekenen.js`**:
+
+- `REKEN_REGELS`: per kraam en per niveau de regels, bijvoorbeeld de grootte van de getallen (`min`, `max`),
+  hoe vaak je moet onthouden of inwisselen, of een deling een rest heeft, welke klokvragen er komen en welke tafels.
+- `REKEN_INSTELLINGEN`: het aantal sommen per ronde, en hoe je noteert, zodat het past bij de rekenmethode:
+  `onthoudPlek` (`'boven'` of `'onder'`), `onthoudVerplicht` (moeten de onthoud-vakjes ingevuld worden?) en
+  `nulZelfInvullen` (typt het kind de 0 in de tweede keerregel zelf?).
+- `LOKALEN`: de namen, begroetingen en uitleg van de karakters. `REKEN_SPELLEN`, `REKEN_TIPS`, `REKEN_FOUT`,
+  `KLOK_TEKSTEN` en `TAFEL_TEKSTEN`: alle andere teksten.
+
+### Rekenkaart en beloning
+
+In de school zie je linksboven de **Rekenkaart** (op het plein de gewone stempelkaart): zes vakjes met een medaille
+voor het hoogste niveau per kraam. Staan alle zes op Goud, dan volgt een feest in Leergroep 3 (confetti en muziek),
+de titel **Rekenkampioen van Leergroep 3!**, en gaat in De Bunders Boetiek de **gouden rekenmachine-rugzak** open
+(150 munten). De Rekenkaart telt **niet** mee voor de poort naar de Voetbalwereld.
+
+## Voor de leerkracht
 
 ### Leerkrachtcode: alles vrijspelen
 
 Typ **Spellingisleuk** ergens in het spel (gewoon op het toetsenbord, zonder invulvak; hoofdletters maken niet uit), of klik op het startscherm
 op **🔑 Leerkracht** en vul de code daar in (handig op het digibord). Dan wordt alles vrijgespeeld: alle stempels
-en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker en alle kleding.
+en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker, de school
+(Leergroep 3) met alle rekenkramen op Goud, en alle kleding (ook de gouden rekenmachine-rugzak).
 De code staat in `src/data/oefeningen.js` bij `TEST.leerkrachtCode`; zet hem op `''` om dit uit te zetten.
 Met **↺ Opnieuw beginnen** zet je alles weer terug.
 
 ### Testen met F9 (voor de leerkracht)
 
-Druk op **F9** om meteen alle stempels te krijgen; daarna komen het feest, de oorkonde en gaat de poort open.
+Druk op **F9** om meteen alle stempels te krijgen, ook alle rekenstempels (Goud). Op het plein komen daarna het feest,
+de oorkonde en gaat de poort open; in Leergroep 3 komt het rekenfeest (sta je op het plein, dan komt het rekenfeest
+zodra je de school in gaat).
 **Zet dit uit voordat de kinderen gaan spelen:** zet in `src/data/oefeningen.js` bij `TEST` de regel
 `geheimeToetsF9: true` op `false`, en zet de nieuwe versie online met `npm run deploy`.
 
@@ -231,9 +296,10 @@ Doorgerekend met een simulatie (`MUNTEN`, `KLEDING` en `MEESTER_VRAAG` in het da
 Alles wordt bewaard in de browser (localStorage) van het apparaat. Zie `src/opslag.js` voor de lijst:
 stempels en niveaus, munten, gekochte en aangetrokken kleding (ook de voetbalspullen), gevonden muntjes
 van vandaag, de vragen van de meesters, of de poort open is, welke tegenstanders verslagen zijn, of de
-Bunders Beker gewonnen is, het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
+Bunders Beker gewonnen is, de Rekenkaart (Brons/Zilver/Goud per rekenkraam en of je Rekenkampioen bent),
+het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
 
-- Oudere opgeslagen voortgang (van vóór de munten) blijft gewoon werken.
+- Oudere opgeslagen voortgang (van vóór de munten of van vóór Leergroep 3) blijft gewoon werken.
 - **↺ Opnieuw beginnen** wist na bevestiging alles, behalve de instellingen voor geluid en voorlezen.
 - Op gedeelde Chromebooks met hetzelfde account delen kinderen dus dezelfde voortgang.
 
@@ -305,6 +371,22 @@ src/
   ui/oorkonde.js       de kampioensoorkonde
   ui/startscherm.js    het startscherm
   wereld/vuurwerk.js   vuurwerk bij het feest
+  data/rekenen.js      ALLE teksten en regels van Leergroep 3 (hier pas je het rekenen aan)
+  data/leeskaartjes.js de vragenkaartjes van de Leeskraam
+  binnen/leergroep3.js de binnenwereld: Leergroep 3 met de zes lokalen (wordt pas geladen bij de deur)
+  binnen/rekenkramen.js de zes rekenkramen met versiering
+  rekenen/sommen.js    willekeurige sommen volgens de regels per niveau
+  rekenen/schema.js    het DHTE-schema als gegevens (plus, min, keer) en het nakijken per kolom
+  rekenen/dhte.js      het DHTE-schema op het scherm (vakjes, typen, nakijken, tips)
+  rekenen/dhtespel.js  het rekenspel met het DHTE-schema (Pim, Mila, Kees)
+  rekenen/staartdeling.js  de staartdeling als gegevens; staartdelingschema.js = op het scherm; deelspel.js = Dina
+  rekenen/tijd.js      klokkijken: tijden in woorden, 24-uurs, tijdsduur en de klokvragen
+  rekenen/klok.js      de analoge klok met versleepbare wijzers; klokspel.js = Klaas
+  rekenen/tafels.js    tafelsommen en het tempo van Tijn; tafelrace.js = de race
+  rekenvoortgang.js    Brons/Zilver/Goud per rekenkraam (bewaard in de browser)
+  ui/rekenkaart.js     de Rekenkaart in beeld
+  ui/schoolslot.js     het wachtwoordvenster bij de schooldeur
+  ui/leesvenster.js    de vragenkaartjes van de Leeskraam
 ```
 
 ## Bouwstappen
@@ -316,3 +398,5 @@ src/
 - [x] Stap 4: stempelkaart, geluid, voorlezen en afwerking
 - [x] Munten, verstopte muntjes, De Bunders Boetiek, kledingkast en de meesters
 - [x] De Voetbalwereld: poort, stadion, wedstrijd 4 tegen 4, toernooi, Bunders Beker, munten en voetbalspullen
+- [x] De Leeskraam (Spot aan!): vragenkaartjes voor maatjeslezen
+- [x] Leergroep 3: de school in, zes rekenkramen (DHTE-schema, staartdeling, klok, tafelrace), Rekenkaart en beloning

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
-import { LEERGROEP, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL } from './data/rekenen.js';
+import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
+import { Rekenkaart } from './ui/rekenkaart.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
@@ -88,6 +89,7 @@ const dialoog = new Dialoog(uiLaag, { voorlezen, geluid });
 dialoog.opInstelling = () => hud.zetKnoppen();
 const kinderen = new Kinderen(scene, botsing, uiLaag, camera, voorlezen);
 const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) => [k.data.id, k.stijl.bord])));
+const rekenkaart = new Rekenkaart(uiLaag); // in Leergroep 3 zie je deze in plaats van de stempelkaart
 const oorkonde = new Oorkonde(uiLaag);
 const vuurwerk = new Vuurwerk(scene, geluid);
 const muntenteller = new Muntenteller(geluid);
@@ -165,14 +167,40 @@ async function speelRekenspel(kraam) {
     opKlaar: (k, { niveau }) => {
       const nieuw = rekenvoortgang.rondeGehaald(k.data.id, niveau);
       if (!nieuw) return '';
+      nieuweMedaille = k.data.id;
       return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam);
     },
     opSluiten: () => {
       actiefSpel = null;
       klok.update();
       terugNaarPlein();
+      if (!nieuweMedaille) return;
+      const id = nieuweMedaille;
+      nieuweMedaille = null;
+      // Medaille op de Rekenkaart; alle zes op Goud = feest.
+      setTimeout(() => {
+        rekenkaart.stempel(id);
+        geluid.stempel();
+        if (Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 900);
+      }, 350);
     },
   });
+}
+
+let nieuweMedaille = null;
+
+/** Feest in Leergroep 3: alle zes de rekenkramen op Goud. */
+function startRekenFeest() {
+  rekenvoortgang.zetKampioen();
+  rekenkaart.ververs();
+  geluid.feestmuziek();
+  confetti(220);
+  hud.toonWolkje(null);
+  toonBanner(REKENKAART.feestTitel);
+  voorlezen.zeg(REKENKAART.feestTekst);
+  // De rekenkarakters praten en zwaaien even mee.
+  for (const k of binnen?.kramen ?? []) for (const c of k.karakters) { c.praat = true; setTimeout(() => { c.praat = false; }, 4000); }
+  setTimeout(() => hud.toonMelding(REKENKAART.nieuwItem), 5200);
 }
 
 /* ---------- Leeskraam: vragenkaartjes voor maatjeslezen ---------- */
@@ -446,6 +474,7 @@ async function naarBinnen() {
   await vanWit();
   hud.toonMelding(LEERGROEP.welkom);
   bezigMetWisselen = false;
+  if (Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
 }
 
 /** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
@@ -534,6 +563,7 @@ hud.opOpnieuw = () => {
   meesters.wis();
   wisSpelOpslag();
   stempelkaart.ververs();
+  rekenkaart.ververs();
   zetKraamSterren();
   voetbalstand.wis();
   poort.zetDicht();
@@ -796,6 +826,9 @@ function speelAllesVrij() {
   voetbalstand.zetBeker();
   if (!poort.open) poort.zetOpen(true, geluid);
   zetBekerOpPlein();
+  for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3); // alle rekenkramen op Goud
+  rekenvoortgang.zetKampioen();
+  rekenkaart.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
   voetbal?.bord?.teken();
   hud.toonMelding(LEERKRACHT.melding);
@@ -836,6 +869,18 @@ if (TEST.geheimeToetsF9) {
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'F9' || startOpen || voetbal) return;
     e.preventDefault();
+    // Ook alle rekenstempels (Goud). Het rekenfeest komt in Leergroep 3.
+    for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3);
+    rekenkaart.ververs();
+    if (binnen) {
+      hud.toonMelding(REKENKAART.testtoets);
+      for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
+      stempelkaart.ververs();
+      zetKraamSterren();
+      werkPoortBordjeBij();
+      if (!rekenvoortgang.kampioen) setTimeout(startRekenFeest, 600);
+      return;
+    }
     for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
     stempelkaart.ververs();
     zetKraamSterren();
@@ -853,4 +898,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
