@@ -18,6 +18,18 @@ export const LEERGROEP = {
   naarBuitenTik: 'Tik hier om naar het schoolplein te gaan',
   deurTerugBord: 'Schoolplein',
   welkom: 'Welkom in Leergroep 3! Hier oefen je rekenen.',
+
+  // Wachtwoord voor de school (hij is nog in aanbouw). Hoofdletters maken niet uit.
+  // Zet op '' als de school klaar is: dan kan iedereen zonder wachtwoord naar binnen.
+  // Is het wachtwoord één keer goed, dan blijft de deur open tot de pagina opnieuw geladen wordt.
+  // De leerkrachtcode opent de school ook.
+  wachtwoord: 'Rekenenisleuk',
+  slotTitel: 'De school is nog in aanbouw',
+  slotTekst: 'Vul het wachtwoord in om naar binnen te gaan.',
+  slotFout: 'Dat wachtwoord klopt niet. Vraag het aan je meester of juf.',
+  slotKnop: 'Naar binnen',
+  slotTerug: 'Terug naar het plein',
+  slotPlaatshouder: 'Wachtwoord',
 };
 
 /*

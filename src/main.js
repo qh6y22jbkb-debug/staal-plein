@@ -13,6 +13,7 @@ import { bouwKramen, bouwBoetiek, bouwLeeskraam } from './wereld/kramen.js';
 import { Winkel } from './winkel.js';
 import { Kastvenster } from './ui/kastvenster.js';
 import { Leesvenster, LeesMelding } from './ui/leesvenster.js';
+import { SchoolSlot } from './ui/schoolslot.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
 import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST, LEERKRACHT, KLEDING, VOETBAL_TEAMS } from './data/oefeningen.js';
@@ -199,6 +200,7 @@ function terugNaarPlein() {
 const winkel = new Winkel(uiLaag, { geluid, voorlezen });
 const kastvenster = new Kastvenster(uiLaag, { geluid });
 const leesMelding = new LeesMelding(uiLaag, { geluid });
+const schoolSlot = new SchoolSlot(uiLaag, { geluid });
 const leesvenster = new Leesvenster(uiLaag, { geluid, voorlezen, beloon: (a, v, l) => muntenteller.beloon(a, v, l) });
 let actiefVenster = null;
 
@@ -404,6 +406,15 @@ function zetSpelerIn(doelScene) {
   besturing.scene = doelScene;
 }
 
+// De school is nog in aanbouw: eerst het wachtwoord (LEERGROEP.wachtwoord). Eén keer goed = open tot herladen.
+let schoolOpen = !LEERGROEP.wachtwoord;
+
+function probeerNaarBinnen() {
+  if (schoolOpen) { naarBinnen(); return; }
+  schoolSlot.opJa = () => { schoolOpen = true; naarBinnen(); };
+  openVenster(schoolSlot);
+}
+
 async function naarBinnen() {
   if (bezigMetWisselen || binnen || voetbal) return;
   bezigMetWisselen = true;
@@ -590,7 +601,7 @@ function praatMetDichtste() {
   if (dichtsteKraam) startGesprek(dichtsteKraam);
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
-  else if (isBijSchooldeur()) naarBinnen();
+  else if (isBijSchooldeur()) probeerNaarBinnen();
 }
 
 besturing.opPraten = praatMetDichtste;
@@ -774,6 +785,7 @@ besturing.aan = false;
 /* ---------- Leerkrachtmodus: alles vrijspelen met de code ---------- */
 
 function speelAllesVrij() {
+  schoolOpen = true; // de leerkrachtcode opent ook de school
   for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3); // alle stempels en niveaus
   voortgang.zetKampioen();
   stempelkaart.ververs();
@@ -841,4 +853,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

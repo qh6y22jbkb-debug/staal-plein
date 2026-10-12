@@ -191,6 +191,13 @@ een aanvoerdersband en een **gouden bal** (alleen te koop na het winnen van de B
 In de Voetbalwereld draag je het teamshirt, maar je eigen hoofddeksel, schoenen en extra's houd je aan.
 Alle bedragen staan in `src/data/oefeningen.js` bij `VOETBAL_MUNTEN` en `winstMunten` per team.
 
+### De school in (Leergroep 3) – wachtwoord
+
+De school is nog in aanbouw. Bij de voordeur vraagt het spel daarom om een wachtwoord: **Rekenenisleuk**
+(hoofdletters maken niet uit). Is het één keer goed ingevuld, dan blijft de deur open tot de pagina opnieuw
+geladen wordt. De leerkrachtcode opent de school ook. Het wachtwoord staat in `src/data/rekenen.js` bij
+`LEERGROEP.wachtwoord`; zet het op `''` als de school klaar is, dan kan iedereen zonder wachtwoord naar binnen.
+
 ### Leerkrachtcode: alles vrijspelen
 
 Typ **Spellingisleuk** ergens in het spel (gewoon op het toetsenbord, zonder invulvak; hoofdletters maken niet uit), of klik op het startscherm
