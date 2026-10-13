@@ -3,11 +3,12 @@ import { itemMetId } from './kleding.js';
 /**
  * Wat heb je gekocht en wat heb je aan? Bewaard in localStorage.
  * aan = { hoofd, shirt, broek, schoenen, extra: [] }  (één item per categorie, extra's mogen samen)
+ * kleuren = { itemId: kleur }  (eigen kleur van een shirt, gekozen in de kledingkast; gratis)
  */
 const SLEUTEL = 'staal-blok2-kleding';
 
 function leeg() {
-  return { gekocht: [], aan: { hoofd: null, shirt: null, broek: null, schoenen: null, extra: [] } };
+  return { gekocht: [], aan: { hoofd: null, shirt: null, broek: null, schoenen: null, extra: [] }, kleuren: {} };
 }
 
 function lees() {
@@ -15,7 +16,10 @@ function lees() {
     const d = JSON.parse(localStorage.getItem(SLEUTEL));
     if (d && Array.isArray(d.gekocht)) {
       const basis = leeg();
-      return { gekocht: d.gekocht.filter((id) => itemMetId(id)), aan: { ...basis.aan, ...d.aan, extra: d.aan?.extra ?? [] } };
+      // (Oudere opslag heeft nog geen kleuren: dan is het gewoon een leeg lijstje.)
+      const kleuren = {};
+      for (const [id, k] of Object.entries(d.kleuren ?? {})) if (itemMetId(id) && Number.isInteger(k)) kleuren[id] = k;
+      return { gekocht: d.gekocht.filter((id) => itemMetId(id)), aan: { ...basis.aan, ...d.aan, extra: d.aan?.extra ?? [] }, kleuren };
     }
   } catch { /* geen opslag */ }
   return leeg();
@@ -31,8 +35,20 @@ function bewaar() {
 
 export const kledingkast = {
   get gekocht() { return staat.gekocht; },
-  /** Kopie van wat je aan hebt. */
-  get aan() { return { ...staat.aan, extra: [...staat.aan.extra] }; },
+  /** Kopie van wat je aan hebt (met de eigen kleuren erbij). */
+  get aan() { return { ...staat.aan, extra: [...staat.aan.extra], kleuren: { ...staat.kleuren } }; },
+
+  /** Eigen kleur van een kledingstuk, of de gewone kleur. */
+  kleurVan(id) { return staat.kleuren[id] ?? itemMetId(id)?.kleur; },
+  heeftEigenKleur(id) { return id in staat.kleuren; },
+
+  /** Andere kleur kiezen (gratis). kleur = null: terug naar de originele kleur. */
+  zetKleur(id, kleur) {
+    if (!this.heeft(id)) return;
+    if (kleur == null) delete staat.kleuren[id];
+    else staat.kleuren[id] = kleur;
+    bewaar();
+  },
   heeft(id) { return staat.gekocht.includes(id); },
   heeftAan(id) {
     const item = itemMetId(id);

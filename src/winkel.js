@@ -97,7 +97,7 @@ export class Winkel {
       const kaart = document.createElement('div');
       kaart.className = `wk-item${this.pasId === item.id ? ' past' : ''}${heeft ? ' heeft' : ''}`;
       kaart.innerHTML = `
-        <div class="wk-icoon" style="--kleur:${hex(item.kleur)}">${item.icoon}</div>
+        <div class="wk-icoon" style="--kleur:${hex(heeft ? kledingkast.kleurVan(item.id) : item.kleur)}">${item.icoon}</div>
         <div class="wk-naam">${item.naam}</div>
         <div class="wk-prijs"><span class="munt klein" aria-hidden="true"></span> ${item.prijs}</div>
         <div class="wk-knoppen">

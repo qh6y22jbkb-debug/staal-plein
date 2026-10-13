@@ -50,7 +50,9 @@ export function trekAan(speler, uitrusting) {
   zetTerug(speler);
   for (const id of alleIds(uitrusting)) {
     const item = itemMetId(id);
-    if (item) BOUWERS[item.categorie]?.(speler, item);
+    // Eigen kleur (gekozen in de kledingkast) gaat voor de gewone kleur.
+    const kleur = uitrusting.kleuren?.[id];
+    if (item) BOUWERS[item.categorie]?.(speler, kleur != null ? { ...item, kleur } : item);
   }
 }
 
@@ -117,9 +119,10 @@ const BOUWERS = {
     const k = item.kleur;
     d.mouwen.forEach((m) => { m.material = mat(k); });
     if (item.model === 'voetbal') {
+      const streepKleur = `#${k.toString(16).padStart(6, '0')}`; // de strepen krijgen de kleur van het shirt
       const strepen = canvasTextuur(128, 64, (ctx, b, h) => {
         for (let i = 0; i < 8; i++) {
-          ctx.fillStyle = i % 2 ? '#ffffff' : '#e03131';
+          ctx.fillStyle = i % 2 ? '#ffffff' : streepKleur;
           ctx.fillRect((i * b) / 8, 0, b / 8 + 1, h);
         }
       });

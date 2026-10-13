@@ -2,6 +2,7 @@ import { WINKEL } from '../data/oefeningen.js';
 import { CATEGORIEEN, itemMetId } from '../kleding.js';
 import { kledingkast } from '../kledingkast.js';
 import { Paspop } from './paspop.js';
+import { maakKleurkiezer } from './kleurkiezer.js';
 
 const hex = (k) => `#${k.toString(16).padStart(6, '0')}`;
 
@@ -73,14 +74,35 @@ export class Kastvenster {
         const knop = document.createElement('button');
         knop.type = 'button';
         knop.className = `kast-item${aan ? ' aan' : ''}`;
-        knop.innerHTML = `<span class="wk-icoon" style="--kleur:${hex(item.kleur)}">${item.icoon}</span><span>${item.naam}</span><small>${aan ? WINKEL.uittrekken : WINKEL.aantrekken}</small>`;
+        knop.innerHTML = `<span class="wk-icoon" style="--kleur:${hex(kledingkast.kleurVan(item.id))}">${item.icoon}</span><span>${item.naam}</span><small>${aan ? WINKEL.uittrekken : WINKEL.aantrekken}</small>`;
         knop.addEventListener('click', () => {
           kledingkast.wissel(item.id);
           this.paspop.kleed(kledingkast.aan);
           this.geluid?.plop();
           this.teken();
         });
-        vakken.appendChild(knop);
+        if (cat !== 'shirt') { vakken.appendChild(knop); continue; }
+        // Shirts: een kleurkiezer eronder. Een kleur kiezen is gratis en trekt het shirt meteen aan.
+        const blok = document.createElement('div');
+        blok.className = 'kast-shirt';
+        blok.appendChild(knop);
+        blok.appendChild(maakKleurkiezer({
+          huidige: kledingkast.heeftEigenKleur(item.id) ? kledingkast.kleurVan(item.id) : null,
+          opKies: (kleur) => {
+            kledingkast.zetKleur(item.id, kleur);
+            if (!kledingkast.heeftAan(item.id)) kledingkast.trekAan(item.id);
+            this.paspop.kleed(kledingkast.aan);
+            this.geluid?.plop();
+            // Alleen het knopje bijwerken (de kleurkiezer laten staan, dan blijft de focus erop).
+            knop.classList.add('aan');
+            knop.querySelector('.wk-icoon').style.setProperty('--kleur', hex(kledingkast.kleurVan(item.id)));
+            for (const ander of this.el.querySelectorAll('.kast-shirt .kast-item')) {
+              if (ander !== knop) { ander.classList.remove('aan'); ander.querySelector('small').textContent = WINKEL.aantrekken; }
+            }
+            knop.querySelector('small').textContent = WINKEL.uittrekken;
+          },
+        }));
+        vakken.appendChild(blok);
       }
       rij.appendChild(vakken);
       lijst.appendChild(rij);

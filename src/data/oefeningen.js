@@ -503,6 +503,25 @@ export const KLEDING = [
 ];
 
 /*
+ * De 12 vaste kleuren van de kleurkiezer (shirts in de kledingkast, later ook fiets en step).
+ * Je kunt de kleuren en namen hier aanpassen; houd het bij 12 vrolijke kleuren.
+ */
+export const KLEURKIEZER_KLEUREN = [
+  { naam: 'Rood', kleur: 0xe03131 },
+  { naam: 'Oranje', kleur: 0xfd7e14 },
+  { naam: 'Geel', kleur: 0xfcc419 },
+  { naam: 'Lichtgroen', kleur: 0x94d82d },
+  { naam: 'Groen', kleur: 0x2f9e44 },
+  { naam: 'Turquoise', kleur: 0x15aabf },
+  { naam: 'Lichtblauw', kleur: 0x74c0fc },
+  { naam: 'Blauw', kleur: 0x1c7ed6 },
+  { naam: 'Paars', kleur: 0x7048e8 },
+  { naam: 'Roze', kleur: 0xf06595 },
+  { naam: 'Wit', kleur: 0xf8f9fa },
+  { naam: 'Zwart', kleur: 0x343a40 },
+];
+
+/*
  * Dansjes (toets M, of de knop "Dans" op een touchscreen). De moonwalk is gratis;
  * de andere koop je in De Bunders Boetiek bij "Dansjes". prijs = aantal munten.
  */
@@ -551,7 +570,9 @@ export const WINKEL = {
   kast: 'Kledingkast',
   kastLeeg: 'Je kast is nog leeg. Koop kleding in De Bunders Boetiek!',
   uittrekken: 'Uittrekken',
-  kastUitleg: 'Klik op kleding om het aan of uit te trekken.',
+  kastUitleg: 'Klik op kleding om het aan of uit te trekken. Shirts kun je gratis een andere kleur geven.',
+  kleurKiezen: 'Kleur:',
+  kleurOrigineel: 'Origineel',
 };
 
 /*

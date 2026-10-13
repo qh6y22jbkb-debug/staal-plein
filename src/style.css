@@ -864,3 +864,19 @@ body.in-gesprek .dansknop, body.venster-open .dansknop, body.in-voetbal .danskno
 .dm-icoon { font-size: 22px; }
 .dm-uitleg { font-size: 14px; color: #868e96; text-align: center; margin-top: 8px; }
 .wk-dans-uitleg { grid-column: 1 / -1; margin: 0 0 4px; font-size: 16px; color: #5c6b7a; }
+
+/* ---------- Kleurkiezer (kledingkast) ---------- */
+.kleurkiezer { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 4px; }
+.kk-label { font-weight: bold; font-size: 15px; color: #5c6b7a; margin-right: 2px; }
+.kk-kleur {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;
+  background: var(--kleur); border: 3px solid #fff; box-shadow: 0 0 0 2px #ced4da;
+}
+.kk-kleur.gekozen { box-shadow: 0 0 0 3px var(--donker); transform: scale(1.12); }
+.kk-kleur:focus-visible, .kk-origineel:focus-visible { outline: 4px solid #ffd43b; outline-offset: 2px; }
+.kk-origineel {
+  font: inherit; font-weight: bold; font-size: 14px; cursor: pointer; color: var(--donker);
+  background: #fff; border: 2px solid #ced4da; border-radius: 12px; padding: 4px 10px;
+}
+.kk-origineel.gekozen { border-color: var(--donker); background: #fff9db; }
+.kast-shirt { display: flex; flex-direction: column; gap: 2px; background: #fff; border: 2px solid #f1e3c8; border-radius: 16px; padding: 6px 8px; }
