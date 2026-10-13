@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { mat, doos, cilinder, bol, canvasTextuur } from '../wereld/helpers.js';
 import { Botsing } from '../wereld/botsing.js';
-import { GYM } from '../data/gym.js';
+import { GYM, GYMTIJD } from '../data/gym.js';
+import { tijdOpKlok } from '../gymtijd.js';
 
 /*
  * De gymzaal: een lichte zaal met houten vloer en lijnen, wandrekken, banken, matten,
@@ -75,7 +76,8 @@ function bordTextuur(tekst, rand = '#2f9e44') {
 
 export class Gymzaal {
   /**
-   * @param ctx { speler, besturing, geluid, beloon(aantal, van, label), melding(tekst), uiLaag, isTouch }
+   * @param ctx { speler, besturing, geluid, beloon(aantal, van, label), melding(tekst), uiLaag, isTouch,
+   *              gymtijd (de opgespaarde gymtijd), opTijdOp() (gymtijd is op: terug naar het plein) }
    */
   constructor(ctx) {
     this.soort = 'gym';
@@ -298,6 +300,7 @@ export class Gymzaal {
     this.ui = document.createElement('div');
     this.ui.className = 'gym-ui';
     this.ui.innerHTML = `
+      <div class="gym-tijd" aria-live="off"></div>
       <div class="gym-teller" hidden></div>
       <div class="gym-kracht" hidden><div class="gym-doel"></div><div class="gym-vulling"></div></div>
       ${isTouch ? `
@@ -310,6 +313,9 @@ export class Gymzaal {
         <div class="gym-knoppen gym-gooi" hidden><button type="button" data-knop="gooi" class="groot">🏀<small>${GYM.knopGooi}</small></button></div>` : ''}`;
     uiLaag.appendChild(this.ui);
     this.tellerEl = this.ui.querySelector('.gym-teller');
+    this.tijdEl = this.ui.querySelector('.gym-tijd');
+    this.gemeld30 = (this.ctx.gymtijd?.seconden ?? 99) <= 30;
+    this.tijdOp = false;
     this.krachtEl = this.ui.querySelector('.gym-kracht');
     this.doelEl = this.ui.querySelector('.gym-doel');
     this.vullingEl = this.ui.querySelector('.gym-vulling');
@@ -481,9 +487,31 @@ export class Gymzaal {
     return false;
   }
 
-  /** Na het lopen: salto, plafond, ballen. */
+  /** Gymtijd: loopt alleen af in de gymzaal. Bij 30 seconden een melding, bij 0 een fluitje en terug naar buiten. */
+  updateGymtijd(dt) {
+    const gt = this.ctx.gymtijd;
+    if (!gt) { this.tijdEl.hidden = true; return; }
+    if (this.ctx.besturing.aan && !this.tijdOp) gt.verbruik(dt);
+    this.tijdEl.textContent = `⏱️ ${tijdOpKlok(gt.seconden)}`;
+    this.tijdEl.classList.toggle('bijna', gt.seconden <= 30);
+    if (!this.gemeld30 && gt.seconden <= 30) {
+      this.gemeld30 = true;
+      this.ctx.melding?.(GYMTIJD.nog30);
+    }
+    if (!this.tijdOp && gt.seconden <= 0) {
+      this.tijdOp = true;
+      this.klim = null;
+      this.laatBalVallen();
+      this.ctx.geluid?.fluit();
+      this.ctx.melding?.(GYMTIJD.voorbij);
+      setTimeout(() => this.ctx.opTijdOp?.(), 1600);
+    }
+  }
+
+  /** Na het lopen: salto, plafond, ballen, gymtijd. */
   update(dt, tijd, spelerPos) {
     const s = this.speler;
+    this.updateGymtijd(dt);
     // Nooit door het plafond (ook niet vanaf de trampoline).
     if (s.positie.y > HOOGTE - 2.3) { s.positie.y = HOOGTE - 2.3; s.vy = Math.min(s.vy, 0); }
     if (s.opGrond && !this.opTrampoline()) this.hoog = false;

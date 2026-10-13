@@ -45,3 +45,21 @@ export const GYM = {
   knopGooi: 'Gooi',
   knopLos: 'Los',
 };
+
+/*
+ * Gymtijd: die verdien je met stempels. Elke nieuwe stempel of betere stempel (een ster erbij bij de
+ * taalkramen, of Brons → Zilver → Goud bij het rekenen) geeft gymtijd. Alleen in de gymzaal loopt hij af.
+ */
+export const GYMTIJD = {
+  minutenPerStempel: 3, // zoveel minuten per nieuwe of betere stempel
+  maxMinuten: 15, // meer kun je niet opsparen
+  menu: '⏱️ Gymtijd: {tijd}',
+  verdiend: '⏱️ +{minuten} minuten gymtijd!',
+  vol: '⏱️ Je gymtijd is vol ({max} minuten).',
+  deurOpen: 'Je hebt {tijd} gymtijd. Druk op E om naar binnen te gaan',
+  deurOpenTik: 'Je hebt {tijd} gymtijd. Tik hier om naar binnen te gaan',
+  deurDicht: 'Haal een stempel om gymtijd te verdienen!',
+  nog30: '⏱️ Nog 30 seconden gymtijd!',
+  voorbij: 'De gymles is voorbij!',
+  testtoets: '🧪 Testtoets: {max} minuten gymtijd',
+};

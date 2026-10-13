@@ -8,6 +8,7 @@
  *   staal-blok2-pleinmunten  welke verstopte muntjes vandaag al gevonden zijn
  *   staal-blok2-meesters     pauze en aantal vragen per meester (per dag)
  *   staal-blok2-voetbal      poort open, verslagen tegenstanders, Bunders Beker
+ *   staal-blok2-gymtijd      gymtijd in seconden (verdiend met stempels, loopt af in de gymzaal)
  *   staal-blok2-gym          gymzaal: hoe vaak je vandaag munten kreeg voor de bel
  *   staal-blok2-dansjes      gekochte dansjes en welk dansje je gekozen hebt (de moonwalk is gratis)
  *   staal-blok2-rekenen      Leergroep 3: gehaalde niveaus (Brons/Zilver/Goud) per rekenkraam
@@ -27,6 +28,7 @@ export const SPEL_SLEUTELS = [
   'staal-blok2-rekenen',
   'staal-blok2-dansjes',
   'staal-blok2-gym',
+  'staal-blok2-gymtijd',
 ];
 
 /** Wist alle spelgegevens (niet de instellingen voor geluid en voorlezen). */

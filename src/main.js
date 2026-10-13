@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR } from './wereld/schoolplein.js';
-import { GYM } from './data/gym.js';
+import { GYM, GYMTIJD } from './data/gym.js';
+import { gymtijd, tijdInWoorden, tijdOpKlok } from './gymtijd.js';
 import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
 import { Rekenkaart } from './ui/rekenkaart.js';
 import { Dansen, dansbezit } from './dansjes.js';
@@ -93,6 +94,31 @@ dialoog.opInstelling = () => hud.zetKnoppen();
 const kinderen = new Kinderen(scene, botsing, uiLaag, camera, voorlezen);
 const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) => [k.data.id, k.stijl.bord])));
 const rekenkaart = new Rekenkaart(uiLaag); // in Leergroep 3 zie je deze in plaats van de stempelkaart
+
+/* ---------- Gymtijd: verdiend met stempels, te zien op de kaarten, loopt af in de gymzaal ---------- */
+const gymtijdLabels = [stempelkaart.el, rekenkaart.el].map((kaart) => {
+  const e = document.createElement('div');
+  e.className = 'sk-gymtijd';
+  kaart.appendChild(e);
+  return e;
+});
+function toonGymtijd() {
+  const tekst = GYMTIJD.menu.replace('{tijd}', tijdOpKlok(gymtijd.seconden));
+  for (const e of gymtijdLabels) {
+    if (e.textContent !== tekst) e.textContent = tekst;
+    e.classList.toggle('leeg', !gymtijd.heeftTijd);
+  }
+  wereld.gymDeur?.zetOpen(gymtijd.heeftTijd);
+}
+gymtijd.opVerandering(toonGymtijd);
+toonGymtijd();
+
+/** Nieuwe of betere stempel: gymtijd erbij. Geeft de tekst voor het eindscherm (met een regel ervoor). */
+function verdienGymtijd() {
+  const minuten = gymtijd.verdien();
+  const tekst = minuten > 0 ? GYMTIJD.verdiend.replace('{minuten}', minuten) : GYMTIJD.vol.replace('{max}', GYMTIJD.maxMinuten);
+  return `<br>${tekst}`;
+}
 
 /* ---------- Dansjes (M, of de knop Dans) ---------- */
 const dansen = new Dansen(speler);
@@ -206,7 +232,7 @@ async function speelRekenspel(kraam) {
       const nieuw = rekenvoortgang.rondeGehaald(k.data.id, niveau);
       if (!nieuw) return '';
       nieuweMedaille = k.data.id;
-      return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam);
+      return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam) + verdienGymtijd();
     },
     opSluiten: () => {
       actiefSpel = null;
@@ -303,10 +329,10 @@ function speelMinispel(kraam) {
     opKlaar: (k, { niveau }) => {
       const wat = voortgang.rondeGehaald(k.data.id, niveau);
       if (wat) nieuweStempel = { id: k.data.id, stempel: wat === 'stempel' };
-      if (wat === 'stempel') return TEKSTEN.stempelErbij;
+      if (wat === 'stempel') return TEKSTEN.stempelErbij + verdienGymtijd();
       if (wat === 'niveau') {
         const nog = NIVEAU_VOOR_STEMPEL - niveau;
-        return TEKSTEN.stempelNog.replace('{aantal}', nog === 1 ? '1 niveau' : `${nog} niveaus`);
+        return TEKSTEN.stempelNog.replace('{aantal}', nog === 1 ? '1 niveau' : `${nog} niveaus`) + verdienGymtijd();
       }
       return '';
     },
@@ -512,6 +538,8 @@ async function naarBinnen(soort = 'school') {
       speler, besturing, geluid, uiLaag, isTouch: besturing.isTouch,
       beloon: (a, v, l) => muntenteller.beloon(a, v ?? hud.wolkje, l),
       melding: (t) => hud.toonMelding(t),
+      gymtijd,
+      opTijdOp: () => naarBuiten(), // gymtijd op: fluitje en terug naar het plein
     });
   } else {
     const { Leergroep3 } = await import('./binnen/leergroep3.js');
@@ -560,6 +588,7 @@ async function naarBuiten() {
   hud.toonWolkje(null);
   geluid.woesj();
   await naarWit();
+  gymtijd.bewaarNu(); // de rest van je gymtijd houd je
   const terug = GEBOUWEN[binnen.soort].buiten;
   ruimBinnenOp();
   hud.verbergMelding();
@@ -624,6 +653,7 @@ hud.opOpnieuw = () => {
   kledingkast.wis();
   dansbezit.wis();
   dansen.stop();
+  gymtijd.wis();
   meesters.wis();
   wisSpelOpslag();
   stempelkaart.ververs();
@@ -697,7 +727,10 @@ function praatMetDichtste() {
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
   else if (isBijSchooldeur()) probeerNaarBinnen();
-  else if (isBijGymdeur()) naarBinnen('gym');
+  else if (isBijGymdeur()) {
+    if (gymtijd.heeftTijd) naarBinnen('gym');
+    else { hud.toonMelding(GYMTIJD.deurDicht); geluid.bijna(); } // zonder gymtijd is de deur dicht
+  }
 }
 
 besturing.opPraten = praatMetDichtste;
@@ -789,7 +822,8 @@ function frame() {
     } else if (isBijSchooldeur()) {
       hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
     } else if (isBijGymdeur()) {
-      hud.toonWolkje(besturing.isTouch ? GYM.naarBinnenTik : GYM.naarBinnenToets);
+      const tijd = tijdInWoorden(gymtijd.seconden);
+      hud.toonWolkje(!gymtijd.heeftTijd ? GYMTIJD.deurDicht : (besturing.isTouch ? GYMTIJD.deurOpenTik : GYMTIJD.deurOpen).replace('{tijd}', tijd));
     } else if (poort.afstandTot(speler.positie) < 5.5) {
       hud.toonWolkje(poort.open ? VOETBAL.wolkjeOpen : VOETBAL.wolkjeDicht.replace('{nog}', nogTekst()));
     } else hud.toonWolkje(null);
@@ -921,6 +955,7 @@ function speelAllesVrij() {
   rekenkaart.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
   dansbezit.geefAlles();
+  gymtijd.vul();
   voetbal?.bord?.teken();
   hud.toonMelding(LEERKRACHT.melding);
   geluid.klaar();
@@ -960,7 +995,9 @@ if (TEST.geheimeToetsF9) {
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'F9' || startOpen || voetbal) return;
     e.preventDefault();
-    // Ook alle rekenstempels (Goud). Het rekenfeest komt in Leergroep 3.
+    // Ook alle rekenstempels (Goud) en volle gymtijd. Het rekenfeest komt in Leergroep 3.
+    gymtijd.vul();
+    setTimeout(() => hud.toonMelding(GYMTIJD.testtoets.replace('{max}', GYMTIJD.maxMinuten)), 2800);
     for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3);
     rekenkaart.ververs();
     if (binnen?.soort === 'school') {
@@ -989,4 +1026,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

@@ -35,7 +35,7 @@ export function bouwSchoolplein(scene, botsing) {
 
   bouwGrond(scene);
   bouwSchool(scene, botsing, blokkers);
-  bouwGymzaal(scene, botsing, blokkers);
+  const gymDeur = bouwGymzaal(scene, botsing, blokkers);
   bouwFietsenhok(scene, botsing, blokkers);
   bouwFietsenrij(scene, botsing);
   bouwHek(scene);
@@ -55,6 +55,7 @@ export function bouwSchoolplein(scene, botsing) {
 
   return {
     blokkers,
+    gymDeur, // gymDeur.zetOpen(true/false): open met gymtijd, dicht zonder
     update(dt, tijd) { for (const a of animaties) a(dt, tijd); },
   };
 }
@@ -222,6 +223,9 @@ function bouwGymzaal(scene, botsing, blokkers) {
   // Deur van de gymzaal: geel kozijn, donkere opening (binnen brandt licht) en een bordje erboven.
   doos(0.2, 3.0, 2.5, KLEUR.geel, 30.95, 1.5, -16.8, g);
   doos(0.22, 2.7, 2.0, 0x5b4636, 30.94, 1.35, -16.8, g);
+  // Deurblad: zichtbaar = dicht (geen gymtijd), weg = open.
+  const deurBlad = doos(0.14, 2.65, 1.95, 0xf08c00, 30.84, 1.33, -16.8, g);
+  const klink = doos(0.08, 0.06, 0.25, 0x495057, 30.76, 1.2, -16.2, g);
   doos(0.6, 0.04, 2.2, 0xd3d0c8, 30.7, 0.03, -16.8, g); // drempel
   const deurBord = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.7), new THREE.MeshLambertMaterial({ map: tekstTextuur('🏀 Gymzaal', { rand: '#d9473e' }) }));
   deurBord.rotation.y = -Math.PI / 2;
@@ -237,6 +241,7 @@ function bouwGymzaal(scene, botsing, blokkers) {
   bord.rotation.y = -Math.PI / 2;
   bord.position.set(30.9, 4.2, -22.5);
   g.add(bord);
+  return { zetOpen(open) { deurBlad.visible = !open; klink.visible = !open; } };
 }
 
 /** Houten fietsenhok met lichte golfplaten op het dak. */
