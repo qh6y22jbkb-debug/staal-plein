@@ -1,4 +1,5 @@
-import { KLEDING, WINKEL, DANSJES, DANS_TEKSTEN } from './data/oefeningen.js';
+import { KLEDING, WINKEL, DANSJES, DANS_TEKSTEN, VERVOER, VERVOER_TEKSTEN } from './data/oefeningen.js';
+import { vervoerbezit } from './vervoer.js';
 import { dansbezit } from './dansjes.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { CATEGORIEEN, itemMetId } from './kleding.js';
@@ -69,7 +70,7 @@ export class Winkel {
 
   kiesTab(tab) {
     this.tab = tab;
-    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal', 'dansjes'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
+    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal', 'dansjes', 'vervoer'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
     this.categorieEl.onclick = (e) => {
       const knop = e.target.closest('button[data-cat]');
       if (!knop) return;
@@ -82,6 +83,8 @@ export class Winkel {
   tekenItems() {
     if (this.tab !== 'kleding') return;
     if (this.categorie === 'dansjes') { this.tekenDansjes(); return; }
+    if (this.categorie === 'vervoer') { this.tekenVervoer(); return; }
+    if (this.paspop.vervoerId) this.paspop.toonVervoer(null);
     // Het knopje "Voetbal" toont de voetbalitems; de andere knopjes de gewone kleding.
     const items = this.categorie === 'voetbal'
       ? KLEDING.filter((k) => k.groep === 'voetbal')
@@ -147,6 +150,41 @@ export class Winkel {
     }
   }
 
+  /** Tabblad Vervoer: bekijken (het poppetje staat erop), kopen en kiezen. */
+  tekenVervoer() {
+    this.itemsEl.innerHTML = `<p class="wk-dans-uitleg">${VERVOER_TEKSTEN.winkelUitleg}</p>`;
+    for (const v of VERVOER) {
+      const heeft = vervoerbezit.heeft(v.id);
+      const gekozen = vervoerbezit.gekozen === v.id;
+      const tekort = v.prijs - munten.totaal;
+      const kaart = document.createElement('div');
+      kaart.className = `wk-item${heeft ? ' heeft' : ''}${this.paspop.vervoerId === v.id ? ' past' : ''}`;
+      kaart.innerHTML = `
+        <div class="wk-icoon" style="--kleur:${hex(vervoerbezit.kleurVan(v.id))}">${v.icoon}</div>
+        <div class="wk-naam">${v.naam}</div>
+        <div class="wk-prijs"><span class="munt klein" aria-hidden="true"></span> ${v.prijs}</div>
+        <div class="wk-knoppen">
+          <button type="button" class="wk-pas">👀 ${VERVOER_TEKSTEN.bekijk}</button>
+          ${heeft
+            ? `<button type="button" class="wk-draag${gekozen ? ' aan' : ''}" ${gekozen ? 'disabled' : ''}>${gekozen ? VERVOER_TEKSTEN.gekozen : VERVOER_TEKSTEN.kiezen}</button>`
+            : `<button type="button" class="wk-koop" ${tekort > 0 ? 'disabled' : ''}>${tekort > 0 ? WINKEL.nogNodig.replace('{aantal}', tekort) : `🛒 ${WINKEL.kopen}`}</button>`}
+        </div>`;
+      kaart.querySelector('.wk-pas').addEventListener('click', () => {
+        // Nog een keer klikken = er weer af.
+        this.paspop.toonVervoer(this.paspop.vervoerId === v.id ? null : v.id, vervoerbezit.kleurVan(v.id));
+        this.geluid?.plop();
+        this.tekenItems();
+      });
+      kaart.querySelector('.wk-koop')?.addEventListener('click', () => this.vraagKopen({ ...v, kleur: vervoerbezit.kleurVan(v.id), soort: 'vervoer' }));
+      kaart.querySelector('.wk-draag')?.addEventListener('click', () => {
+        vervoerbezit.kies(v.id);
+        this.paspop.toonVervoer(v.id, vervoerbezit.kleurVan(v.id));
+        this.tekenItems();
+      });
+      this.itemsEl.appendChild(kaart);
+    }
+  }
+
   /** Even passen (nog niet kopen). Nog een keer klikken = weer uit. */
   pas(id) {
     if (this.pasId === id) {
@@ -188,6 +226,16 @@ export class Winkel {
 
   koop(item) {
     if (!munten.geefUit(item.prijs)) return;
+    if (item.soort === 'vervoer') {
+      vervoerbezit.koop(item.id);
+      this.paspop.toonVervoer(item.id, vervoerbezit.kleurVan(item.id));
+      this.geluid?.klaar();
+      const tekst = VERVOER_TEKSTEN.gekocht.replace('{naam}', item.naam.toLowerCase());
+      this.pasmelding.textContent = `🎉 ${tekst}`;
+      this.voorlezen?.zeg(tekst, { toonhoogte: 1.3 });
+      this.tekenItems();
+      return;
+    }
     if (item.soort === 'dans') {
       dansbezit.koop(item.id);
       this.paspop.dans(item.id);

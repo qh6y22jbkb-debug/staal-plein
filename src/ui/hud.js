@@ -29,6 +29,7 @@ export class Hud {
             <li>👆 ${isTouch ? 'Tik' : 'Klik'} op de grond: loop erheen</li>
             <li>👕 Kledingkast: <b>${isTouch ? 'knop 👕' : 'K'}</b></li>
             <li>💃 Dansen: <b>${isTouch ? 'knop Dans' : 'M'}</b>${isTouch ? '' : ' (lang = dansmenu)'}</li>
+            <li>🚲 Op- en afstappen: <b>${isTouch ? 'knop 🚲' : 'V'}</b></li>
           </ul>
         </div>
       </div>

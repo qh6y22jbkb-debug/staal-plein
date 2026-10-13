@@ -522,6 +522,32 @@ export const KLEURKIEZER_KLEUREN = [
 ];
 
 /*
+ * Vervoersmiddelen (toets V, of de knop 🚲 op een touchscreen). Alleen op het schoolplein.
+ * prijs = aantal munten, snelheid = hoeveel keer zo snel als lopen, kleurbaar = kleurkiezer in de kledingkast.
+ */
+export const VERVOER = [
+  { id: 'step', naam: 'Step', icoon: '🛴', prijs: 80, kleur: 0x1c7ed6, snelheid: 1.8, kleurbaar: true },
+  { id: 'skateboard', naam: 'Skateboard', icoon: '🛹', prijs: 150, kleur: 0xe8590c, snelheid: 1.9, kleurbaar: false },
+  { id: 'fiets', naam: 'Fiets', icoon: '🚲', prijs: 250, kleur: 0xe03131, snelheid: 2.1, kleurbaar: true },
+];
+
+export const VERVOER_TEKSTEN = {
+  knop: 'Rijden',
+  winkelUitleg: 'Op- en afstappen doe je met V (of de knop 🚲). Rijden kan alleen op het schoolplein.',
+  gekocht: 'Je hebt nu een {naam}! Op het schoolplein stap je op met V (of de knop 🚲).',
+  kiezen: 'Gebruiken',
+  gekozen: '✓ In gebruik',
+  bekijk: 'Bekijk',
+  kastKop: '🚲 Vervoer',
+  kastUitleg: 'Kies waarmee je rijdt. Fiets en step kun je een andere kleur geven.',
+  geenVervoer: 'Je hebt nog geen vervoer. Koop een step, skateboard of fiets in De Bunders Boetiek!',
+  opgestapt: '{icoon} Op je {naam}! Druk op V om af te stappen.',
+  afgestapt: 'Je stapt af.',
+  afgestaptKraam: 'Je stapt af, zodat je kunt praten.',
+  nietHier: 'Rijden kan alleen op het schoolplein.',
+};
+
+/*
  * Dansjes (toets M, of de knop "Dans" op een touchscreen). De moonwalk is gratis;
  * de andere koop je in De Bunders Boetiek bij "Dansjes". prijs = aantal munten.
  */
@@ -551,7 +577,7 @@ export const WINKEL = {
   verkoper: 'Bo Boetiek',
   welkom: 'Welkom bij De Bunders Boetiek! Ik ben Bo. Kijk maar rond en pas gerust iets aan!',
   tabKleding: 'Kleding',
-  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal', dansjes: '💃 Dansjes' },
+  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal', dansjes: '💃 Dansjes', vervoer: '🚲 Vervoer' },
   vereistBeker: '🔒 Win eerst de Bunders Beker',
   vereistRekenkaart: '🔒 Haal eerst de hele Rekenkaart op Goud',
   openToets: 'Druk op E om de winkel te openen',

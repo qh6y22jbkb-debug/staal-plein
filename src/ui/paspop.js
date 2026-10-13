@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Speler } from '../speler.js';
 import { trekAan } from '../kleding.js';
 import { danshouding, zetHoudingTerug } from '../dansjes.js';
+import { maakVervoerModel, rijhouding, OPHOOGTE } from '../vervoer.js';
 
 /**
  * Een draaiend poppetje in een klein venster (winkel en kledingkast).
@@ -61,6 +62,13 @@ export class Paspop {
         this.dansje.t += dt;
         if (this.dansje.t > 3.5) { this.dansje = null; zetHoudingTerug(this.pop); }
         else danshouding(this.pop, this.dansje.id, this.dansje.t, this.hoek);
+      } else if (this.vervoer) {
+        // Op een vervoersmiddel (winkel "Bekijk" en kledingkast): doen alsof je rijdt.
+        const v = this.vervoer;
+        v.fase += dt * 5;
+        for (const w of v.model.userData.wielen) w.rotation.x += dt * (v.id === 'fiets' ? 9 : 30);
+        if (v.model.userData.trapper) v.model.userData.trapper.rotation.x = v.fase;
+        rijhouding(this.pop, v.id, v.fase, 0.6);
       }
       this.renderer.render(this.scene, this.camera);
       requestAnimationFrame(stap);
@@ -79,6 +87,25 @@ export class Paspop {
   dans(id) {
     this.dansje = { id, t: 0 };
   }
+
+  /** Op een vervoersmiddel zetten (null = er weer af). */
+  toonVervoer(id, kleur) {
+    if (this.vervoer) {
+      this.vervoer.model.parent?.remove(this.vervoer.model);
+      this.vervoer.model.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
+      this.vervoer = null;
+      zetHoudingTerug(this.pop);
+      this.pop.model.position.y = 0;
+      for (const been of this.pop.benen) been.position.y = 0.75;
+    }
+    if (!id) return;
+    const model = maakVervoerModel(id, kleur);
+    model.position.y = -(OPHOOGTE[id] ?? 0);
+    this.pop.model.add(model);
+    this.vervoer = { id, model, fase: 0 };
+  }
+
+  get vervoerId() { return this.vervoer?.id ?? null; }
 
   kleed(uitrusting) {
     trekAan(this.pop, uitrusting);

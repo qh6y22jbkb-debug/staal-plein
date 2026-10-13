@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DANS_TEKSTEN } from './data/oefeningen.js';
+import { DANS_TEKSTEN, VERVOER_TEKSTEN } from './data/oefeningen.js';
 
 const TOETSEN = {
   vooruit: ['KeyW', 'ArrowUp'],
@@ -58,6 +58,7 @@ export class Besturing {
     if (e.code === 'KeyK' && !e.repeat && this.opKast) this.opKast();
     // Dansen: M indrukken = dansen (zolang je M vasthoudt); M + cijfer = ander dansje kiezen.
     if (e.code === 'KeyM' && !e.repeat) this.opDans?.('omlaag');
+    if (e.code === 'KeyV' && !e.repeat) this.opVervoer?.(); // op- of afstappen
     const cijfer = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);
     if (cijfer && this.ingedrukt.has('KeyM')) this.opDansKeuze?.(Number(cijfer[1]) - 1);
   }
@@ -176,6 +177,13 @@ export class Besturing {
     dans.addEventListener('pointercancel', () => { clearTimeout(langTimer); langTimer = null; });
     uiLaag.appendChild(dans);
     this.dansKnop = dans;
+
+    // Knop 🚲: op- of afstappen (alleen te zien als je vervoer hebt).
+    const rij = document.createElement('button');
+    rij.className = 'rijknop';
+    rij.innerHTML = `<span aria-hidden="true">🚲</span>${VERVOER_TEKSTEN.knop}`;
+    rij.addEventListener('pointerdown', (e) => { e.preventDefault(); if (this.aan) this.opVervoer?.(); });
+    uiLaag.appendChild(rij);
   }
 
   /**

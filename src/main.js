@@ -7,6 +7,7 @@ import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } fro
 import { Rekenkaart } from './ui/rekenkaart.js';
 import { Dansen, dansbezit } from './dansjes.js';
 import { Dansmenu } from './ui/dansmenu.js';
+import { Rijden, vervoerbezit, vervoerMetId } from './vervoer.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
@@ -21,7 +22,7 @@ import { Leesvenster, LeesMelding } from './ui/leesvenster.js';
 import { SchoolSlot } from './ui/schoolslot.js';
 import { kledingkast } from './kledingkast.js';
 import { trekAan } from './kleding.js';
-import { TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST, LEERKRACHT, KLEDING, VOETBAL_TEAMS } from './data/oefeningen.js';
+import { VERVOER_TEKSTEN, TEKSTEN, MUNTEN, MUNT_TEKSTEN, WINKEL, MEESTER_VRAAG, VOETBAL, TEST, LEERKRACHT, KLEDING, VOETBAL_TEAMS } from './data/oefeningen.js';
 import { startMinispel } from './minispellen/index.js';
 import { Kinderen } from './kinderen.js';
 import { Meesters } from './meesters.js';
@@ -120,11 +121,39 @@ function verdienGymtijd() {
   return `<br>${tekst}`;
 }
 
+/* ---------- Vervoer (V, of de knop 🚲): alleen op het schoolplein ---------- */
+const rijden = new Rijden(speler);
+function werkVervoerKlassenBij() {
+  document.body.classList.toggle('heeft-vervoer', vervoerbezit.gekocht.length > 0);
+  document.body.classList.toggle('op-vervoer', rijden.actief);
+}
+function stapAf(tekst) {
+  if (!rijden.afstappen()) return;
+  werkVervoerKlassenBij();
+  if (tekst) hud.toonMelding(tekst);
+}
+besturing.opVervoer = () => {
+  if (rijden.actief) { stapAf(VERVOER_TEKSTEN.afgestapt); return; }
+  if (!besturing.aan || dialoog.open || actiefSpel || actiefVenster || bezigMetWisselen) return;
+  if (binnen || voetbal) { hud.toonMelding(VERVOER_TEKSTEN.nietHier); return; }
+  if (!vervoerbezit.gekozen) { hud.toonMelding(VERVOER_TEKSTEN.geenVervoer); return; }
+  dansen.stop();
+  if (rijden.opstappen()) {
+    const v = vervoerMetId(rijden.id);
+    hud.toonMelding(VERVOER_TEKSTEN.opgestapt.replace('{icoon}', v.icoon).replace('{naam}', v.naam.toLowerCase()));
+    geluid.plop();
+  }
+  werkVervoerKlassenBij();
+};
+// Andere keuze of kleur in de kledingkast: meteen zichtbaar als je erop staat.
+vervoerbezit.opVerandering(() => { rijden.ververs(); werkVervoerKlassenBij(); });
+werkVervoerKlassenBij();
+
 /* ---------- Dansjes (M, of de knop Dans) ---------- */
 const dansen = new Dansen(speler);
 const dansmenu = new Dansmenu(uiLaag, { isTouch: besturing.isTouch });
 let dansMenuTimer = null;
-const magDansen = () => besturing.aan && !voetbal && !actiefSpel && !actiefVenster && !dialoog.open && !bezigMetWisselen && !startOpen && !binnen?.bezig && !binnen?.vastBal;
+const magDansen = () => !rijden.actief && besturing.aan && !voetbal && !actiefSpel && !actiefVenster && !dialoog.open && !bezigMetWisselen && !startOpen && !binnen?.bezig && !binnen?.vastBal;
 besturing.opDans = (wat) => {
   if (wat === 'omlaag') {
     if (!magDansen()) return;
@@ -431,6 +460,8 @@ let bezigMetWisselen = false;
 
 async function naarVoetbal() {
   if (bezigMetWisselen || voetbal) return;
+  stapAf(); // door de poort: afstappen
+  dansen.stop();
   bezigMetWisselen = true;
   besturing.aan = false;
   besturing.doel = null;
@@ -522,6 +553,7 @@ function probeerNaarBinnen() {
 async function naarBinnen(soort = 'school') {
   if (bezigMetWisselen || binnen || voetbal) return;
   dansen.stop();
+  stapAf(); // in een gebouw rijd je niet
   bezigMetWisselen = true;
   besturing.aan = false;
   besturing.doel = null;
@@ -653,6 +685,8 @@ hud.opOpnieuw = () => {
   kledingkast.wis();
   dansbezit.wis();
   dansen.stop();
+  stapAf();
+  vervoerbezit.wis();
   gymtijd.wis();
   meesters.wis();
   wisSpelOpslag();
@@ -797,6 +831,7 @@ function frame() {
   // Dicht bij een kraam of een kind? Dan verschijnt het tekstwolkje.
   if (!dialoog.open && besturing.aan) {
     dichtsteKraam = zoekDichtsteKraam();
+    if (dichtsteKraam && rijden.actief) stapAf(VERVOER_TEKSTEN.afgestaptKraam); // bij een kraam stap je af om te praten
     dichtsteKind = kinderen.dichtsteBij(speler.positie, KIND_PRAATAFSTAND);
     dichtsteMeester = meesters.dichtsteBij(speler.positie, MEESTER_PRAATAFSTAND);
     // Wie staat het dichtst bij: de kraam, een meester of een kind? Alleen die blijft over.
@@ -875,7 +910,9 @@ function beweegSpeler(dt, bots) {
     beweging = naarDoel(besturing.doel);
   }
 
-  const afgelegd = speler.update(dt, beweging, besturing.neemSprong(), bots, { draaiMee: !invoer.actief });
+  const sprong = besturing.neemSprong() && !rijden.actief; // op een vervoersmiddel spring je niet
+  const afgelegd = speler.update(dt, beweging, sprong, bots, { draaiMee: !invoer.actief });
+  rijden.update(dt);
   if (!achteruit && (afgelegd > 0.002 || invoer.draai)) {
     volgCam.volgAchter(speler.richting + Math.PI, dt, invoer.draai ? 5 : 2.5);
   }
@@ -955,6 +992,7 @@ function speelAllesVrij() {
   rekenkaart.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
   dansbezit.geefAlles();
+  vervoerbezit.geefAlles();
   gymtijd.vul();
   voetbal?.bord?.teken();
   hud.toonMelding(LEERKRACHT.melding);
@@ -1026,4 +1064,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

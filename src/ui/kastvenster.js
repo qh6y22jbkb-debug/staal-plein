@@ -1,4 +1,5 @@
-import { WINKEL } from '../data/oefeningen.js';
+import { WINKEL, VERVOER_TEKSTEN } from '../data/oefeningen.js';
+import { vervoerbezit } from '../vervoer.js';
 import { CATEGORIEEN, itemMetId } from '../kleding.js';
 import { kledingkast } from '../kledingkast.js';
 import { Paspop } from './paspop.js';
@@ -54,7 +55,7 @@ export class Kastvenster {
     const lijst = this.el.querySelector('.kast-lijst');
     const uitleg = this.el.querySelector('.kast-uitleg');
     const gekocht = kledingkast.gekocht.map(itemMetId).filter(Boolean);
-    if (!gekocht.length) {
+    if (!gekocht.length && !vervoerbezit.gekocht.length) {
       uitleg.textContent = '';
       lijst.innerHTML = `<p class="wk-binnenkort">👕 ${WINKEL.kastLeeg}</p>`;
       return;
@@ -107,6 +108,54 @@ export class Kastvenster {
       rij.appendChild(vakken);
       lijst.appendChild(rij);
     }
+    this.tekenVervoer(lijst);
+  }
+
+  /** Vervoer: kies waarmee je rijdt. Fiets en step krijgen een kleurkiezer. */
+  tekenVervoer(lijst) {
+    const alles = vervoerbezit.gekocht;
+    if (!alles.length) return;
+    const rij = document.createElement('div');
+    rij.className = 'kast-rij';
+    rij.innerHTML = `<h3>${VERVOER_TEKSTEN.kastKop}</h3><p class="kast-vervoer-uitleg">${VERVOER_TEKSTEN.kastUitleg}</p>`;
+    const vakken = document.createElement('div');
+    vakken.className = 'kast-vakken';
+    for (const v of alles) {
+      const gekozen = vervoerbezit.gekozen === v.id;
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = `kast-item${gekozen ? ' aan' : ''}`;
+      knop.innerHTML = `<span class="wk-icoon" style="--kleur:${hex(vervoerbezit.kleurVan(v.id))}">${v.icoon}</span><span>${v.naam}</span><small>${gekozen ? VERVOER_TEKSTEN.gekozen : VERVOER_TEKSTEN.kiezen}</small>`;
+      knop.addEventListener('click', () => {
+        vervoerbezit.kies(v.id);
+        this.paspop.toonVervoer(v.id, vervoerbezit.kleurVan(v.id));
+        this.geluid?.plop();
+        this.teken();
+      });
+      if (!v.kleurbaar) { vakken.appendChild(knop); continue; }
+      const blok = document.createElement('div');
+      blok.className = 'kast-shirt';
+      blok.appendChild(knop);
+      blok.appendChild(maakKleurkiezer({
+        huidige: vervoerbezit.heeftEigenKleur(v.id) ? vervoerbezit.kleurVan(v.id) : null,
+        label: `Kleur van je ${v.naam.toLowerCase()}`,
+        opKies: (kleur) => {
+          vervoerbezit.zetKleur(v.id, kleur);
+          vervoerbezit.kies(v.id);
+          this.paspop.toonVervoer(v.id, vervoerbezit.kleurVan(v.id));
+          this.geluid?.plop();
+          knop.querySelector('.wk-icoon').style.setProperty('--kleur', hex(vervoerbezit.kleurVan(v.id)));
+          for (const ander of vakken.querySelectorAll('.kast-item')) {
+            const isDeze = ander === knop;
+            ander.classList.toggle('aan', isDeze);
+            ander.querySelector('small').textContent = isDeze ? VERVOER_TEKSTEN.gekozen : VERVOER_TEKSTEN.kiezen;
+          }
+        },
+      }));
+      vakken.appendChild(blok);
+    }
+    rij.appendChild(vakken);
+    lijst.appendChild(rij);
   }
 
   sluit() {
