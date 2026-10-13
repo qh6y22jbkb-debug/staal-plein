@@ -161,7 +161,7 @@ export class Leergroep3 {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xe7edf1);
     this.botsing = new Botsing(BINNEN_GRENZEN);
-    this.blokkers = []; // binnen botst de camera nergens tegen (plafonds en muren laten haar door)
+    this.blokkers = []; // muren waar de camera niet doorheen mag: komt ze dichtbij, dan schuift ze naar voren
     this.kramen = [];
     this.eigenMaterialen = new Set();
 
@@ -203,7 +203,9 @@ export class Leergroep3 {
   muur(x1, z1, x2, z2, h, kleur, y0 = 0) {
     const b = Math.max(Math.abs(x2 - x1), DIK), d = Math.max(Math.abs(z2 - z1), DIK);
     const mesh = doos(b, h, d, kleur, (x1 + x2) / 2, y0 + h / 2, (z1 + z2) / 2, this.groep);
-    if (y0 < 1) this.botsing.voegDoosToe((x1 + x2) / 2 - b / 2, (x1 + x2) / 2 + b / 2, (z1 + z2) / 2 - d / 2, (z1 + z2) / 2 + d / 2, y0 + h);
+    // Massief: je kunt er niet op staan en er nooit overheen springen (ook niet vanaf een kast).
+    if (y0 < 1) this.botsing.voegDoosToe((x1 + x2) / 2 - b / 2, (x1 + x2) / 2 + b / 2, (z1 + z2) / 2 - d / 2, (z1 + z2) / 2 + d / 2, y0 + h, { massief: true });
+    if (h >= 2) this.blokkers.push(mesh); // de camera kijkt niet door hoge muren
     return mesh;
   }
 
@@ -218,10 +220,18 @@ export class Leergroep3 {
     const draai = { '+z': 0, '-z': Math.PI, '+x': Math.PI / 2, '-x': -Math.PI / 2 }[naarBinnen];
     const nx = Math.sin(draai), nz = Math.cos(draai);
     this.wandVlak((x1 + x2) / 2 + nx * (DIK / 2 + 0.01), y0 + h / 2, (z1 + z2) / 2 + nz * (DIK / 2 + 0.01), lengte, h, draai, kleur);
-    if (y0 < 1) {
-      const b = langsX ? lengte : DIK, d = langsX ? DIK : lengte;
-      const cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
-      this.botsing.voegDoosToe(cx - b / 2, cx + b / 2, cz - d / 2, cz + d / 2, y0 + h);
+    const b = langsX ? lengte : DIK, d = langsX ? DIK : lengte;
+    const cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
+    if (y0 < 1) this.botsing.voegDoosToe(cx - b / 2, cx + b / 2, cz - d / 2, cz + d / 2, y0 + h, { massief: true });
+    // Onzichtbaar blok voor de camera (het zichtbare vlak laat haar van buiten door).
+    // Extra hoog, zodat de camera ook niet boven de buitenmuur uit naar buiten gaat.
+    if (h >= 2) {
+      const hoog = Math.max(h, 12);
+      const blok = new THREE.Mesh(new THREE.BoxGeometry(b, hoog, d), mat(0xffffff));
+      blok.position.set(cx, y0 + hoog / 2, cz);
+      blok.visible = false;
+      this.groep.add(blok);
+      this.blokkers.push(blok);
     }
   }
 
@@ -396,7 +406,7 @@ export class Leergroep3 {
 
     // Vier tafelgroepjes in de hoeken; in het midden staat de kraam.
     for (const dx of [3.4, -3.0]) {
-      for (const dz of [-3.3, 3.3]) this.tafelgroep(xc - kant * dx, zc + dz);
+      for (const dz of [-2.9, 2.9]) this.tafelgroep(xc - kant * dx, zc + dz); // ruim 1 m tot de muur: nergens klem
     }
     // Lage kast tegen de achtermuur, en een kast bij de deur.
     this.kast(buitenX - kant * 0.4, zc, kant > 0 ? -Math.PI / 2 : Math.PI / 2, { soort: 'bakken', breed: 2.4 });
@@ -412,6 +422,20 @@ export class Leergroep3 {
     this.buitenMuur(-rand, zZ, -DEUR / 2, zZ, MUURH, KLEUR.muur, '-z');
     this.buitenMuur(DEUR / 2, zZ, rand, zZ, MUURH, KLEUR.muur, '-z');
     this.buitenMuur(-DEUR / 2, zZ, DEUR / 2, zZ, MUURH - 2.4, KLEUR.muur, '-z', 2.4);
+    // Naast de ingang is het buiten: daar mag de camera ook niet komen (onzichtbare blokken).
+    for (const kant of [-1, 1]) {
+      const hoek = new THREE.Mesh(new THREE.BoxGeometry(BINNEN_GRENZEN.maxX - rand + 2, 12, zZ - zN + 2), mat(0xffffff));
+      hoek.position.set(kant * (rand + (BINNEN_GRENZEN.maxX - rand + 2) / 2), 6, (zN + zZ) / 2 + 1);
+      hoek.visible = false;
+      this.groep.add(hoek);
+      this.blokkers.push(hoek);
+    }
+    // De camera gaat ook niet door de deuropening naar buiten (onzichtbaar blok, alleen voor de camera).
+    const deurBlok = new THREE.Mesh(new THREE.BoxGeometry(DEUR, 12, DIK), mat(0xffffff));
+    deurBlok.position.set(0, 6, zZ + 0.2);
+    deurBlok.visible = false;
+    this.groep.add(deurBlok);
+    this.blokkers.push(deurBlok);
     // Blauwe achterwand van de nissen tegen de lokalen aan.
     for (const kant of [-1, 1]) this.wandVlak(kant * (HAL + rand) / 2, MUURH / 2, zN + DIK / 2 + 0.02, rand - HAL, MUURH, 0, KLEUR.blauw);
     this.plafond(0, (zN + zZ) / 2, rand * 2, zZ - zN, MUURH, this.m({ map: tegelTextuur() }), [rand * 2 / 1.2, (zZ - zN) / 1.2]);
@@ -538,7 +562,7 @@ export class Leergroep3 {
     // Botsing (de kast staat recht of een kwartslag gedraaid).
     const dwars = Math.abs(Math.sin(draai)) > 0.5;
     const hb = (dwars ? diep : breed) / 2, hd = (dwars ? breed : diep) / 2;
-    this.botsing.voegDoosToe(x - hb, x + hb, z - hd, z + hd, hoog);
+    this.botsing.voegDoosToe(x - hb, x + hb, z - hd, z + hd, hoog, { massief: true });
   }
 
   verfkast(x, z, draai) {
@@ -553,7 +577,7 @@ export class Leergroep3 {
       doos(1.5, 0.03, 0.4, KLEUR.houtRand, 0, y - 0.02, 0, g);
       for (let i = 0; i < 6; i++) cilinder(0.06, 0.26, verf[(i + Math.round(y * 3)) % 6], -0.6 + i * 0.24, y + 0.13, 0.05, g, 8).castShadow = false;
     }
-    this.botsing.voegDoosToe(x - 0.25, x + 0.25, z - 0.8, z + 0.8, 1.8);
+    this.botsing.voegDoosToe(x - 0.25, x + 0.25, z - 0.8, z + 0.8, 1.8, { massief: true });
   }
 
   ladekast(x, z, draai) {
@@ -566,7 +590,7 @@ export class Leergroep3 {
       doos(0.7, 0.17, 0.03, KLEUR.houtRand, 0, 0.17 + r * 0.2, 0.26, g);
       doos(0.12, 0.03, 0.03, 0x8a6a3c, 0, 0.17 + r * 0.2, 0.28, g);
     }
-    this.botsing.voegDoosToe(x - 0.25, x + 0.25, z - 0.4, z + 0.4, 1.3);
+    this.botsing.voegDoosToe(x - 0.25, x + 0.25, z - 0.4, z + 0.4, 1.3, { massief: true });
   }
 
   /** Tafel: b = breedte in x, d = diepte in z. */
@@ -575,7 +599,7 @@ export class Leergroep3 {
     for (const dx of [-1, 1]) {
       for (const dz of [-1, 1]) cilinder(0.025, 0.72, KLEUR.poot, x + dx * (b / 2 - 0.06), 0.36, z + dz * (d / 2 - 0.06), this.groep, 6);
     }
-    this.botsing.voegDoosToe(x - b / 2, x + b / 2, z - d / 2, z + d / 2, 0.77);
+    this.botsing.voegDoosToe(x - b / 2, x + b / 2, z - d / 2, z + d / 2, 0.77, { massief: true });
   }
 
   /** Oranje schoolstoeltje. draai = waar de zitting naartoe kijkt. */

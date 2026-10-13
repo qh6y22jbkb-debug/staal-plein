@@ -132,9 +132,10 @@ export class Speler {
     const oudX = pos.x, oudZ = pos.z;
     const sterkte = Math.min(1, Math.hypot(beweging.x, beweging.z));
 
+    let dx = 0, dz = 0;
     if (sterkte > 0.05) {
-      pos.x += beweging.x * this.uiterlijk.snelheid * dt;
-      pos.z += beweging.z * this.uiterlijk.snelheid * dt;
+      dx = beweging.x * this.uiterlijk.snelheid * dt;
+      dz = beweging.z * this.uiterlijk.snelheid * dt;
       if (draaiMee) {
         // Draai in de looprichting (bij klikken op de grond of bij de kinderen).
         const doelRichting = Math.atan2(beweging.x, beweging.z);
@@ -149,7 +150,15 @@ export class Speler {
       this.opGrond = false;
     }
 
-    const grond = botsing.losOp(pos, SPELER_STRAAL, STAPHOOGTE);
+    // In kleine stapjes bewegen en steeds de botsing narekenen: zo schiet je nooit door een dunne muur,
+    // ook niet als het beeld hapert (grote dt) of als je snel gaat.
+    const stapjes = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.12));
+    let grond = 0;
+    for (let i = 0; i < stapjes; i++) {
+      pos.x += dx / stapjes;
+      pos.z += dz / stapjes;
+      grond = botsing.losOp(pos, SPELER_STRAAL, STAPHOOGTE);
+    }
     this.vy -= ZWAARTEKRACHT * dt;
     pos.y += this.vy * dt;
     if (pos.y <= grond) {

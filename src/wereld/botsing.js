@@ -1,10 +1,14 @@
 import * as THREE from 'three';
 
 /**
- * Eenvoudige botsingen op het plein.
+ * Eenvoudige botsingen (plein, Leergroep 3, Voetbalwereld, ...).
  * - Dozen (rechthoeken van bovenaf) en cirkels, elk met een hoogte ('top').
- * - Lage dingen (lager dan de staphoogte) kun je op stappen; op hogere dingen kun je springen.
+ * - Lage dingen (lager dan de staphoogte) kun je op stappen; op wat hogere dingen kun je springen
+ *   (bijv. de klimtoren en het hutje op het plein).
+ * - MASSIEF (muren, kasten, grote meubels, en alles vanaf 2 meter hoog): daar kun je nooit op staan
+ *   en nooit overheen springen, hoe hoog je ook springt. Een sprong komt maximaal ±1,8 m hoog.
  */
+export const MASSIEF_VANAF = 2; // meter: alles wat zo hoog of hoger is, is automatisch massief
 export class Botsing {
   constructor(grenzen) {
     this.grenzen = grenzen; // { minX, maxX, minZ, maxZ }
@@ -13,19 +17,20 @@ export class Botsing {
     this._box = new THREE.Box3();
   }
 
-  voegDoosToe(minX, maxX, minZ, maxZ, top) {
-    this.dozen.push({ minX, maxX, minZ, maxZ, top });
+  /** @param opties { massief } — true = er nooit op of overheen (standaard: vanaf MASSIEF_VANAF meter hoog) */
+  voegDoosToe(minX, maxX, minZ, maxZ, top, { massief } = {}) {
+    this.dozen.push({ minX, maxX, minZ, maxZ, top, massief: massief ?? top >= MASSIEF_VANAF });
   }
 
   /** Neemt de omhullende doos van een 3D-object over. */
-  voegObjectToe(object, marge = 0, top) {
+  voegObjectToe(object, marge = 0, top, opties) {
     object.updateWorldMatrix(true, true);
     const b = this._box.setFromObject(object);
-    this.voegDoosToe(b.min.x - marge, b.max.x + marge, b.min.z - marge, b.max.z + marge, top ?? b.max.y);
+    this.voegDoosToe(b.min.x - marge, b.max.x + marge, b.min.z - marge, b.max.z + marge, top ?? b.max.y, opties);
   }
 
-  voegCirkelToe(x, z, r, top) {
-    this.cirkels.push({ x, z, r, top });
+  voegCirkelToe(x, z, r, top, { massief } = {}) {
+    this.cirkels.push({ x, z, r, top, massief: massief ?? top >= MASSIEF_VANAF });
   }
 
   /** Is er op deze plek ruimte (geen obstakel hoger dan een stapje)? */
@@ -45,9 +50,9 @@ export class Botsing {
 
   /** Duwt de speler uit obstakels en geeft de grondhoogte onder de speler terug. */
   losOp(pos, straal, stap) {
-    for (let ronde = 0; ronde < 2; ronde++) {
+    for (let ronde = 0; ronde < 4; ronde++) { // een paar rondes: ook tussen twee dingen in klopt het dan
       for (const d of this.dozen) {
-        if (pos.y >= d.top - stap) continue;
+        if (!d.massief && pos.y >= d.top - stap) continue; // massief: altijd tegenhouden, ook in de lucht
         const px = Math.max(d.minX, Math.min(pos.x, d.maxX));
         const pz = Math.max(d.minZ, Math.min(pos.z, d.maxZ));
         let dx = pos.x - px, dz = pos.z - pz;
@@ -67,7 +72,7 @@ export class Botsing {
         }
       }
       for (const c of this.cirkels) {
-        if (pos.y >= c.top - stap) continue;
+        if (!c.massief && pos.y >= c.top - stap) continue;
         const dx = pos.x - c.x, dz = pos.z - c.z;
         const afst = Math.hypot(dx, dz);
         const min = c.r + straal;
@@ -86,13 +91,13 @@ export class Botsing {
     let grond = 0;
     const r = straal * 0.5;
     for (const d of this.dozen) {
-      if (d.top > pos.y + stap) continue;
+      if (d.massief || d.top > pos.y + stap) continue; // op iets massiefs kun je nooit staan
       if (pos.x > d.minX - r && pos.x < d.maxX + r && pos.z > d.minZ - r && pos.z < d.maxZ + r) {
         grond = Math.max(grond, d.top);
       }
     }
     for (const c of this.cirkels) {
-      if (c.top > pos.y + stap) continue;
+      if (c.massief || c.top > pos.y + stap) continue;
       if (Math.hypot(pos.x - c.x, pos.z - c.z) < c.r + r) grond = Math.max(grond, c.top);
     }
     return grond;

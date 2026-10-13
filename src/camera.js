@@ -18,6 +18,17 @@ export class VolgCamera {
     this.meng = 0;
     this.handmatig = 0;
     this.kijk = new THREE.Vector3();
+    this.ontwijk = 0; // extra schuinte als er vlak achter de speler een muur staat
+  }
+
+  /** Hoe ver kan de camera naar achteren bij deze schuinte, voordat ze een muur raakt? */
+  vrijeAfstand(pitch, richting) {
+    const cp = Math.cos(pitch);
+    richting.set(Math.sin(this.yaw) * cp, Math.sin(pitch), Math.cos(this.yaw) * cp);
+    this.raycaster.set(this.focus, richting);
+    this.raycaster.far = this.afstand;
+    const raak = this.blokkers.length ? this.raycaster.intersectObjects(this.blokkers, true)[0] : null;
+    return raak ? raak.distance - 0.35 : this.afstand;
   }
 
   /** Draait de camera rustig naar een bepaalde kijkrichting (bijv. bij een gesprek). */
@@ -70,15 +81,22 @@ export class VolgCamera {
       if (Math.abs(this.doelPitch - this.pitch) < 0.002) this.doelPitch = null;
     }
 
-    const cp = Math.cos(this.pitch);
-    this.richting.set(Math.sin(this.yaw) * cp, Math.sin(this.pitch), Math.cos(this.yaw) * cp);
-
     // Zit er een muur tussen speler en camera? Dan komt de camera dichterbij.
-    let max = this.afstand;
-    this.raycaster.set(this.focus, this.richting);
-    this.raycaster.far = this.afstand;
-    const raak = this.raycaster.intersectObjects(this.blokkers, true)[0];
-    if (raak) max = Math.max(1.2, raak.distance - 0.4);
+    // Staat de muur vlak achter de speler, dan kijkt de camera meer van boven (over de speler heen),
+    // zodat ze nooit door de muur hoeft te kijken.
+    const PRETTIG = Math.min(4.5, this.afstand); // zoveel ruimte wil de camera minstens achter de speler
+    let doelOntwijk = 0;
+    if (this.vrijeAfstand(this.pitch, this.richting) < PRETTIG - 0.5) {
+      let beste = -1;
+      for (const extra of [0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05]) {
+        const p = Math.min(1.45, this.pitch + extra);
+        const vrij = this.vrijeAfstand(p, this.richting);
+        if (vrij > beste + 0.3) { beste = vrij; doelOntwijk = p - this.pitch; }
+        if (vrij >= PRETTIG || p >= 1.45) break;
+      }
+    }
+    this.ontwijk += (doelOntwijk - this.ontwijk) * Math.min(1, dt * 6);
+    const max = Math.max(0.5, this.vrijeAfstand(this.pitch + this.ontwijk, this.richting));
 
     if (max < this.huidigeAfstand) this.huidigeAfstand = max; // meteen naar voren
     else this.huidigeAfstand += (max - this.huidigeAfstand) * Math.min(1, dt * 3);

@@ -251,7 +251,7 @@ function bouwFietsenhok(scene, botsing, blokkers) {
   for (let x = -3.6; x <= 3.6; x += 0.6) doos(0.08, 0.05, 5.4, 0xcfd3d6, x, 2.6, 0, g).rotation.x = 0.05;
   doos(0.6, 0.3, 0.05, KLEUR.blauw, 1.5, 1.9, 2.52, g); // bordje
   blokkers.push(hok, dak);
-  botsing.voegDoosToe(-39.2, -30.8, -22.2, -16.8, 2.6);
+  botsing.voegDoosToe(-41, -30.8, -22.2, -16.8, 2.6); // loopt door tot achter het hek: geen smal gangetje om in klem te raken
 }
 
 function fiets(ouder, x, z, kleur, draai) {
