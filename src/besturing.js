@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DANS_TEKSTEN } from './data/oefeningen.js';
 
 const TOETSEN = {
   vooruit: ['KeyW', 'ArrowUp'],
@@ -31,8 +32,11 @@ export class Besturing {
     this.muis = new THREE.Vector2();
 
     window.addEventListener('keydown', (e) => this.toetsOmlaag(e));
-    window.addEventListener('keyup', (e) => this.ingedrukt.delete(e.code));
-    window.addEventListener('blur', () => this.ingedrukt.clear());
+    window.addEventListener('keyup', (e) => {
+      this.ingedrukt.delete(e.code);
+      if (e.code === 'KeyM') this.opDans?.('omhoog');
+    });
+    window.addEventListener('blur', () => { this.ingedrukt.clear(); this.opDans?.('omhoog'); });
     this.koppelAanwijzer();
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -52,6 +56,10 @@ export class Besturing {
     if (e.code === 'Space' && !e.repeat) this.sprong = true;
     if (e.code === 'KeyE' && !e.repeat && this.opPraten) this.opPraten();
     if (e.code === 'KeyK' && !e.repeat && this.opKast) this.opKast();
+    // Dansen: M indrukken = dansen (zolang je M vasthoudt); M + cijfer = ander dansje kiezen.
+    if (e.code === 'KeyM' && !e.repeat) this.opDans?.('omlaag');
+    const cijfer = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);
+    if (cijfer && this.ingedrukt.has('KeyM')) this.opDansKeuze?.(Number(cijfer[1]) - 1);
   }
 
   koppelAanwijzer() {
@@ -146,6 +154,28 @@ export class Besturing {
     spring.textContent = 'Spring';
     spring.addEventListener('pointerdown', (e) => { e.preventDefault(); if (this.aan) this.sprong = true; });
     uiLaag.appendChild(spring);
+
+    // Knop "Dans": één tik = 3 seconden dansen, lang drukken = dansmenu.
+    const dans = document.createElement('button');
+    dans.className = 'dansknop';
+    dans.innerHTML = `<span aria-hidden="true">💃</span>${DANS_TEKSTEN.knop}`;
+    let langTimer = null, lang = false;
+    dans.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      lang = false;
+      clearTimeout(langTimer);
+      langTimer = setTimeout(() => { lang = true; this.opDansKnop?.('lang'); }, 500);
+    });
+    const los = (e) => {
+      e.preventDefault();
+      clearTimeout(langTimer);
+      if (langTimer && !lang && this.aan) this.opDansKnop?.('tik');
+      langTimer = null;
+    };
+    dans.addEventListener('pointerup', los);
+    dans.addEventListener('pointercancel', () => { clearTimeout(langTimer); langTimer = null; });
+    uiLaag.appendChild(dans);
+    this.dansKnop = dans;
   }
 
   /**

@@ -1,4 +1,5 @@
-import { KLEDING, WINKEL } from './data/oefeningen.js';
+import { KLEDING, WINKEL, DANSJES, DANS_TEKSTEN } from './data/oefeningen.js';
+import { dansbezit } from './dansjes.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { CATEGORIEEN, itemMetId } from './kleding.js';
 import { kledingkast } from './kledingkast.js';
@@ -68,7 +69,7 @@ export class Winkel {
 
   kiesTab(tab) {
     this.tab = tab;
-    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
+    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal', 'dansjes'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
     this.categorieEl.onclick = (e) => {
       const knop = e.target.closest('button[data-cat]');
       if (!knop) return;
@@ -80,6 +81,7 @@ export class Winkel {
 
   tekenItems() {
     if (this.tab !== 'kleding') return;
+    if (this.categorie === 'dansjes') { this.tekenDansjes(); return; }
     // Het knopje "Voetbal" toont de voetbalitems; de andere knopjes de gewone kleding.
     const items = this.categorie === 'voetbal'
       ? KLEDING.filter((k) => k.groep === 'voetbal')
@@ -115,6 +117,32 @@ export class Winkel {
         this.pasmelding.textContent = '';
         this.tekenItems();
       });
+      this.itemsEl.appendChild(kaart);
+    }
+  }
+
+  /** Tabblad Dansjes: bekijken (het poppetje doet het voor), kopen en kiezen. */
+  tekenDansjes() {
+    this.itemsEl.innerHTML = `<p class="wk-dans-uitleg">${DANS_TEKSTEN.winkelUitleg}</p>`;
+    for (const dans of DANSJES) {
+      const heeft = dansbezit.heeft(dans.id);
+      const gekozen = dansbezit.gekozen === dans.id;
+      const tekort = dans.prijs - munten.totaal;
+      const kaart = document.createElement('div');
+      kaart.className = `wk-item${heeft ? ' heeft' : ''}`;
+      kaart.innerHTML = `
+        <div class="wk-icoon" style="--kleur:#f783ac">${dans.icoon}</div>
+        <div class="wk-naam">${dans.naam}</div>
+        <div class="wk-prijs">${dans.prijs ? `<span class="munt klein" aria-hidden="true"></span> ${dans.prijs}` : DANS_TEKSTEN.gratis}</div>
+        <div class="wk-knoppen">
+          <button type="button" class="wk-pas">👀 ${DANS_TEKSTEN.bekijk}</button>
+          ${heeft
+            ? `<button type="button" class="wk-draag${gekozen ? ' aan' : ''}" ${gekozen ? 'disabled' : ''}>${gekozen ? DANS_TEKSTEN.gekozen : DANS_TEKSTEN.kiezen}</button>`
+            : `<button type="button" class="wk-koop" ${tekort > 0 ? 'disabled' : ''}>${tekort > 0 ? WINKEL.nogNodig.replace('{aantal}', tekort) : `🛒 ${WINKEL.kopen}`}</button>`}
+        </div>`;
+      kaart.querySelector('.wk-pas').addEventListener('click', () => { this.paspop.dans(dans.id); this.geluid?.plop(); });
+      kaart.querySelector('.wk-koop')?.addEventListener('click', () => this.vraagKopen({ ...dans, kleur: 0xf783ac, soort: 'dans' }));
+      kaart.querySelector('.wk-draag')?.addEventListener('click', () => { dansbezit.kies(dans.id); this.paspop.dans(dans.id); this.tekenItems(); });
       this.itemsEl.appendChild(kaart);
     }
   }
@@ -160,6 +188,16 @@ export class Winkel {
 
   koop(item) {
     if (!munten.geefUit(item.prijs)) return;
+    if (item.soort === 'dans') {
+      dansbezit.koop(item.id);
+      this.paspop.dans(item.id);
+      this.geluid?.klaar();
+      const tekst = DANS_TEKSTEN.gekocht.replace('{naam}', item.naam);
+      this.pasmelding.textContent = `🎉 ${tekst}`;
+      this.voorlezen?.zeg(tekst, { toonhoogte: 1.3 });
+      this.tekenItems();
+      return;
+    }
     kledingkast.koop(item.id);
     this.pasId = null;
     this.paspop.kleed(kledingkast.aan);

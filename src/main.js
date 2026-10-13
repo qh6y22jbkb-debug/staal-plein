@@ -3,6 +3,8 @@ import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
 import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
 import { Rekenkaart } from './ui/rekenkaart.js';
+import { Dansen, dansbezit } from './dansjes.js';
+import { Dansmenu } from './ui/dansmenu.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { Botsing } from './wereld/botsing.js';
 import { Speler } from './speler.js';
@@ -90,6 +92,41 @@ dialoog.opInstelling = () => hud.zetKnoppen();
 const kinderen = new Kinderen(scene, botsing, uiLaag, camera, voorlezen);
 const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) => [k.data.id, k.stijl.bord])));
 const rekenkaart = new Rekenkaart(uiLaag); // in Leergroep 3 zie je deze in plaats van de stempelkaart
+
+/* ---------- Dansjes (M, of de knop Dans) ---------- */
+const dansen = new Dansen(speler);
+const dansmenu = new Dansmenu(uiLaag, { isTouch: besturing.isTouch });
+let dansMenuTimer = null;
+const magDansen = () => besturing.aan && !voetbal && !actiefSpel && !actiefVenster && !dialoog.open && !bezigMetWisselen && !startOpen;
+besturing.opDans = (wat) => {
+  if (wat === 'omlaag') {
+    if (!magDansen()) return;
+    dansen.start(dansbezit.gekozen); // dansen zolang je M vasthoudt
+    clearTimeout(dansMenuTimer);
+    dansMenuTimer = setTimeout(() => { if (besturing.ingedrukt.has('KeyM') && dansen.actief) dansmenu.toon(); }, 700);
+  } else {
+    clearTimeout(dansMenuTimer);
+    dansmenu.verberg();
+    if (dansen.rest == null) dansen.stop(); // een dansje van de knop (3 seconden) loopt gewoon door
+  }
+};
+besturing.opDansKeuze = (n) => {
+  const id = dansmenu.dansBijCijfer(n);
+  if (!id || !dansen.actief) return;
+  dansbezit.kies(id);
+  dansen.start(id);
+  if (dansmenu.open) dansmenu.toon();
+};
+besturing.opDansKnop = (wat) => {
+  if (!magDansen()) return;
+  if (wat === 'tik') { dansmenu.verberg(); dansen.start(dansbezit.gekozen, 3); } // één tik: 3 seconden
+  else dansmenu.toon();
+};
+dansmenu.opKies = (id) => {
+  dansbezit.kies(id);
+  dansmenu.verberg();
+  if (magDansen()) dansen.start(id, besturing.ingedrukt.has('KeyM') ? null : 3);
+};
 const oorkonde = new Oorkonde(uiLaag);
 const vuurwerk = new Vuurwerk(scene, geluid);
 const muntenteller = new Muntenteller(geluid);
@@ -560,6 +597,8 @@ hud.opOpnieuw = () => {
   munten.wis();
   pleinMuntjes.wis();
   kledingkast.wis();
+  dansbezit.wis();
+  dansen.stop();
   meesters.wis();
   wisSpelOpslag();
   stempelkaart.ververs();
@@ -747,6 +786,17 @@ function beweegSpeler(dt, bots) {
   volgCam.draai(cam.x, cam.y);
   if (cam.zoom) volgCam.zoom(cam.zoom);
 
+  // Dansen: lopen staat even stil (alleen de moonwalk glijdt achteruit). Een dansje van de knop stopt als je gaat lopen.
+  if (dansen.actief && (!besturing.aan || (dansen.rest != null && besturing.beweging().actief))) { dansen.stop(); dansmenu.verberg(); }
+  if (dansen.actief) {
+    besturing.doel = null;
+    besturing.neemSprong();
+    speler.update(dt, dansen.beweging(), false, bots, { draaiMee: false });
+    dansen.update(dt);
+    doelRing.visible = false;
+    return;
+  }
+
   volgKind();
   // Toetsen/joystick: vooruit lopen en draaien. De camera draait vanzelf mee.
   const invoer = besturing.beweging();
@@ -830,6 +880,7 @@ function speelAllesVrij() {
   rekenvoortgang.zetKampioen();
   rekenkaart.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
+  dansbezit.geefAlles();
   voetbal?.bord?.teken();
   hud.toonMelding(LEERKRACHT.melding);
   geluid.klaar();
@@ -898,4 +949,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

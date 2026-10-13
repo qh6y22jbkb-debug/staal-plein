@@ -502,12 +502,37 @@ export const KLEDING = [
   { id: 'gouden-bal', categorie: 'extra', groep: 'voetbal', naam: 'Gouden bal', icoon: '⚽', kleur: 0xffc929, model: 'gouden-bal', prijs: 250, vereist: 'beker' },
 ];
 
+/*
+ * Dansjes (toets M, of de knop "Dans" op een touchscreen). De moonwalk is gratis;
+ * de andere koop je in De Bunders Boetiek bij "Dansjes". prijs = aantal munten.
+ */
+export const DANSJES = [
+  { id: 'moonwalk', naam: 'Moonwalk', icoon: '🕺', prijs: 0 },
+  { id: 'juichen', naam: 'Juichdansje', icoon: '🙌', prijs: 40 },
+  { id: 'robot', naam: 'Robotdans', icoon: '🤖', prijs: 60 },
+  { id: 'draaien', naam: 'Draaien op één been', icoon: '🩰', prijs: 80 },
+];
+
+export const DANS_TEKSTEN = {
+  knop: 'Dans',
+  menuTitel: 'Kies je dansje',
+  menuUitleg: 'Druk op een cijfer om te wisselen',
+  menuUitlegTouch: 'Tik op een dansje',
+  menuMeer: 'Meer dansjes koop je in De Bunders Boetiek!',
+  gratis: 'Gratis',
+  bekijk: 'Bekijk',
+  kiezen: 'Kiezen',
+  gekozen: '✓ Gekozen',
+  gekocht: 'Gekocht: {naam}! Druk op M om te dansen.',
+  winkelUitleg: 'Dansen doe je met M (lang ingedrukt = dansmenu), of met de knop Dans.',
+};
+
 export const WINKEL = {
   naam: 'De Bunders Boetiek',
   verkoper: 'Bo Boetiek',
   welkom: 'Welkom bij De Bunders Boetiek! Ik ben Bo. Kijk maar rond en pas gerust iets aan!',
   tabKleding: 'Kleding',
-  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal' },
+  categorieen: { hoofd: 'Hoofd', shirt: 'Shirt', broek: 'Broek', schoenen: 'Schoenen', extra: 'Extra', voetbal: '⚽ Voetbal', dansjes: '💃 Dansjes' },
   vereistBeker: '🔒 Win eerst de Bunders Beker',
   vereistRekenkaart: '🔒 Haal eerst de hele Rekenkaart op Goud',
   openToets: 'Druk op E om de winkel te openen',

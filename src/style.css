@@ -835,3 +835,32 @@ body.in-school .stempelkaart:not(.rekenkaart) { display: none; }
 @media (max-width: 700px), (max-height: 560px) {
   .rekenkaart .sk-sterren { font-size: 13px; }
 }
+
+/* ---------- Dansjes: knop en dansmenu ---------- */
+.dansknop {
+  position: absolute; right: 22px; bottom: 150px; width: 84px; height: 84px; border-radius: 50%;
+  font: inherit; font-weight: bold; font-size: 17px; color: #fff; background: #d6336c;
+  border: 4px solid #fff; box-shadow: 0 4px 0 rgba(0,0,0,.25); touch-action: none; user-select: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1;
+}
+.dansknop span { font-size: 28px; }
+.dansknop:active { transform: scale(.94); }
+body.in-gesprek .dansknop, body.venster-open .dansknop, body.in-voetbal .dansknop, body.start-open .dansknop { display: none; }
+.dansmenu {
+  position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(20px);
+  background: #fff; border: 4px solid #d6336c; border-radius: 20px; padding: 10px 14px 12px;
+  box-shadow: 0 6px 0 rgba(0,0,0,.2); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+  max-width: calc(100vw - 32px); z-index: 15;
+}
+.dansmenu.zichtbaar { opacity: 1; pointer-events: auto; transform: translateX(-50%); }
+.dm-titel { font-weight: bold; font-size: 18px; color: #d6336c; text-align: center; margin-bottom: 8px; }
+.dm-knoppen { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.dm-knoppen button {
+  font: inherit; font-weight: bold; font-size: 16px; cursor: pointer; color: var(--donker);
+  background: #fff0f6; border: 3px solid #f783ac; border-radius: 14px; padding: 6px 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dm-knoppen button.gekozen { background: #d6336c; color: #fff; border-color: #d6336c; }
+.dm-icoon { font-size: 22px; }
+.dm-uitleg { font-size: 14px; color: #868e96; text-align: center; margin-top: 8px; }
+.wk-dans-uitleg { grid-column: 1 / -1; margin: 0 0 4px; font-size: 16px; color: #5c6b7a; }

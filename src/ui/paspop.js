@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Speler } from '../speler.js';
 import { trekAan } from '../kleding.js';
+import { danshouding, zetHoudingTerug } from '../dansjes.js';
 
 /**
  * Een draaiend poppetje in een klein venster (winkel en kledingkast).
@@ -55,6 +56,12 @@ export class Paspop {
       if (this.slepen == null) this.hoek += dt * 0.7;
       this.pop.richting = this.hoek; // animeer() zet de draaiing van het model
       this.pop.animeer(dt, 0);
+      if (this.dansje) {
+        // Het poppetje doet een dansje voor (in de winkel bij "Bekijk").
+        this.dansje.t += dt;
+        if (this.dansje.t > 3.5) { this.dansje = null; zetHoudingTerug(this.pop); }
+        else danshouding(this.pop, this.dansje.id, this.dansje.t, this.hoek);
+      }
       this.renderer.render(this.scene, this.camera);
       requestAnimationFrame(stap);
     };
@@ -66,6 +73,11 @@ export class Paspop {
     this.renderer.setSize(b, h);
     this.camera.aspect = b / h;
     this.camera.updateProjectionMatrix();
+  }
+
+  /** Een dansje voordoen (3,5 seconde). */
+  dans(id) {
+    this.dansje = { id, t: 0 };
   }
 
   kleed(uitrusting) {
