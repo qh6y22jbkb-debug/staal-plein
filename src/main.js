@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
-import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR } from './wereld/schoolplein.js';
+import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR } from './wereld/schoolplein.js';
+import { GYM } from './data/gym.js';
 import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
 import { Rekenkaart } from './ui/rekenkaart.js';
 import { Dansen, dansbezit } from './dansjes.js';
@@ -97,7 +98,7 @@ const rekenkaart = new Rekenkaart(uiLaag); // in Leergroep 3 zie je deze in plaa
 const dansen = new Dansen(speler);
 const dansmenu = new Dansmenu(uiLaag, { isTouch: besturing.isTouch });
 let dansMenuTimer = null;
-const magDansen = () => besturing.aan && !voetbal && !actiefSpel && !actiefVenster && !dialoog.open && !bezigMetWisselen && !startOpen;
+const magDansen = () => besturing.aan && !voetbal && !actiefSpel && !actiefVenster && !dialoog.open && !bezigMetWisselen && !startOpen && !binnen?.bezig && !binnen?.vastBal;
 besturing.opDans = (wat) => {
   if (wat === 'omlaag') {
     if (!magDansen()) return;
@@ -457,14 +458,26 @@ async function naarPlein() {
   bezigMetWisselen = false;
 }
 
-/* ---------- Wisselen tussen schoolplein en Leergroep 3 (in de school) ---------- */
+/* ---------- Wisselen tussen schoolplein en een gebouw: Leergroep 3 (school) of de gymzaal ---------- */
 
-let binnen = null; // Leergroep 3 (alleen als je binnen bent)
+let binnen = null; // Leergroep 3 of de gymzaal (alleen als je binnen bent); binnen.soort = 'school' of 'gym'
 const pleinCamera = { pitch: 0.42, afstand: 10 };
 
 function isBijSchooldeur() {
   return Math.hypot(speler.positie.x - SCHOOLDEUR.x, speler.positie.z - SCHOOLDEUR.z) < 2.6;
 }
+
+function isBijGymdeur() {
+  return Math.hypot(speler.positie.x - GYMDEUR.x, speler.positie.z - GYMDEUR.z) < 2.4;
+}
+
+/* Per gebouw: titel, camera, welkomsttekst, deur buiten en waar je weer buiten komt. */
+const GEBOUWEN = {
+  school: { titel: LEERGROEP.naam, welkom: LEERGROEP.welkom, klasse: 'in-school', camera: { pitch: 0.78, afstand: 8.5 },
+    buiten: { x: SCHOOLDEUR.x, z: SCHOOLDEUR.z + 3.4, richting: 0 }, deurTekst: LEERGROEP },
+  gym: { titel: GYM.naam, welkom: GYM.welkom, klasse: 'in-gym', camera: { pitch: 0.6, afstand: 9 },
+    buiten: { x: GYMDEUR.x - 3, z: GYMDEUR.z, richting: -Math.PI / 2 }, deurTekst: GYM },
+};
 
 function zetSpelerIn(doelScene) {
   doelScene.add(speler.groep, doelRing);
@@ -480,8 +493,9 @@ function probeerNaarBinnen() {
   openVenster(schoolSlot);
 }
 
-async function naarBinnen() {
+async function naarBinnen(soort = 'school') {
   if (bezigMetWisselen || binnen || voetbal) return;
+  dansen.stop();
   bezigMetWisselen = true;
   besturing.aan = false;
   besturing.doel = null;
@@ -491,27 +505,37 @@ async function naarBinnen() {
   meesters.verbergBallon();
   geluid.woesj();
   await naarWit();
-  // Pas nu laden: Leergroep 3 wordt pas gebouwd als je naar binnen gaat. Het plein staat dan stil.
-  const { Leergroep3 } = await import('./binnen/leergroep3.js');
-  binnen = new Leergroep3();
+  // Pas nu laden: het gebouw wordt pas gebouwd als je naar binnen gaat. Het plein staat dan stil.
+  if (soort === 'gym') {
+    const { Gymzaal } = await import('./binnen/gymzaal.js');
+    binnen = new Gymzaal({
+      speler, besturing, geluid, uiLaag, isTouch: besturing.isTouch,
+      beloon: (a, v, l) => muntenteller.beloon(a, v ?? hud.wolkje, l),
+      melding: (t) => hud.toonMelding(t),
+    });
+  } else {
+    const { Leergroep3 } = await import('./binnen/leergroep3.js');
+    binnen = new Leergroep3();
+  }
+  const gebouw = GEBOUWEN[binnen.soort];
   zetSpelerIn(binnen.scene);
   speler.positie.copy(binnen.startPlek);
   speler.richting = binnen.startRichting;
   volgCam.blokkers = binnen.blokkers;
   Object.assign(pleinCamera, { pitch: volgCam.pitch, afstand: volgCam.afstand });
-  volgCam.pitch = 0.78; // binnen kijk je wat meer van boven, over de muren heen
-  volgCam.afstand = 8.5;
+  volgCam.pitch = gebouw.camera.pitch; // binnen kijk je wat meer van boven
+  volgCam.afstand = gebouw.camera.afstand;
   volgCam.yaw = speler.richting + Math.PI;
   volgCam.doelYaw = volgCam.doelPitch = null;
   volgCam.eersteKeer = true;
-  hud.zetTitel(LEERGROEP.naam);
-  document.body.classList.add('in-school');
+  hud.zetTitel(gebouw.titel);
+  document.body.classList.add(gebouw.klasse);
   klok.update();
   besturing.aan = true;
   await vanWit();
-  hud.toonMelding(LEERGROEP.welkom);
+  hud.toonMelding(gebouw.welkom);
   bezigMetWisselen = false;
-  if (Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
+  if (binnen?.soort === 'school' && Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
 }
 
 /** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
@@ -524,7 +548,7 @@ function ruimBinnenOp() {
   volgCam.pitch = pleinCamera.pitch;
   volgCam.afstand = pleinCamera.afstand;
   hud.zetTitel(null);
-  document.body.classList.remove('in-school');
+  document.body.classList.remove('in-school', 'in-gym');
 }
 
 async function naarBuiten() {
@@ -536,12 +560,13 @@ async function naarBuiten() {
   hud.toonWolkje(null);
   geluid.woesj();
   await naarWit();
+  const terug = GEBOUWEN[binnen.soort].buiten;
   ruimBinnenOp();
   hud.verbergMelding();
-  // Terug op het plein, vlak voor de voordeur, met de rug naar de school.
-  speler.positie.set(SCHOOLDEUR.x, 0, SCHOOLDEUR.z + 3.4);
-  speler.richting = 0;
-  volgCam.yaw = Math.PI;
+  // Terug op het plein, vlak voor de deur, met de rug naar het gebouw.
+  speler.positie.set(terug.x, 0, terug.z);
+  speler.richting = terug.richting;
+  volgCam.yaw = terug.richting + Math.PI;
   volgCam.doelYaw = volgCam.doelPitch = null;
   volgCam.eersteKeer = true;
   klok.update();
@@ -663,6 +688,7 @@ function praatMetFiguur(f) {
 function praatMetDichtste() {
   if (voetbal || bezigMetWisselen) return; // op het voetbalveld is E iets anders
   if (binnen) {
+    if (binnen.actie?.()) return; // gymzaal: touw pakken/loslaten, bal pakken
     if (dichtsteKraam) startGesprek(dichtsteKraam);
     else if (binnen.isBijDeurTerug(speler.positie)) naarBuiten();
     return;
@@ -671,6 +697,7 @@ function praatMetDichtste() {
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
   else if (isBijSchooldeur()) probeerNaarBinnen();
+  else if (isBijGymdeur()) naarBinnen('gym');
 }
 
 besturing.opPraten = praatMetDichtste;
@@ -761,6 +788,8 @@ function frame() {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else if (isBijSchooldeur()) {
       hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
+    } else if (isBijGymdeur()) {
+      hud.toonWolkje(besturing.isTouch ? GYM.naarBinnenTik : GYM.naarBinnenToets);
     } else if (poort.afstandTot(speler.positie) < 5.5) {
       hud.toonWolkje(poort.open ? VOETBAL.wolkjeOpen : VOETBAL.wolkjeDicht.replace('{nog}', nogTekst()));
     } else hud.toonWolkje(null);
@@ -830,13 +859,24 @@ function beweegSpeler(dt, bots) {
 
 }
 
-/** Leergroep 3: lopen, wolkjes bij de kramen en de deur, en tekenen. Het plein staat stil. */
+let klimCamera = false;
+
+/** In een gebouw (Leergroep 3 of de gymzaal): lopen, wolkjes, activiteiten en tekenen. Het plein staat stil. */
 function frameBinnen(dt) {
-  beweegSpeler(dt, binnen.botsing);
+  // De gymzaal neemt de besturing over tijdens het klimmen; verder gewoon lopen.
+  const overgenomen = besturing.aan && binnen.besturingOvernemen?.(dt);
+  if (!overgenomen) beweegSpeler(dt, binnen.botsing);
+  if (!binnen) return;
+  // Tijdens het klimmen kijkt de camera van iets lager mee (anders zit hij bovenin tegen het plafond).
+  if (binnen.bezig && !klimCamera) { klimCamera = true; volgCam.draaiNaar(speler.richting + Math.PI, -0.05); }
+  else if (!binnen.bezig && klimCamera) { klimCamera = false; volgCam.draaiNaar(volgCam.yaw, GEBOUWEN[binnen.soort].camera.pitch); }
   if (!dialoog.open && besturing.aan) {
     dichtsteKraam = zoekDichtsteKraam();
+    const eigen = binnen.wolkje?.();
+    const deur = GEBOUWEN[binnen.soort].deurTekst;
     if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
-    else if (binnen.isBijDeurTerug(speler.positie)) hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBuitenTik : LEERGROEP.naarBuitenToets);
+    else if (eigen) hud.toonWolkje(eigen);
+    else if (binnen.isBijDeurTerug(speler.positie)) hud.toonWolkje(besturing.isTouch ? deur.naarBuitenTik : deur.naarBuitenToets);
     else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
   binnen.update(dt, tijd, speler.positie);
@@ -923,7 +963,7 @@ if (TEST.geheimeToetsF9) {
     // Ook alle rekenstempels (Goud). Het rekenfeest komt in Leergroep 3.
     for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3);
     rekenkaart.ververs();
-    if (binnen) {
+    if (binnen?.soort === 'school') {
       hud.toonMelding(REKENKAART.testtoets);
       for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
       stempelkaart.ververs();
@@ -949,4 +989,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

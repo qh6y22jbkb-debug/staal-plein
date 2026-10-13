@@ -138,6 +138,39 @@ export const geluid = {
   },
 
   /** Plopje bij het openen van een gesprek of knop. */
+  /** Bel in de gymzaal: een heldere DING. */
+  bel() {
+    if (!aan) return;
+    toon(NOOT(91), 0, 1.2, { type: 'sine', volume: 0.3 });
+    toon(NOOT(103), 0, 0.8, { type: 'sine', volume: 0.12 });
+  },
+
+  /** Trampoline: boing. */
+  boing() {
+    if (!aan) return;
+    toon(180, 0, 0.25, { type: 'sine', volume: 0.25, glijNaar: 420 });
+  },
+
+  /** Bal door de ring: swish. */
+  swish() {
+    if (!aan) return;
+    ruis(0, 0.25, { volume: 0.35, filter: 3000 });
+    [76, 81, 84].forEach((n, i) => toon(NOOT(n), 0.1 + i * 0.07, 0.2, { volume: 0.25 }));
+  },
+
+  /** Bal stuitert op de vloer. */
+  stuiter(kracht = 0.5) {
+    if (!aan) return;
+    toon(90 + kracht * 40, 0, 0.08, { type: 'sine', volume: 0.12 + 0.2 * Math.min(1, kracht), glijNaar: 50 });
+  },
+
+  /** Fluitsignaal (einde gymles). */
+  fluit() {
+    if (!aan) return;
+    toon(NOOT(96), 0, 0.25, { type: 'square', volume: 0.08 });
+    toon(NOOT(96), 0.32, 0.6, { type: 'square', volume: 0.08 });
+  },
+
   plop() {
     if (!aan) return;
     toon(500, 0, 0.1, { type: 'sine', volume: 0.25, glijNaar: 900 });

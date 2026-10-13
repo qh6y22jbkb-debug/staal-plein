@@ -22,6 +22,7 @@ export class Speler {
     this.groep = new THREE.Group();
     this.model = new THREE.Group();
     this.groep.add(this.model);
+    this.model.rotation.order = 'YXZ'; // eerst de kijkrichting, dan voorover/achterover (dansjes, salto)
     scene.add(this.groep);
     this.positie = this.groep.position;
 

@@ -158,6 +158,7 @@ function whiteboardTextuur(id) {
 
 export class Leergroep3 {
   constructor() {
+    this.soort = 'school';
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xe7edf1);
     this.botsing = new Botsing(BINNEN_GRENZEN);

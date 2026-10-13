@@ -11,6 +11,8 @@ export const PLEIN = { minX: -40, maxX: 40, minZ: -30, maxZ: 30 };
 export const STARTPLEK = new THREE.Vector3(0, 0, 22);
 /** Voor de voordeur van de school (naar Leergroep 3). */
 export const SCHOOLDEUR = new THREE.Vector3(0, 0, -20.6);
+/** Voor de deur van de gymzaal (rechts naast de school). */
+export const GYMDEUR = new THREE.Vector3(30.0, 0, -16.8);
 
 const KLEUR = {
   gras: 0x7fb35a, rubbergras: 0x8db37a, zand: 0xdccba3, donkerTegel: 0x6f7883,
@@ -217,7 +219,14 @@ function bouwGymzaal(scene, botsing, blokkers) {
   const hal = doos(9, 8, 15, 0x8c949c, 35.5, 4, -22.5, g);
   doos(9.6, 0.5, 15.6, KLEUR.dak, 35.5, 8.25, -22.5, g);
   for (let z = -27; z <= -18; z += 3) doos(0.12, 1.2, 2.2, KLEUR.glas, 30.95, 6.2, z, g);
-  doos(0.2, 2.8, 2, KLEUR.geel, 30.95, 1.4, -16.8, g); // deur
+  // Deur van de gymzaal: geel kozijn, donkere opening (binnen brandt licht) en een bordje erboven.
+  doos(0.2, 3.0, 2.5, KLEUR.geel, 30.95, 1.5, -16.8, g);
+  doos(0.22, 2.7, 2.0, 0x5b4636, 30.94, 1.35, -16.8, g);
+  doos(0.6, 0.04, 2.2, 0xd3d0c8, 30.7, 0.03, -16.8, g); // drempel
+  const deurBord = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.7), new THREE.MeshLambertMaterial({ map: tekstTextuur('🏀 Gymzaal', { rand: '#d9473e' }) }));
+  deurBord.rotation.y = -Math.PI / 2;
+  deurBord.position.set(30.83, 3.45, -16.8);
+  g.add(deurBord);
   blokkers.push(hal);
   botsing.voegDoosToe(31, 40, -30, -15, 8);
 
