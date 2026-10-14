@@ -62,6 +62,15 @@ Dit bouwt het spel en zet het op de `gh-pages`-tak. Na een minuutje staat de nie
 | Zoomen | scrollwiel | – |
 | Praten met een karakter of kind | E (of klik op de kraam/het kind) | tik op het wolkje, de kraam of het kind |
 | Keuzes in een gesprek | 1, 2, 3 of Esc | tik op de knop |
+| Dansen | M (kort = je gekozen dansje, lang = dansmenu; M + 1–4 kiest een dansje) | knop Dans (lang = dansmenu) |
+| Op- en afstappen (vervoer) | V | knop 🚲 (alleen als je vervoer hebt) |
+
+### Muren en camera
+
+- Muren, hekken, kasten en andere hoge dingen zijn **massief**: je kunt er niet doorheen lopen en er ook niet
+  overheen springen. Alles van 2 meter of hoger is vanzelf massief (`MASSIEF_VANAF` in `src/wereld/botsing.js`).
+- Je beweegt in kleine stapjes, zodat je ook bij hoge snelheid (of een haperende computer) niet door een muur schiet.
+- De camera gaat nooit door een muur. Staat er een muur achter je, dan kantelt de camera omhoog en kijkt van bovenaf mee.
 
 ## Teksten aanpassen (voor leerkrachten)
 
@@ -135,6 +144,32 @@ Bij de ingang staat **De Bunders Boetiek** met verkoopster **Bo Boetiek**. Druk 
 - Gekochte kleding trek je meteen aan. In de **Kledingkast** (toets **K** of de knop 👕) trek je kleding aan en uit.
 
 Alle kleding en prijzen staan in `src/data/oefeningen.js` bij `KLEDING`; hoe het eruitziet staat in `src/kleding.js`.
+
+### Shirtkleur
+
+In de kledingkast staat onder elk shirt een **kleurkiezer** met 12 kleuren (en de knop "Origineel").
+Een kleur kiezen is gratis en trekt het shirt meteen aan. De kleur wordt bewaard en is ook te zien bij
+**Pas aan** in de winkel. De kleuren staan in `src/data/oefeningen.js` bij `KLEURKIEZER_KLEUREN`.
+
+### Dansjes
+
+In de winkel staat het tabblad **💃 Dansjes**: Moonwalk (gratis), Juichdansje (40), Robotdans (60) en
+Draaien op één been (80). Met **Bekijk** doet het poppetje het dansje voor. Op het plein druk je op **M**
+(of de knop Dans) om te dansen; houd M lang ingedrukt voor het dansmenu. Dansen kan niet tijdens een gesprek,
+in een minispel, op een vervoersmiddel of in het klimtouw. De dansjes staan bij `DANSJES` in het databestand.
+
+### Vervoer: step, skateboard en fiets
+
+In de winkel staat het tabblad **🚲 Vervoer**: step (80), skateboard (150) en fiets (250). Met **Bekijk**
+staat het poppetje erop.
+
+- Met **V** (of de knop 🚲 op een tablet) stap je op en af. Je gaat dan ongeveer **twee keer zo snel**.
+  Springen kan niet zolang je rijdt.
+- Op de fiets zit je en trap je (de wielen en trappers draaien mee); op de step en het skateboard zet je af met één been.
+- Rijden kan **alleen op het schoolplein**. Je stapt vanzelf af bij een kraam (zodat je kunt praten), bij de deur
+  van de school of de gymzaal en bij de poort naar de Voetbalwereld.
+- In de **kledingkast** kies je waarmee je rijdt. De fiets en de step hebben ook de kleurkiezer.
+- Prijzen en snelheden staan bij `VERVOER` in `src/data/oefeningen.js` (`snelheid: 2` = twee keer zo snel als lopen).
 
 ## De meesters op het plein
 
@@ -258,6 +293,29 @@ voor het hoogste niveau per kraam. Staan alle zes op Goud, dan volgt een feest i
 de titel **Rekenkampioen van Leergroep 3!**, en gaat in De Bunders Boetiek de **gouden rekenmachine-rugzak** open
 (150 munten). De Rekenkaart telt **niet** mee voor de poort naar de Voetbalwereld.
 
+## De gymzaal
+
+Rechts naast de school staat de **gymzaal** (deur met het bord 🏀 Gymzaal). Binnen:
+
+- **Klimtouw met bel**: druk op E bij een touw, klim met ↑ en ↓, en luid bovenin de bel met spatie.
+  De bel geeft 3 munten, maximaal 3 keer per dag.
+- **Trampoline**: spring met spatie en druk in de lucht nog eens op spatie voor een **salto**.
+- **Basketbal**: pak de bal met E, houd spatie ingedrukt en laat los als de krachtbalk in het groene vak staat.
+  Je ziet hoe vaak je gescoord hebt.
+
+De gymzaal wordt pas geladen als je naar binnen gaat. Alle teksten en instellingen staan in `src/data/gym.js` bij `GYM`.
+
+### Gymtijd
+
+Naar de gymzaal mag je alleen met **gymtijd**. Die verdien je met stempels:
+
+- Elke **nieuwe of betere stempel** (op het plein of een medaille in Leergroep 3) geeft **3 minuten** gymtijd.
+- Je kunt maximaal **15 minuten** opsparen.
+- Je gymtijd zie je onder de stempelkaart en bij de deur van de gymzaal. Zonder gymtijd is de deur dicht.
+- In de gymzaal loopt de tijd af (rechtsboven). Bij nog 30 seconden komt er een melding; bij 0 klinkt een fluitje,
+  verschijnt **"De gymles is voorbij!"** en sta je weer op het schoolplein.
+- De instellingen staan in `src/data/gym.js` bij `GYMTIJD` (`minutenPerStempel` en `maxMinuten`).
+
 ## Voor de leerkracht
 
 ### Leerkrachtcode: alles vrijspelen
@@ -265,7 +323,8 @@ de titel **Rekenkampioen van Leergroep 3!**, en gaat in De Bunders Boetiek de **
 Typ **Spellingisleuk** ergens in het spel (gewoon op het toetsenbord, zonder invulvak; hoofdletters maken niet uit), of klik op het startscherm
 op **🔑 Leerkracht** en vul de code daar in (handig op het digibord). Dan wordt alles vrijgespeeld: alle stempels
 en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker, de school
-(Leergroep 3) met alle rekenkramen op Goud, en alle kleding (ook de gouden rekenmachine-rugzak).
+(Leergroep 3) met alle rekenkramen op Goud, alle kleding (ook de gouden rekenmachine-rugzak), alle dansjes,
+alle vervoersmiddelen en 15 minuten gymtijd.
 De code staat in `src/data/oefeningen.js` bij `TEST.leerkrachtCode`; zet hem op `''` om dit uit te zetten.
 Met **↺ Opnieuw beginnen** zet je alles weer terug.
 
@@ -273,7 +332,7 @@ Met **↺ Opnieuw beginnen** zet je alles weer terug.
 
 Druk op **F9** om meteen alle stempels te krijgen, ook alle rekenstempels (Goud). Op het plein komen daarna het feest,
 de oorkonde en gaat de poort open; in Leergroep 3 komt het rekenfeest (sta je op het plein, dan komt het rekenfeest
-zodra je de school in gaat).
+zodra je de school in gaat). F9 geeft ook 15 minuten gymtijd.
 **Zet dit uit voordat de kinderen gaan spelen:** zet in `src/data/oefeningen.js` bij `TEST` de regel
 `geheimeToetsF9: true` op `false`, en zet de nieuwe versie online met `npm run deploy`.
 
@@ -297,9 +356,20 @@ Alles wordt bewaard in de browser (localStorage) van het apparaat. Zie `src/opsl
 stempels en niveaus, munten, gekochte en aangetrokken kleding (ook de voetbalspullen), gevonden muntjes
 van vandaag, de vragen van de meesters, of de poort open is, welke tegenstanders verslagen zijn, of de
 Bunders Beker gewonnen is, de Rekenkaart (Brons/Zilver/Goud per rekenkraam en of je Rekenkampioen bent),
-het laatst gekozen niveau per kraam, en de instellingen voor geluid en voorlezen.
+het laatst gekozen niveau per kraam, de gekochte dansjes en welk dansje je gekozen hebt, de shirtkleuren,
+de gekochte vervoersmiddelen (welk je gebruikt en de kleuren), je gymtijd, hoe vaak je vandaag munten kreeg
+voor de bel in de gymzaal, en de instellingen voor geluid en voorlezen.
 
-- Oudere opgeslagen voortgang (van vóór de munten of van vóór Leergroep 3) blijft gewoon werken.
+| Sleutel | Wat |
+|---|---|
+| `staal-blok2-dansjes` | gekochte dansjes en het gekozen dansje |
+| `staal-blok2-vervoer` | gekochte vervoersmiddelen, welk je gebruikt en de kleuren |
+| `staal-blok2-gymtijd` | opgespaarde gymtijd (in seconden) |
+| `staal-blok2-gym` | hoe vaak je vandaag munten kreeg voor de bel |
+| `staal-blok2-kleding` | gekochte en aangetrokken kleding, nu ook met de shirtkleuren |
+
+- Oudere opgeslagen voortgang (van vóór de munten, Leergroep 3, de dansjes, de shirtkleuren, het vervoer of de gymtijd)
+  blijft gewoon werken. Kapotte of onbekende gegevens worden overgeslagen.
 - **↺ Opnieuw beginnen** wist na bevestiging alles, behalve de instellingen voor geluid en voorlezen.
 - Op gedeelde Chromebooks met hetzelfde account delen kinderen dus dezelfde voortgang.
 
@@ -361,7 +431,7 @@ src/
   wereld/
     schoolplein.js     gebouw, hek, natuurspeelplaats, bomen, buurt
     kramen.js          de zes marktkramen met versiering
-    botsing.js         zorgt dat je niet door dingen heen loopt
+    botsing.js         zorgt dat je niet door dingen heen loopt (massief: ook niet eroverheen springen)
     helpers.js         kleine bouwstenen (doos, cilinder, naambord)
   ui/hud.js            titel, hulpkaart en tekstwolkje
   ui/dialoog.js        gespreksvenster met de drie knoppen
@@ -387,6 +457,14 @@ src/
   ui/rekenkaart.js     de Rekenkaart in beeld
   ui/schoolslot.js     het wachtwoordvenster bij de schooldeur
   ui/leesvenster.js    de vragenkaartjes van de Leeskraam
+  dansjes.js           de dansjes: bezit (bewaard in de browser), houdingen en het dansen zelf
+  ui/dansmenu.js       het dansmenu (M lang ingedrukt of de knop Dans)
+  ui/kleurkiezer.js    de kleurkiezer met 12 kleuren (shirts, fiets en step)
+  vervoer.js           step, skateboard en fiets: bezit, 3D-modellen, rijhouding, op- en afstappen
+  gymtijd.js           de gymtijd: verdienen, aftellen en bewaren
+  data/gym.js          ALLE teksten en instellingen van de gymzaal en de gymtijd
+  binnen/gymzaal.js    de gymzaal: klimtouw, trampoline, basketbal (wordt pas geladen bij de deur)
+  (opslaan: opslag.js; botsing: wereld/botsing.js)
 ```
 
 ## Bouwstappen
@@ -400,3 +478,4 @@ src/
 - [x] De Voetbalwereld: poort, stadion, wedstrijd 4 tegen 4, toernooi, Bunders Beker, munten en voetbalspullen
 - [x] De Leeskraam (Spot aan!): vragenkaartjes voor maatjeslezen
 - [x] Leergroep 3: de school in, zes rekenkramen (DHTE-schema, staartdeling, klok, tafelrace), Rekenkaart en beloning
+- [x] Verbeteringen: massieve muren en camera, dansjes (moonwalk), shirtkleur, gymzaal, gymtijd en vervoer (step, skateboard, fiets)
