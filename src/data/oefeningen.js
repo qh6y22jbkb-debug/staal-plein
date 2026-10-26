@@ -788,7 +788,7 @@ export const TEST = {
   geheimeToetsF9: true,
   // Leerkrachtcode: typ deze code ergens in het spel (of vul hem in op het startscherm bij 🔑 Leerkracht)
   // om ALLES vrij te spelen. Zet hem op '' om dit uit te zetten.
-  leerkrachtCode: 'Spellingisleuk', // hoofdletters maken niet uit: spellingisleuk werkt ook
+  leerkrachtCode: 'Themamuur', // hoofdletters maken niet uit: themamuur werkt ook
 };
 
 export const LEERKRACHT = {

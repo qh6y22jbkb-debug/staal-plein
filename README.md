@@ -320,7 +320,7 @@ Naar de gymzaal mag je alleen met **gymtijd**. Die verdien je met stempels:
 
 ### Leerkrachtcode: alles vrijspelen
 
-Typ **Spellingisleuk** ergens in het spel (gewoon op het toetsenbord, zonder invulvak; hoofdletters maken niet uit), of klik op het startscherm
+Typ **Themamuur** ergens in het spel (gewoon op het toetsenbord, zonder invulvak; hoofdletters maken niet uit), of klik op het startscherm
 op **🔑 Leerkracht** en vul de code daar in (handig op het digibord). Dan wordt alles vrijgespeeld: alle stempels
 en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker, de school
 (Leergroep 3) met alle rekenkramen op Goud, alle kleding (ook de gouden rekenmachine-rugzak), alle dansjes,
