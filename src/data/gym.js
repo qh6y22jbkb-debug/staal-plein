@@ -47,12 +47,12 @@ export const GYM = {
 };
 
 /*
- * Gymtijd: die verdien je met stempels. Elke nieuwe stempel of betere stempel (een ster erbij bij de
- * taalkramen, of Brons → Zilver → Goud bij het rekenen) geeft gymtijd. Alleen in de gymzaal loopt hij af.
+ * Gymtijd: die verdien je met stempels. Alleen een hele nieuwe stempel (alle 3 niveaus van een taalkraam,
+ * of Goud bij een rekenkraam) geeft gymtijd. Alleen in de gymzaal loopt hij af.
  */
 export const GYMTIJD = {
-  minutenPerStempel: 3, // zoveel minuten per nieuwe of betere stempel
-  maxMinuten: 15, // meer kun je niet opsparen
+  minutenPerStempel: 3, // zoveel minuten per nieuwe stempel (alle 3 niveaus van een kraam, of Goud bij een rekenkraam)
+  maxMinuten: 3, // meer kun je niet opsparen
   menu: '⏱️ Gymtijd: {tijd}',
   verdiend: '⏱️ +{minuten} minuten gymtijd!',
   vol: '⏱️ Je gymtijd is vol ({max} minuten).',

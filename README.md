@@ -309,8 +309,9 @@ De gymzaal wordt pas geladen als je naar binnen gaat. Alle teksten en instelling
 
 Naar de gymzaal mag je alleen met **gymtijd**. Die verdien je met stempels:
 
-- Elke **nieuwe of betere stempel** (op het plein of een medaille in Leergroep 3) geeft **3 minuten** gymtijd.
-- Je kunt maximaal **15 minuten** opsparen.
+- Alleen een **hele nieuwe stempel** geeft gymtijd: **3 minuten**. Op het plein is dat een kraam met alle 3 de niveaus,
+  in Leergroep 3 een rekenkraam op **Goud**. Een los niveau (of Brons/Zilver) geeft geen gymtijd.
+- Je kunt niet meer dan **3 minuten** opsparen: eerst opmaken in de gymzaal, dan pas weer verdienen.
 - Je gymtijd zie je onder de stempelkaart en bij de deur van de gymzaal. Zonder gymtijd is de deur dicht.
 - In de gymzaal loopt de tijd af (rechtsboven). Bij nog 30 seconden komt er een melding; bij 0 klinkt een fluitje,
   verschijnt **"De gymles is voorbij!"** en sta je weer op het schoolplein.
@@ -324,7 +325,7 @@ Typ **Themamuur** ergens in het spel (gewoon op het toetsenbord, zonder invulvak
 op **🔑 Leerkracht** en vul de code daar in (handig op het digibord). Dan wordt alles vrijgespeeld: alle stempels
 en niveaus, de oorkonde, de poort naar de Voetbalwereld, alle tegenstanders, de Bunders Beker, de school
 (Leergroep 3) met alle rekenkramen op Goud, alle kleding (ook de gouden rekenmachine-rugzak), alle dansjes,
-alle vervoersmiddelen en 15 minuten gymtijd.
+alle vervoersmiddelen en een volle gymtijd (3 minuten).
 De code staat in `src/data/oefeningen.js` bij `TEST.leerkrachtCode`; zet hem op `''` om dit uit te zetten.
 Met **↺ Opnieuw beginnen** zet je alles weer terug.
 
@@ -332,7 +333,7 @@ Met **↺ Opnieuw beginnen** zet je alles weer terug.
 
 Druk op **F9** om meteen alle stempels te krijgen, ook alle rekenstempels (Goud). Op het plein komen daarna het feest,
 de oorkonde en gaat de poort open; in Leergroep 3 komt het rekenfeest (sta je op het plein, dan komt het rekenfeest
-zodra je de school in gaat). F9 geeft ook 15 minuten gymtijd.
+zodra je de school in gaat). F9 geeft ook een volle gymtijd (3 minuten).
 **Zet dit uit voordat de kinderen gaan spelen:** zet in `src/data/oefeningen.js` bij `TEST` de regel
 `geheimeToetsF9: true` op `false`, en zet de nieuwe versie online met `npm run deploy`.
 

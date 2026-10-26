@@ -114,7 +114,7 @@ function toonGymtijd() {
 gymtijd.opVerandering(toonGymtijd);
 toonGymtijd();
 
-/** Nieuwe of betere stempel: gymtijd erbij. Geeft de tekst voor het eindscherm (met een regel ervoor). */
+/** Nieuwe stempel: gymtijd erbij. Geeft de tekst voor het eindscherm (met een regel ervoor). */
 function verdienGymtijd() {
   const minuten = gymtijd.verdien();
   const tekst = minuten > 0 ? GYMTIJD.verdiend.replace('{minuten}', minuten) : GYMTIJD.vol.replace('{max}', GYMTIJD.maxMinuten);
@@ -261,7 +261,8 @@ async function speelRekenspel(kraam) {
       const nieuw = rekenvoortgang.rondeGehaald(k.data.id, niveau);
       if (!nieuw) return '';
       nieuweMedaille = k.data.id;
-      return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam) + verdienGymtijd();
+      // Gymtijd alleen voor de hele stempel: Goud (alle 3 niveaus).
+      return REKEN_TEKSTEN_SPEL.niveauGehaald.replace('{medaille}', REKEN_TEKSTEN_SPEL.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam) + (nieuw === 3 ? verdienGymtijd() : '');
     },
     opSluiten: () => {
       actiefSpel = null;
@@ -361,7 +362,7 @@ function speelMinispel(kraam) {
       if (wat === 'stempel') return TEKSTEN.stempelErbij + verdienGymtijd();
       if (wat === 'niveau') {
         const nog = NIVEAU_VOOR_STEMPEL - niveau;
-        return TEKSTEN.stempelNog.replace('{aantal}', nog === 1 ? '1 niveau' : `${nog} niveaus`) + verdienGymtijd();
+        return TEKSTEN.stempelNog.replace('{aantal}', nog === 1 ? '1 niveau' : `${nog} niveaus`); // gymtijd pas bij de hele stempel
       }
       return '';
     },
