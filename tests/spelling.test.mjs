@@ -2,9 +2,9 @@
 // - Elk woord heeft precies één [moeilijk stukje], een zin met precies één ___ en een foute schrijfwijze.
 // - De foute schrijfwijze is echt anders dan het goede woord en wordt nooit goed gerekend.
 // - Het moeilijke stukje past bij de categorie (c bij cent- en colawoorden, heid/teit, isch(e), tie).
-// - Geen woord staat twee keer in een lijst, en elke categorie heeft minstens 8 woorden.
+// - Geen woord staat twee keer in een lijst; elke categorie heeft minstens 10 gewone en 6 lange woorden.
 import { SPELLING_WOORDEN, SPELLING_LOKALEN } from '../src/data/spelling.js';
-import { woordenVan, gatGoed, woordGoed, zinMetWoord } from '../src/spelling/spellingwoorden.js';
+import { woordenVan, gatGoed, woordGoed, zinMetWoord, zinInStukjes } from '../src/spelling/spellingwoorden.js';
 
 let fouten = 0, woorden = 0, controles = 0;
 const meld = (...m) => { fouten++; console.log('FOUT', ...m); };
@@ -13,7 +13,9 @@ const STUKJE = { centwoord: /^c$/, colawoord: /^c$/, heidteit: /^(heid|teit)$/, 
 for (const [cat, lijst] of Object.entries(SPELLING_WOORDEN)) {
   const ontleed = woordenVan(cat);
   if (ontleed.length !== lijst.length) meld(cat, 'niet elk woord heeft precies één [stukje]');
-  if (ontleed.length < 8) meld(cat, `maar ${ontleed.length} woorden`);
+  const kort = ontleed.filter((w) => !w.lang).length, lang = ontleed.filter((w) => w.lang).length;
+  if (kort < 10) meld(cat, `maar ${kort} gewone woorden`);
+  if (lang < 6) meld(cat, `maar ${lang} lange woorden`);
   const gezien = new Set();
   for (const w of ontleed) {
     woorden++;
@@ -24,8 +26,18 @@ for (const [cat, lijst] of Object.entries(SPELLING_WOORDEN)) {
     if (!/[.!?]$/.test(w.zin)) meld(cat, 'zin eindigt niet met een leesteken', w.zin);
     if (!/^[a-z]+$/.test(w.woord)) meld(cat, 'woord met rare tekens', w.woord);
     controles += 6;
-    if (!w.fout || w.fout === w.woord) meld(cat, 'geen echte foute schrijfwijze', w.woord, w.fout);
-    if (w.fout && woordGoed(w, w.fout)) meld(cat, 'fout woord wordt goed gerekend', w.fout);
+    if (!w.fouten.length) meld(cat, 'geen foute schrijfwijze', w.woord);
+    for (const f of w.fouten) {
+      controles++;
+      if (f === w.woord || woordGoed(w, f)) meld(cat, 'fout woord wordt goed gerekend', f);
+    }
+    // Foutenjacht: de zin in stukjes heeft precies één keer het woord, en samen is het weer de hele zin.
+    for (const invul of [w.woord, ...w.fouten]) {
+      const stukjes = zinInStukjes(w.zin, invul);
+      controles++;
+      if (stukjes.filter((x) => x.isHetWoord).length !== 1 || stukjes.find((x) => x.isHetWoord).tekst !== invul) meld(cat, 'zin in stukjes klopt niet', w.zin);
+      if (stukjes.some((x) => x.woord && !x.tekst)) meld(cat, 'leeg woordje in zin', w.zin);
+    }
     if (!woordGoed(w, w.woord) || !woordGoed(w, ` ${w.woord.toUpperCase()}. `)) meld(cat, 'goed woord wordt niet goed gerekend', w.woord);
     if (!gatGoed(w, w.gat)) meld(cat, 'goed stukje wordt niet goed gerekend', w.gat);
     for (const bijna of ['s', 'k', 'heit', 'hijd', 'tijt', 'ies', 'iese', 'sie', 'tsie', `${w.gat}${w.gat}`]) {

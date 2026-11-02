@@ -8,13 +8,14 @@
  *  Zo schrijf je een woord:
  *    w:    het woord, met het moeilijke stukje tussen [haakjes]: 'pro[c]ent', 'gezond[heid]', 'log[isch]'
  *    zin:  een zin met het woord, waar het woord als ___ staat. Die zin hoort het kind bij het dictee.
- *    fout: (mag weg) de foute schrijfwijze voor Brons. Anders maakt het spel die zelf
- *          (c → s, c → k, heid → heit, teit → tijt, isch → ies, tie → sie).
+ *    fout: (mag weg) een vaste foute schrijfwijze. Anders maakt het spel er zelf een
+ *          (c → s, c → k, heid → heit/hijd, teit → tijt, isch → ies, tie → sie/tsie).
+ *    lang: true = een lang woord (samenstelling). Die komen alleen bij Goud.
  *  Per niveau:
- *    🥉 Brons  = kies de goede schrijfwijze uit 2
- *    🥈 Zilver = vul de ontbrekende letters in
- *    🥇 Goud   = dictee: je hoort het woord en typt het hele woord
- *  Per ronde kiest het spel 8 woorden. Zet er per lokaal minstens 8 in.
+ *    🥉 Brons  = foutenjacht: in drie zinnen staat één woord fout gespeld; klik het aan
+ *    🥈 Zilver = foutenjacht + het woord goed typen (en soms is alles goed gespeld)
+ *    🥇 Goud   = dictee: je hoort het woord en de zin, en typt het hele woord (ook lange woorden)
+ *  Zet per lokaal minstens 10 gewone woorden en 6 lange woorden in.
  * ============================================================
  */
 
@@ -46,12 +47,19 @@ export const SPELLINGKAART = {
 
 export const SPELLING_TEKSTEN = {
   niveauNamen: ['🥉 Brons', '🥈 Zilver', '🥇 Goud'],
-  niveaus: ['Kies de goede schrijfwijze', 'Vul de letters in', 'Dictee: luister en schrijf'],
-  opdrachtBrons: 'Kies de goede schrijfwijze.',
-  opdrachtZilver: 'Welke letters horen op de plek van het vraagteken? Typ ze.',
-  opdrachtGoud: 'Dictee! Luister goed en typ het hele woord.',
-  opdrachtMix: 'Kies eerst de categorie. Schrijf daarna het woord.',
+  niveaus: ['Foutenjacht: vind het foute woord', 'Foutenjacht + verbeteren', 'Dictee met lange woorden'],
+  opdrachtBrons: 'Foutenjacht! In één zin staat een woord fout gespeld. Klik op dat woord.',
+  opdrachtZilver: 'Foutenjacht! Klik op het foute woord en verbeter het. Is alles goed? Klik dan op de groene knop.',
+  opdrachtGoud: 'Dictee! Luister goed en typ het hele woord. Je ziet de zin niet.',
+  opdrachtMix: 'Herhaalmix! Vind of hoor het woord, kies de categorie en schrijf het goed.',
   welkeCategorie: 'Bij welke categorie hoort dit woord?',
+  allesGoed: '✅ Alles is goed gespeld',
+  welkWoordFout: 'Welk woord is fout gespeld?',
+  verbeter: 'Typ het woord goed:',
+  nietFout: 'Dat woord is goed gespeld. Zoek verder!',
+  welFout: 'Kijk nog eens goed: er staat wél een fout in.',
+  geenFout: 'Goed gekeken: alles is goed gespeld!',
+  luisterOpdracht: 'Luister naar het woord en typ het.',
   categorieFout: 'Luister nog eens goed naar het woord. Wat hoor je, en wat schrijf je?',
   luister: '🔊 Luister nog eens',
   geenStem: 'Deze computer kan niet voorlezen. Kijk goed naar de zin.',
@@ -144,6 +152,17 @@ export const SPELLING_WOORDEN = {
     { w: 'con[c]ert', zin: 'We gaan naar een ___ van mijn favoriete band.' },
     { w: 'provin[c]ie', zin: 'Noord-Brabant is een ___ van Nederland.' },
     { w: 'o[c]eaan', zin: 'De walvis zwemt in de ___.' },
+    // Lang (alleen bij Goud): samenstellingen en lange woorden
+    { w: '[c]ijferslot', zin: 'Mijn kluisje zit dicht met een ___.', lang: true },
+    { w: '[c]ircustent', zin: 'De ___ staat op het grasveld.', lang: true },
+    { w: '[c]itroenthee', zin: 'Als ik verkouden ben, drink ik ___.', lang: true },
+    { w: 'stads[c]entrum', zin: 'Op zaterdag is het druk in het ___.', lang: true },
+    { w: 'winkel[c]entrum', zin: 'In het ___ kopen we nieuwe schoenen.', lang: true },
+    { w: 'vioolcon[c]ert', zin: 'Mijn zus speelt mee in een ___.', lang: true },
+    { w: 'openings[c]eremonie', zin: 'De Olympische Spelen beginnen met een ___.', lang: true },
+    { w: 'familiere[c]ept', zin: 'Deze soep maken we volgens een oud ___.', lang: true },
+    { w: 'om[c]irkelen', zin: 'Je moet het goede antwoord ___.', lang: true },
+    { w: 'euro[c]ent', zin: 'Ik vond een ___ onder de bank.', lang: true },
   ],
   heidteit: [
     { w: 'gezond[heid]', zin: 'Groente is goed voor je ___.' },
@@ -163,6 +182,15 @@ export const SPELLING_WOORDEN = {
     { w: 'reali[teit]', zin: 'Het was geen droom, maar ___.', fout: 'realiteid' },
     { w: 'creativi[teit]', zin: 'Bij het knutselen gebruik je je ___.' },
     { w: 'speciali[teit]', zin: 'Pannenkoeken bakken is de ___ van mijn opa.' },
+    // Lang (alleen bij Goud)
+    { w: 'veilig[heid]shelm', zin: 'Op de bouwplaats draag je een ___.', lang: true },
+    { w: 'houdbaar[heid]sdatum', zin: 'Kijk op de ___ voordat je de melk drinkt.', lang: true },
+    { w: 'elektrici[teit]skabel', zin: 'De ___ ligt diep onder de grond.', lang: true },
+    { w: 'kwali[teit]scontrole', zin: 'In de fabriek is elke dag een ___.', lang: true },
+    { w: 'universi[teit]sgebouw', zin: 'Het nieuwe ___ heeft tien verdiepingen.', lang: true },
+    { w: 'nieuwsgierig[heid]', zin: 'Door haar ___ ontdekte ze een geheime kamer.', lang: true },
+    { w: 'moeilijk[heid]sgraad', zin: 'Bij dit spel kies je zelf de ___.', lang: true },
+    { w: 'brandveilig[heid]', zin: 'De brandweer controleert de ___ van de school.', lang: true },
   ],
   isch: [
     { w: 'log[isch]', zin: 'Het antwoord is heel ___.' },
@@ -181,6 +209,18 @@ export const SPELLING_WOORDEN = {
     { w: 'fantast[ische]', zin: 'Wat een ___ tekening!' },
     { w: 'typ[ische]', zin: 'Dat is een ___ fout.' },
     { w: 'histor[ische]', zin: 'De ___ optocht trekt door de stad.' },
+    // Lang (alleen bij Goud)
+    { w: 'alfabet[isch]', zin: 'In het woordenboek staan de woorden ___.', lang: true },
+    { w: 'automat[isch]', zin: 'De deur van de supermarkt gaat ___ open.', lang: true },
+    { w: 'biolog[isch]', zin: 'Deze appels zijn ___ gekweekt.', lang: true },
+    { w: 'chronolog[isch]', zin: 'Vertel het verhaal ___, van het begin tot het eind.', lang: true },
+    { w: 'gigant[isch]', zin: 'De blauwe vinvis is ___ groot.', lang: true },
+    { w: 'optimist[isch]', zin: 'Mijn opa is altijd vrolijk en ___.', lang: true },
+    { w: 'vegetar[isch]', zin: 'Mijn tante eet ___.', lang: true },
+    { w: 'romant[isch]', zin: 'Het was een ___ diner bij kaarslicht.', lang: true },
+    { w: 'automat[ische]', zin: 'De winkel heeft een ___ deur.', lang: true },
+    { w: 'biolog[ische]', zin: 'Op de markt koop ik ___ groente.', lang: true },
+    { w: 'gigant[ische]', zin: 'In het bos staat een ___ boom.', lang: true },
   ],
   colawoord: [
     { w: '[c]ola', zin: 'Bij de pizza drink ik een glas ___.' },
@@ -199,6 +239,18 @@ export const SPELLING_WOORDEN = {
     { w: '[c]ollega', zin: 'De juf drinkt koffie met een ___.' },
     { w: 'produ[c]t', zin: 'Dit ___ kun je in de winkel kopen.' },
     { w: 'dire[c]teur', zin: 'De ___ van de school opent het schoolfeest.' },
+    // Lang (alleen bij Goud)
+    { w: '[c]adeaupapier', zin: 'Ik pak het pakje in met ___.', lang: true },
+    { w: '[c]lubhuis', zin: 'Na de training drinken we limonade in het ___.', lang: true },
+    { w: 'voetbal[c]lub', zin: 'Ik speel bij een ___ in het dorp.', lang: true },
+    { w: 'taal[c]ursus', zin: 'Mijn moeder volgt een ___ Spaans.', lang: true },
+    { w: 'stop[c]ontact', zin: 'Steek de stekker in het ___.', lang: true },
+    { w: 'fluit[c]oncert', zin: 'Mijn broer speelt mee in een ___.', lang: true },
+    { w: 'bios[c]oop', zin: 'We kijken de nieuwe film in de ___.', lang: true },
+    { w: '[c]ursusleider', zin: 'De ___ legt uit hoe je moet tekenen.', lang: true },
+    { w: 'a[c]robaat', zin: 'De ___ maakt een salto op het touw.', lang: true },
+    { w: 'mi[c]rofoon', zin: 'De zanger zingt in een ___.', lang: true },
+    { w: 'ta[c]tiek', zin: 'De trainer bedenkt een slimme ___.', lang: true },
   ],
   tie: [
     { w: 'poli[tie]', zin: 'De ___ zet de straat af.' },
@@ -214,14 +266,29 @@ export const SPELLING_WOORDEN = {
     { w: 'emo[tie]', zin: 'Blij zijn is een ___.' },
     { w: 'presta[tie]', zin: 'Tien kilometer lopen is een knappe ___.' },
     { w: 'por[tie]', zin: 'Ik wil graag een ___ patat.' },
+    // Lang (alleen bij Goud)
+    { w: 'vakan[tie]huis', zin: 'Ons ___ staat vlak bij het strand.', lang: true },
+    { w: 'poli[tie]auto', zin: 'Er rijdt een ___ met sirene voorbij.', lang: true },
+    { w: 'poli[tie]bureau', zin: 'De dief moest mee naar het ___.', lang: true },
+    { w: 'informa[tie]bord', zin: 'Op het ___ staat hoe laat de trein vertrekt.', lang: true },
+    { w: 'opera[tie]kamer', zin: 'De dokter gaat de ___ in.', lang: true },
+    { w: 'concentra[tie]', zin: 'Voor dit dictee heb je veel ___ nodig.', lang: true },
+    { w: 'presenta[tie]', zin: 'Ik geef morgen een ___ over haaien.', lang: true },
+    { w: 'motiva[tie]', zin: 'Met veel ___ train ik voor de wedstrijd.', lang: true },
+    { w: 'vaccina[tie]', zin: 'Bij de dokter kreeg ik een ___.', lang: true },
+    { w: 'organisa[tie]', zin: 'De ___ van het schoolfeest was perfect.', lang: true },
+    { w: 'demonstra[tie]', zin: 'De brandweer geeft een ___ op het plein.', lang: true },
   ],
 };
 
-/** Hoe het spel zelf een foute schrijfwijze maakt (voor Brons), per categorie. */
+/**
+ * Hoe het spel zelf foute schrijfwijzen maakt, per categorie. Het spel kiest er steeds één uit,
+ * dus het ene kind ziet 'gezondheit' en het andere 'gezondhijd'.
+ */
 export const FOUTE_KLANK = {
-  centwoord: { c: 's' },
-  colawoord: { c: 'k' },
-  heidteit: { heid: 'heit', teit: 'tijt' },
-  isch: { isch: 'ies', ische: 'iese' },
-  tie: { tie: 'sie' },
+  centwoord: { c: ['s'] },
+  colawoord: { c: ['k'] },
+  heidteit: { heid: ['heit', 'hijd', 'hijt'], teit: ['tijt', 'teid', 'tijd'] },
+  isch: { isch: ['ies', 'iesch', 'is'], ische: ['iese', 'iesche', 'isse'] },
+  tie: { tie: ['sie', 'tsie', 'cie'] },
 };

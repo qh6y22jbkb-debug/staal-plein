@@ -9,8 +9,9 @@ export function ontleed(item, cat) {
   const [, voor, gat, na] = m;
   const woord = voor + gat + na;
   const regel = FOUTE_KLANK[cat] ?? {};
-  const fout = item.fout ?? (regel[gat] != null ? voor + regel[gat] + na : null);
-  return { woord, voor, gat, na, zin: item.zin, fout, cat };
+  // Alle foute schrijfwijzen: een vaste uit de data, of die het spel maakt met de regels per categorie.
+  const fouten = item.fout ? [item.fout] : (regel[gat] ?? []).map((klank) => voor + klank + na);
+  return { woord, voor, gat, na, zin: item.zin, fouten: fouten.filter((f) => f !== woord), lang: !!item.lang, cat };
 }
 
 /** Alle woorden van een categorie, ontleed (woorden die niet kloppen worden overgeslagen). */
@@ -31,6 +32,27 @@ export function gatGoed(w, tekst) {
 /** Goud (dictee): klopt het hele woord? */
 export function woordGoed(w, tekst) {
   return schoon(tekst) === w.woord;
+}
+
+/** Een willekeurige foute schrijfwijze van dit woord. */
+export function foutVan(w) {
+  return w.fouten[Math.floor(Math.random() * w.fouten.length)];
+}
+
+/** Een zin in losse stukjes: woorden (klikbaar) en leestekens. Het gat (___) wordt het woord zelf. */
+export function zinInStukjes(zin, invul) {
+  return zin.split(' ').flatMap((stuk) => {
+    if (!stuk.includes('___')) {
+      const m = /^(.*?)([.,!?]*)$/.exec(stuk);
+      return [{ tekst: m[1], woord: true }, ...(m[2] ? [{ tekst: m[2], woord: false }] : [])];
+    }
+    const [voor, na] = stuk.split('___');
+    return [
+      ...(voor ? [{ tekst: voor, woord: false }] : []),
+      { tekst: invul, woord: true, isHetWoord: true },
+      ...(na ? [{ tekst: na, woord: false }] : []),
+    ];
+  });
 }
 
 /** De zin met het woord ingevuld (voor het voorlezen en na een goed antwoord). */
