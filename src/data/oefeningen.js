@@ -786,18 +786,23 @@ export const VOETBAL_TEAMS = [
  */
 export const TEST = {
   geheimeToetsF9: true,
-  // Leerkrachtcode: typ deze code ergens in het spel (of vul hem in op het startscherm bij 🔑 Leerkracht)
+  // Leerkrachtcode: druk op de sneltoets (Ctrl + Alt + L, op een Mac Control + Option + L) en vul de code in
   // om ALLES vrij te spelen. Zet hem op '' om dit uit te zetten.
   leerkrachtCode: 'Themamuur', // hoofdletters maken niet uit: themamuur werkt ook
+  // De sneltoets: Ctrl (of Cmd) + Alt + deze letter. (Ctrl+T of Cmd+T kan niet: dat opent in elke browser een nieuw tabblad.)
+  leerkrachtSneltoets: { code: 'KeyL', alt: true, shift: false },
+  leerkrachtPogingen: 2, // zo vaak mag je raden...
+  leerkrachtBlokkeerMinuten: 15, // ...daarna is het invullen zo lang geblokkeerd
 };
 
 export const LEERKRACHT = {
-  knop: '🔑 Leerkracht',
+  titel: 'Leerkrachtcode',
   uitleg: 'Vul de leerkrachtcode in om alles vrij te spelen.',
   plaatshouder: 'Code',
   ok: 'OK',
-  goed: '🔑 Alles is vrijgespeeld!',
-  fout: 'Die code klopt niet.',
+  sluiten: 'Sluiten',
+  fout: 'Die code klopt niet. Je hebt {nog}.',
+  geblokkeerd: 'Te vaak een verkeerde code. Probeer het over {tijd} opnieuw.',
   melding: '🔑 Leerkrachtmodus: alles is vrijgespeeld!',
 };
 

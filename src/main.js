@@ -33,6 +33,7 @@ import { voortgang, NIVEAU_VOOR_STEMPEL } from './voortgang.js';
 import { Stempelkaart } from './ui/stempelkaart.js';
 import { Oorkonde } from './ui/oorkonde.js';
 import { toonStartscherm } from './ui/startscherm.js';
+import { LeerkrachtSlot, isLeerkrachtSneltoets } from './ui/leerkrachtslot.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
 import { wisSpelOpslag } from './opslag.js';
@@ -1006,20 +1007,16 @@ function controleerCode(code) {
   return true;
 }
 
-// De code kan ook gewoon getypt worden (zonder invulvak).
-if (TEST.leerkrachtCode) {
-  let getypt = '';
-  window.addEventListener('keydown', (e) => {
-    if (e.target?.tagName === 'INPUT' || e.key.length !== 1) return;
-    getypt = (getypt + e.key.toLowerCase()).slice(-TEST.leerkrachtCode.length);
-    if (getypt === TEST.leerkrachtCode.toLowerCase()) {
-      getypt = '';
-      // De laatste letter (k) opent anders ook de kledingkast.
-      setTimeout(() => { if (kastvenster.open) kastvenster.sluit(); }, 0);
-      speelAllesVrij();
-    }
-  });
-}
+// Leerkrachtcode: alleen via de sneltoets (Ctrl/Cmd + Alt + L). Na 2 foute pogingen 15 minuten geblokkeerd.
+const leerkrachtSlot = new LeerkrachtSlot(uiLaag, { geluid, opCode: controleerCode });
+window.addEventListener('keydown', (e) => {
+  if (!isLeerkrachtSneltoets(e)) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if (leerkrachtSlot.open || actiefVenster || dialoog.open || actiefSpel || voetbal || bezigMetWisselen) return;
+  if (startOpen) { leerkrachtSlot.opSluiten = null; leerkrachtSlot.toon(); return; } // op het startscherm staat de besturing al uit
+  openVenster(leerkrachtSlot);
+}, true);
 
 toonStartscherm(uiLaag, () => {
   startOpen = false;
@@ -1027,7 +1024,7 @@ toonStartscherm(uiLaag, () => {
   geluid.plop();
   // Al alle stempels (bijv. van vóór de Voetbalwereld)? Dan gaat de poort nu open.
   if (voortgang.aantal === KRAAM_AANTAL && !poort.open) setTimeout(openPoortMetMelding, 1200);
-}, controleerCode);
+});
 
 /* Geheime testtoets F9: alle stempels (uitzetten in src/data/oefeningen.js bij TEST). */
 if (TEST.geheimeToetsF9) {
