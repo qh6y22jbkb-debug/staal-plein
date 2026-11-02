@@ -33,6 +33,7 @@ import { voortgang, NIVEAU_VOOR_STEMPEL } from './voortgang.js';
 import { Stempelkaart } from './ui/stempelkaart.js';
 import { Oorkonde } from './ui/oorkonde.js';
 import { toonStartscherm } from './ui/startscherm.js';
+import { ONDERDELEN } from './data/onderdelen.js';
 import { LeerkrachtSlot, isLeerkrachtSneltoets } from './ui/leerkrachtslot.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
@@ -72,15 +73,23 @@ scene.add(zon, zon.target);
 /* ---------- Wereld, speler, camera, besturing ---------- */
 
 const botsing = new Botsing(PLEIN);
-const wereld = bouwSchoolplein(scene, botsing);
+const wereld = bouwSchoolplein(scene, botsing, { poort: ONDERDELEN.voetbalwereld });
 const kramen = bouwKramen(scene, botsing);
 const boetiek = bouwBoetiek(scene, botsing);
-const leeskraam = bouwLeeskraam(scene, botsing); // telt niet mee voor stempels en poort
-const alleKramen = [...kramen, boetiek, leeskraam]; // de 6 leerkramen + de winkel + de Leeskraam
+// De Leeskraam telt niet mee voor stempels en poort. Staat hij uit (src/data/onderdelen.js), dan wordt hij niet gebouwd.
+const leeskraam = ONDERDELEN.leeskraam ? bouwLeeskraam(scene, botsing) : null;
+const alleKramen = [...kramen, boetiek, leeskraam].filter(Boolean); // de leerkramen + de winkel (+ de Leeskraam)
 
 // Poort naar de Voetbalwereld in het oostelijke hek. Gaat open bij alle 6 stempels.
-const poort = new Poort(scene, { x: 40, z: 0, draai: 0, bord: VOETBAL.poortBord, open: voetbalstand.poortOpen, botsing });
-wereld.blokkers.push(poort.groep); // de camera gaat niet door de poort heen
+// Staat de Voetbalwereld uit? Dan is het een gewoon hek, en doet deze 'lege poort' niets.
+const GEEN_POORT = {
+  open: false, groep: null, update() {}, afstandTot: () => Infinity, isInOpening: () => false,
+  zetOpen() {}, zetDicht() {}, zetBordje() {},
+};
+const poort = ONDERDELEN.voetbalwereld
+  ? new Poort(scene, { x: 40, z: 0, draai: 0, bord: VOETBAL.poortBord, open: voetbalstand.poortOpen, botsing })
+  : GEEN_POORT;
+if (poort.groep) wereld.blokkers.push(poort.groep); // de camera gaat niet door de poort heen
 const speler = new Speler(scene);
 speler.positie.copy(STARTPLEK);
 // Gekochte kleding aantrekken (en opnieuw als je iets aan- of uittrekt).
@@ -427,7 +436,7 @@ werkPoortBordjeBij();
 
 /** Na het feest (of meteen bij oude opslag met alle stempels): de poort gaat open. */
 function openPoortMetMelding() {
-  if (poort.open || voortgang.aantal < KRAAM_AANTAL) return;
+  if (!ONDERDELEN.voetbalwereld || poort.open || voortgang.aantal < KRAAM_AANTAL) return;
   voetbalstand.zetPoortOpen();
   poort.zetOpen(true, geluid);
   toonBanner(`🔓 ${VOETBAL.poortOpen}`);
@@ -440,7 +449,7 @@ function openPoortMetMelding() {
 let bekerOpPlein = null;
 let bekerBotsing = null;
 function zetBekerOpPlein() {
-  if (bekerOpPlein || !voetbalstand.beker) return false;
+  if (bekerOpPlein || !voetbalstand.beker || !ONDERDELEN.voetbalwereld) return false;
   bekerOpPlein = bouwBeker(VOETBAL.bekerBord);
   bekerOpPlein.position.set(0, 0, 4); // midden tussen de kramen
   scene.add(bekerOpPlein);
@@ -461,7 +470,7 @@ let voetbal = null; // de Voetbalwereld (alleen als je er bent)
 let bezigMetWisselen = false;
 
 async function naarVoetbal() {
-  if (bezigMetWisselen || voetbal) return;
+  if (bezigMetWisselen || voetbal || !ONDERDELEN.voetbalwereld) return;
   stapAf(); // door de poort: afstappen
   dansen.stop();
   bezigMetWisselen = true;
@@ -547,6 +556,8 @@ function zetSpelerIn(doelScene) {
 let schoolOpen = !LEERGROEP.wachtwoord;
 
 function probeerNaarBinnen() {
+  // Rekenwereld uit en de Spellingwereld nog niet klaar: de school blijft dicht.
+  if (!ONDERDELEN.rekenwereld) { hud.toonMelding(LEERGROEP.binnenkort); return; }
   if (schoolOpen) { naarBinnen(); return; }
   schoolSlot.opJa = () => { schoolOpen = true; naarBinnen(); };
   openVenster(schoolSlot);
@@ -577,7 +588,7 @@ async function naarBinnen(soort = 'school') {
     });
   } else {
     const { Leergroep3 } = await import('./binnen/leergroep3.js');
-    binnen = new Leergroep3();
+    binnen = new Leergroep3({ rekenwereld: ONDERDELEN.rekenwereld });
   }
   const gebouw = GEBOUWEN[binnen.soort];
   zetSpelerIn(binnen.scene);
@@ -857,7 +868,7 @@ function frame() {
     } else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else if (isBijSchooldeur()) {
-      hud.toonWolkje(besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
+      hud.toonWolkje(!ONDERDELEN.rekenwereld ? LEERGROEP.binnenkort : besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
     } else if (isBijGymdeur()) {
       const tijd = tijdInWoorden(gymtijd.seconden);
       hud.toonWolkje(!gymtijd.heeftTijd ? GYMTIJD.deurDicht : (besturing.isTouch ? GYMTIJD.deurOpenTik : GYMTIJD.deurOpen).replace('{tijd}', tijd));

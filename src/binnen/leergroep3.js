@@ -157,7 +157,8 @@ function whiteboardTextuur(id) {
 /* ---------- De binnenwereld ---------- */
 
 export class Leergroep3 {
-  constructor() {
+  /** @param opties.rekenwereld  false = geen rekenkramen in de lokalen (zie src/data/onderdelen.js). */
+  constructor({ rekenwereld = true } = {}) {
     this.soort = 'school';
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xe7edf1);
@@ -183,7 +184,7 @@ export class Leergroep3 {
     this.bouwIngang();
     this.bouwMeubelsLeerplein();
     // In elk lokaal één rekenkraam met een karakter erachter.
-    this.kramen = bouwRekenkramen(this.groep, this.botsing, lokaalPlek);
+    if (rekenwereld) this.kramen = bouwRekenkramen(this.groep, this.botsing, lokaalPlek);
 
     this.groep.traverse((o) => { if (o.isMesh && !o.userData.geenSchaduw) { o.castShadow = o.castShadow ?? true; o.receiveShadow = true; } });
 

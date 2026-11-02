@@ -1,4 +1,5 @@
 import { TEKSTEN } from '../data/oefeningen.js';
+import { ONDERDELEN } from '../data/onderdelen.js';
 import { voortgang } from '../voortgang.js';
 
 /**
@@ -15,7 +16,7 @@ export function toonStartscherm(laag, opStart) {
       <h1>${TEKSTEN.startTitel}</h1>
       <p class="ss-sub">${TEKSTEN.startOndertitel}</p>
       <p>${TEKSTEN.startUitleg}</p>
-      <p class="ss-extra">${TEKSTEN.startExtra}</p>
+      <p class="ss-extra">${TEKSTEN.startExtra}${ONDERDELEN.voetbalwereld ? TEKSTEN.startPoort : ''}</p>
       ${verder ? `<p class="ss-verder">${TEKSTEN.startVerder.replace('{aantal}', voortgang.aantal)}</p>` : ''}
       <button type="button" class="ss-knop">${verder ? TEKSTEN.startKnopVerder : TEKSTEN.startKnop} ▶</button>
     </div>`;

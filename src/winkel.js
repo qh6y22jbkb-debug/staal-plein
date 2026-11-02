@@ -1,5 +1,13 @@
 import { KLEDING, WINKEL, DANSJES, DANS_TEKSTEN, VERVOER, VERVOER_TEKSTEN } from './data/oefeningen.js';
 import { vervoerbezit } from './vervoer.js';
+import { ONDERDELEN } from './data/onderdelen.js';
+
+/** Items van een onderdeel dat uit staat, verkoopt de winkel niet (wie ze al heeft, houdt ze gewoon). */
+function inDeWinkel(item) {
+  if (!ONDERDELEN.voetbalwereld && (item.groep === 'voetbal' || item.vereist === 'beker')) return false;
+  if (!ONDERDELEN.rekenwereld && item.vereist === 'rekenkampioen') return false;
+  return true;
+}
 import { dansbezit } from './dansjes.js';
 import { rekenvoortgang } from './rekenvoortgang.js';
 import { CATEGORIEEN, itemMetId } from './kleding.js';
@@ -70,7 +78,7 @@ export class Winkel {
 
   kiesTab(tab) {
     this.tab = tab;
-    this.categorieEl.innerHTML = [...CATEGORIEEN, 'voetbal', 'dansjes', 'vervoer'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
+    this.categorieEl.innerHTML = [...CATEGORIEEN, ...(ONDERDELEN.voetbalwereld ? ['voetbal'] : []), 'dansjes', 'vervoer'].map((c) => `<button type="button" data-cat="${c}" class="${c === this.categorie ? 'actief' : ''}">${WINKEL.categorieen[c]}</button>`).join('');
     this.categorieEl.onclick = (e) => {
       const knop = e.target.closest('button[data-cat]');
       if (!knop) return;
@@ -87,8 +95,8 @@ export class Winkel {
     if (this.paspop.vervoerId) this.paspop.toonVervoer(null);
     // Het knopje "Voetbal" toont de voetbalitems; de andere knopjes de gewone kleding.
     const items = this.categorie === 'voetbal'
-      ? KLEDING.filter((k) => k.groep === 'voetbal')
-      : KLEDING.filter((k) => k.categorie === this.categorie && !k.groep);
+      ? KLEDING.filter((k) => k.groep === 'voetbal' && inDeWinkel(k))
+      : KLEDING.filter((k) => k.categorie === this.categorie && !k.groep && inDeWinkel(k));
     this.itemsEl.innerHTML = '';
     for (const item of items) {
       const heeft = kledingkast.heeft(item.id);

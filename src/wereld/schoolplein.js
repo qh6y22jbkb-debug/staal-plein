@@ -28,7 +28,8 @@ const KLEUR = {
  * Bouwt het hele schoolplein.
  * Geeft terug: blokkers (voor de camera) en een update-functie (wolken, vlag, schommel).
  */
-export function bouwSchoolplein(scene, botsing) {
+/** @param opties.poort  false = geen opening voor de poort in het oostelijke hek (Voetbalwereld uit). */
+export function bouwSchoolplein(scene, botsing, { poort = true } = {}) {
   const blokkers = [];
   const animaties = [];
   const stammen = new Stammen(scene);
@@ -38,7 +39,7 @@ export function bouwSchoolplein(scene, botsing) {
   const gymDeur = bouwGymzaal(scene, botsing, blokkers);
   bouwFietsenhok(scene, botsing, blokkers);
   bouwFietsenrij(scene, botsing);
-  bouwHek(scene);
+  bouwHek(scene, poort);
   bouwKeienzand(scene, botsing, -6, -14);
   bouwBalanceerpalen(scene, botsing, stammen, 11, -15);
   bouwTouwschommel(scene, botsing, -24, -10, animaties);
@@ -305,7 +306,7 @@ function bouwFietsenrij(scene, botsing) {
 
 /* ---------- Hek ---------- */
 
-function bouwHek(scene) {
+function bouwHek(scene, metPoort = true) {
   const textuur = canvasTextuur(64, 64, (ctx) => {
     ctx.clearRect(0, 0, 64, 64);
     ctx.fillStyle = '#2b2f33';
@@ -343,8 +344,10 @@ function bouwHek(scene) {
 
   const { minX, maxX, minZ, maxZ } = PLEIN;
   maakStuk(minX, minZ, minX, maxZ);
-  maakStuk(maxX, minZ, maxX, -3); // oostkant: opening voor de poort naar de Voetbalwereld
-  maakStuk(maxX, 3, maxX, maxZ);
+  if (metPoort) {
+    maakStuk(maxX, minZ, maxX, -3); // oostkant: opening voor de poort naar de Voetbalwereld
+    maakStuk(maxX, 3, maxX, maxZ);
+  } else maakStuk(maxX, minZ, maxX, maxZ); // Voetbalwereld uit: gewoon een dicht hek
   maakStuk(minX, maxZ, -3, maxZ); // ingang in het midden van de zuidkant
   maakStuk(3, maxZ, maxX, maxZ);
   for (const x of [-3, 3]) {

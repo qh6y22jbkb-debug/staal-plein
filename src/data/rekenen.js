@@ -12,6 +12,7 @@ export const LEERGROEP = {
   deurBord: 'Leergroep 3 - Rekenen',
   // Buiten, bij de voordeur van de school.
   naarBinnenToets: 'Druk op E om naar binnen te gaan',
+  binnenkort: '🚧 Hier komt binnenkort de Spellingwereld!', // als de rekenwereld uit staat (src/data/onderdelen.js)
   naarBinnenTik: 'Tik hier om naar binnen te gaan',
   // Binnen, bij de deur terug.
   naarBuitenToets: 'Druk op E om naar het schoolplein te gaan',
