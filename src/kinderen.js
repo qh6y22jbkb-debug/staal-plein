@@ -23,9 +23,11 @@ const UITERLIJKEN = [
 const WANDELSNELHEID = 2.4;
 
 export class Kind {
-  constructor(scene, botsing, naam, uiterlijk, start) {
+  /** @param gebied  waar het kind rondloopt: { minX, maxX, minZ, maxZ, magDoel(x, z) } (standaard: het schoolplein) */
+  constructor(scene, botsing, naam, uiterlijk, start, gebied = null) {
     this.naam = naam;
     this.botsing = botsing;
+    this.gebied = gebied;
     this.figuur = new Speler(scene, { ...uiterlijk, snelheid: WANDELSNELHEID });
     this.figuur.groep.scale.setScalar(0.88);
     this.figuur.positie.copy(start);
@@ -49,10 +51,12 @@ export class Kind {
     for (let poging = 0; poging < 30; poging++) {
       // Meestal een plekje in de buurt, soms ver weg.
       const ver = Math.random() < 0.3;
+      const g = this.gebied ?? { minX: PLEIN.minX + 3, maxX: PLEIN.maxX - 3, minZ: -18, maxZ: PLEIN.maxZ - 3 };
       const bereik = ver ? 40 : 12;
-      const x = ver ? THREE.MathUtils.randFloat(PLEIN.minX + 3, PLEIN.maxX - 3) : this.positie.x + THREE.MathUtils.randFloatSpread(bereik);
-      const z = ver ? THREE.MathUtils.randFloat(-18, PLEIN.maxZ - 3) : this.positie.z + THREE.MathUtils.randFloatSpread(bereik);
-      if (z < -19) continue; // niet tegen de school aan
+      const x = ver ? THREE.MathUtils.randFloat(g.minX, g.maxX) : this.positie.x + THREE.MathUtils.randFloatSpread(bereik);
+      const z = ver ? THREE.MathUtils.randFloat(g.minZ, g.maxZ) : this.positie.z + THREE.MathUtils.randFloatSpread(bereik);
+      if (!this.gebied && z < -19) continue; // niet tegen de school aan
+      if (this.gebied && (x < g.minX || x > g.maxX || z < g.minZ || z > g.maxZ || g.magDoel?.(x, z) === false)) continue;
       if (this.botsing.isVrij(x, z, 0.8)) return new THREE.Vector3(x, 0, z);
     }
     return null;
@@ -60,7 +64,8 @@ export class Kind {
 
   /** Zegt iets grappigs en kijkt naar de speler. */
   praat(spelerPos) {
-    if (!this.uitspraken.length) this.uitspraken = kiesWillekeurig(KINDEREN.uitspraken, KINDEREN.uitspraken.length);
+    const alle = this.eigenUitspraken ?? KINDEREN.uitspraken;
+    if (!this.uitspraken.length) this.uitspraken = kiesWillekeurig(alle, alle.length);
     this.toestand = 'praat';
     this.timer = 4.5;
     this.springNu = true; // vrolijk sprongetje
@@ -106,20 +111,30 @@ export class Kind {
   }
 }
 
-/** Alle kinderen op het plein, plus het tekstballonnetje boven hun hoofd. */
+/**
+ * Rondlopende kinderen, plus het tekstballonnetje boven hun hoofd.
+ * Standaard op het schoolplein. Met opties kun je ze ook in een gebouw zetten:
+ *   { namen, uitspraken, gebied: { minX, maxX, minZ, maxZ, magDoel(x, z) }, vrijVan: { x, z, r } (niet beginnen bij de deur) }
+ */
 export class Kinderen {
-  constructor(scene, botsing, uiLaag, camera, voorlezen) {
+  constructor(scene, botsing, uiLaag, camera, voorlezen, opties = {}) {
     this.voorlezen = voorlezen;
     this.camera = camera;
     this.lijst = [];
-    const namen = KINDEREN.namen;
+    const namen = opties.namen ?? KINDEREN.namen;
+    const g = opties.gebied ?? { minX: -34, maxX: 34, minZ: -17, maxZ: 27 };
+    const vrij = opties.vrijVan ?? { x: 0, z: 22, r: 5 };
+    const eerste = opties.uiterlijkVanaf ?? 0; // binnen andere kinderen dan op het plein
     for (let i = 0; i < namen.length; i++) {
       let start = null;
-      for (let p = 0; p < 50 && !start; p++) {
-        const x = THREE.MathUtils.randFloat(-34, 34), z = THREE.MathUtils.randFloat(-17, 27);
-        if (botsing.isVrij(x, z, 1) && Math.hypot(x, z - 22) > 5) start = new THREE.Vector3(x, 0, z);
+      for (let p = 0; p < 80 && !start; p++) {
+        const x = THREE.MathUtils.randFloat(g.minX, g.maxX), z = THREE.MathUtils.randFloat(g.minZ, g.maxZ);
+        if (botsing.isVrij(x, z, 1) && Math.hypot(x - vrij.x, z - vrij.z) > vrij.r && g.magDoel?.(x, z) !== false) start = new THREE.Vector3(x, 0, z);
       }
-      this.lijst.push(new Kind(scene, botsing, namen[i], UITERLIJKEN[i % UITERLIJKEN.length], start ?? new THREE.Vector3(i * 3 - 12, 0, 18)));
+      const kind = new Kind(scene, botsing, namen[i], UITERLIJKEN[(i + eerste) % UITERLIJKEN.length], start ?? new THREE.Vector3(g.minX + 2 + i * 1.5, 0, g.maxZ - 2), opties.gebied ?? null);
+      if (opties.uitspraken) kind.eigenUitspraken = opties.uitspraken;
+      kind.eigenaar = this; // om te weten in welke groep het kind hoort (plein, school of bieb)
+      this.lijst.push(kind);
     }
 
     this.ballon = document.createElement('div');
@@ -152,6 +167,14 @@ export class Kinderen {
   verbergBallon() {
     this.ballonKind = null;
     this.ballon.classList.remove('zichtbaar');
+  }
+
+  /** Opruimen (kinderen in een gebouw): de figuren zitten in de scène van het gebouw, de ballon in de UI. */
+  dispose() {
+    this.verbergBallon();
+    this.ballon.remove();
+    for (const k of this.lijst) k.figuur.groep.removeFromParent();
+    this.lijst = [];
   }
 
   /** Alle kinderen springen een tijdje van blijdschap (feest!). */

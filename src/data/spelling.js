@@ -292,3 +292,22 @@ export const FOUTE_KLANK = {
   isch: { isch: ['ies', 'iesch', 'is'], ische: ['iese', 'iesche', 'isse'] },
   tie: { tie: ['sie', 'tsie', 'cie'] },
 };
+
+/** Kinderen die door de Spellingwereld lopen (aanspreken met E) en wat ze zeggen. */
+export const SPELLING_KINDEREN = {
+  namen: ['Yara', 'Luuk', 'Isa', 'Omar', 'Julia', 'Thijs'],
+  uitspraken: [
+    'Hoor je een s, maar schrijf je een c? Dan is het een centwoord, zoals citroen!',
+    "Ik schreef laatst 'kadeau'. Oeps, het is cadeau met een c!",
+    'Gezondheid eindigt op -heid, met een d. Niet met een t!',
+    'Logisch schrijf je met -isch. Dat is toch logisch?',
+    'Bij Max Mix moet je eerst kiezen bij welke categorie een woord hoort. Lastig!',
+    'Clown, camping, computer: allemaal colawoorden met een c!',
+    'Agent Patty zegt: politie schrijf je met -tie, niet met -sie.',
+    'Weet jij hoe je houdbaarheidsdatum schrijft? Ik moest het drie keer proberen!',
+    'Het dictee bij Goud is echt moeilijk. Goed luisteren!',
+    'Elektriciteit: je hoort ij, maar je schrijft ei. Zo raar!',
+    'Bij de foutenjacht klik ik eerst op het woord dat er gek uitziet.',
+    'Ik heb al Brons bij Cisca Cent. Nu nog Zilver!',
+  ],
+};

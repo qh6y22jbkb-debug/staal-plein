@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR, BIEBDEUR } from './wereld/schoolplein.js';
-import { BIEB, BIEBKAART, BIEB_TEKSTEN, BIEB_PLEKKEN } from './data/bieb.js';
+import { BIEB, BIEBKAART, BIEB_TEKSTEN, BIEB_PLEKKEN, BIEB_KINDEREN } from './data/bieb.js';
 import { Biebkaart } from './ui/biebkaart.js';
 import { biebvoortgang } from './biebvoortgang.js';
 import { GYM, GYMTIJD } from './data/gym.js';
 import { gymtijd, tijdInWoorden, tijdOpKlok } from './gymtijd.js';
 import { LOKALEN as REKEN_LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
 import { LEERGROEP, SCHOOL_SOORT } from './data/school.js';
-import { SPELLINGKAART, SPELLING_TEKSTEN } from './data/spelling.js';
+import { SPELLINGKAART, SPELLING_TEKSTEN, SPELLING_KINDEREN } from './data/spelling.js';
 import { Spellingkaart, SPELLING_ACTIEF } from './ui/spellingkaart.js';
 import { spellingvoortgang } from './spellingvoortgang.js';
 import { Rekenkaart } from './ui/rekenkaart.js';
@@ -250,6 +250,7 @@ function startGesprek(kraam, toestemming = false) {
   document.body.classList.add('in-gesprek');
   hud.toonWolkje(null);
   kinderen.verbergBallon();
+  binnenKinderen?.verbergBallon();
 
   // Speler kijkt naar de kraam, camera gaat er netjes achter staan.
   const dx = kraam.groep.position.x - speler.positie.x;
@@ -634,6 +635,26 @@ async function naarPlein() {
 /* ---------- Wisselen tussen schoolplein en een gebouw: Leergroep 3 (school) of de gymzaal ---------- */
 
 let binnen = null; // Leergroep 3 of de gymzaal (alleen als je binnen bent); binnen.soort = 'school' of 'gym'
+let binnenKinderen = null; // rondlopende kinderen in de school of de bieb
+
+/** Kinderen in de Spellingwereld en de Bieb (niet in de gymzaal en niet in de rekenwereld). */
+function maakBinnenKinderen() {
+  const info = binnen.soort === 'bieb' ? BIEB_KINDEREN : binnen.soort === 'school' && SCHOOL_SOORT === 'spelling' ? SPELLING_KINDEREN : null;
+  if (!info) return;
+  const g = binnen.botsing.grenzen;
+  const praatPunten = binnen.kramen.map((k) => k.praatPunt);
+  binnenKinderen = new Kinderen(binnen.scene, binnen.botsing, uiLaag, camera, voorlezen, {
+    namen: info.namen,
+    uitspraken: info.uitspraken,
+    uiterlijkVanaf: binnen.soort === 'bieb' ? 7 : 3,
+    // Niet op de plek gaan staan waar je met een karakter praat, en niet vlak bij de deur beginnen.
+    gebied: {
+      minX: g.minX + 1.5, maxX: g.maxX - 1.5, minZ: g.minZ + 1.5, maxZ: g.maxZ - 1.5,
+      magDoel: (x, z) => praatPunten.every((p) => Math.hypot(x - p.x, z - p.z) > 1.8),
+    },
+    vrijVan: { x: binnen.startPlek.x, z: binnen.startPlek.z, r: 3 },
+  });
+}
 const pleinCamera = { pitch: 0.42, afstand: 10 };
 
 function isBijSchooldeur() {
@@ -705,6 +726,7 @@ async function naarBinnen(soort = 'school') {
     binnen = new Leergroep3({ wereld: SCHOOL_SOORT });
   }
   const gebouw = GEBOUWEN[binnen.soort];
+  maakBinnenKinderen();
   zetSpelerIn(binnen.scene);
   speler.positie.copy(binnen.startPlek);
   speler.richting = binnen.startRichting;
@@ -730,6 +752,8 @@ async function naarBinnen(soort = 'school') {
 /** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
 function ruimBinnenOp() {
   if (!binnen) return;
+  binnenKinderen?.dispose();
+  binnenKinderen = null;
   binnen.dispose();
   binnen = null;
   zetSpelerIn(scene);
@@ -842,7 +866,7 @@ let dichtsteKind = null;
 function spreekKindAan(kind) {
   if (!kind || dialoog.open || actiefSpel) return;
   speler.richting = Math.atan2(kind.positie.x - speler.positie.x, kind.positie.z - speler.positie.z);
-  kinderen.spreekAan(kind, speler.positie);
+  (kind.eigenaar ?? kinderen).spreekAan(kind, speler.positie); // kind op het plein of in een gebouw
 }
 
 /* Meesters: stellen een vraag (20 munten bij een goed antwoord). */
@@ -887,6 +911,7 @@ function praatMetDichtste() {
   if (binnen) {
     if (binnen.actie?.()) return; // gymzaal: touw pakken/loslaten, bal pakken
     if (dichtsteKraam) startGesprek(dichtsteKraam);
+    else if (dichtsteKind) spreekKindAan(dichtsteKind);
     else if (binnen.isBijDeurTerug(speler.positie)) naarBuiten();
     return;
   }
@@ -1079,14 +1104,23 @@ function frameBinnen(dt) {
   else if (!binnen.bezig && klimCamera) { klimCamera = false; volgCam.draaiNaar(volgCam.yaw, GEBOUWEN[binnen.soort].camera.pitch); }
   if (!dialoog.open && besturing.aan) {
     dichtsteKraam = zoekDichtsteKraam();
+    dichtsteKind = binnenKinderen?.dichtsteBij(speler.positie, KIND_PRAATAFSTAND) ?? null;
+    // Staat een kind dichterbij dan de praatplek van een karakter? Dan praat je met het kind.
+    if (dichtsteKraam && dichtsteKind) {
+      const afstand = (p) => Math.hypot(p.x - speler.positie.x, p.z - speler.positie.z);
+      if (afstand(dichtsteKind.positie) < afstand(dichtsteKraam.praatPunt)) dichtsteKraam = null; else dichtsteKind = null;
+    }
     const eigen = binnen.wolkje?.();
     const deur = GEBOUWEN[binnen.soort].deurTekst;
     if (dichtsteKraam) hud.toonWolkje(besturing.isTouch ? TEKSTEN.praatTik : TEKSTEN.praatToets);
-    else if (eigen) hud.toonWolkje(eigen);
+    else if (dichtsteKind && binnenKinderen.ballonKind !== dichtsteKind) {
+      hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
+    } else if (eigen) hud.toonWolkje(eigen);
     else if (binnen.isBijDeurTerug(speler.positie)) hud.toonWolkje(besturing.isTouch ? deur.naarBuitenTik : deur.naarBuitenToets);
     else hud.toonWolkje(null);
   } else if (!besturing.aan) hud.toonWolkje(null);
   binnen.update(dt, tijd, speler.positie);
+  binnenKinderen?.update(dt, speler);
   volgCam.update(dt, speler.positie);
   renderer.render(binnen.scene, camera);
 }
@@ -1218,4 +1252,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { biebvoortgang, biebkaart, speelBiebspel, naarBieb: () => naarBinnen('bieb'), spellingvoortgang, spellingkaart, speelSpellingspel, rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { get binnenKinderen() { return binnenKinderen; }, biebvoortgang, biebkaart, speelBiebspel, naarBieb: () => naarBinnen('bieb'), spellingvoortgang, spellingkaart, speelSpellingspel, rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

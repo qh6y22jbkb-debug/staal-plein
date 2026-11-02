@@ -196,3 +196,20 @@ export const BIEB_ZINNEN = [
   { niveau: 3, zin: 'Na het concert zijn de muzikanten met de bus naar huis gereden.', pv: 'zijn', ow: 'de muzikanten', wg: 'zijn gereden', lv: null, vz: ['Na', 'met', 'naar'] },
   { niveau: 3, zin: 'Door de regen moesten wij binnen blijven.', pv: 'moesten', ow: 'wij', wg: 'moesten blijven', lv: null, vz: ['Door'] },
 ];
+
+/** Kinderen die door de Bieb lopen (aanspreken met E) en wat ze zeggen. */
+export const BIEB_KINDEREN = {
+  namen: ['Saar', 'Milan', 'Nora', 'Bilal'],
+  uitspraken: [
+    'Sst! In de bieb praten we zachtjes.',
+    'Ik lees een griezelboek. Superspannend!',
+    'Weet jij waar de strips staan?',
+    'Bob de Boekenwurm vraagt naar voorzetsels. Op, in, onder… ik ken ze allemaal!',
+    'Wie of wat + persoonsvorm? Dan vind je het onderwerp. Dat heeft Olga me geleerd!',
+    'Niet elke zin heeft een lijdend voorwerp. Daar trapte ik eerst in!',
+    'Het werkwoordelijk gezegde zijn álle werkwoorden. Ook de persoonsvorm!',
+    'Ik zit het liefst op de groene bank om te lezen.',
+    'Vraagproef: maak er een vraag van. Het werkwoord vooraan is de persoonsvorm!',
+    'Ik heb drie boeken geleend. Eentje over haaien!',
+  ],
+};
