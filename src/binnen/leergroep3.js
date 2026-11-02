@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { mat, doos, cilinder, kegel, bol, canvasTextuur } from '../wereld/helpers.js';
 import { Botsing } from '../wereld/botsing.js';
-import { LEERGROEP, LOKALEN } from '../data/rekenen.js';
+import { LEERGROEP, LOKALEN } from '../data/school.js';
 import { bouwRekenkramen } from './rekenkramen.js';
+import { bouwSpellingkramen } from './spellingkramen.js';
 
 /*
  * Leergroep 3: de binnenwereld in de school, nagebouwd naar de foto's.
@@ -157,8 +158,8 @@ function whiteboardTextuur(id) {
 /* ---------- De binnenwereld ---------- */
 
 export class Leergroep3 {
-  /** @param opties.rekenwereld  false = geen rekenkramen in de lokalen (zie src/data/onderdelen.js). */
-  constructor({ rekenwereld = true } = {}) {
+  /** @param opties.wereld  'rekenen' of 'spelling': welke kramen er in de lokalen staan (zie src/data/school.js). */
+  constructor({ wereld = 'rekenen' } = {}) {
     this.soort = 'school';
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xe7edf1);
@@ -183,8 +184,9 @@ export class Leergroep3 {
     LOKALEN.forEach((l, i) => this.bouwLokaal(l, i));
     this.bouwIngang();
     this.bouwMeubelsLeerplein();
-    // In elk lokaal één rekenkraam met een karakter erachter.
-    if (rekenwereld) this.kramen = bouwRekenkramen(this.groep, this.botsing, lokaalPlek);
+    // In elk lokaal één kraam met een karakter erachter: rekenen of spelling.
+    if (wereld === 'rekenen') this.kramen = bouwRekenkramen(this.groep, this.botsing, lokaalPlek);
+    else if (wereld === 'spelling') this.kramen = bouwSpellingkramen(this.groep, this.botsing, lokaalPlek);
 
     this.groep.traverse((o) => { if (o.isMesh && !o.userData.geenSchaduw) { o.castShadow = o.castShadow ?? true; o.receiveShadow = true; } });
 

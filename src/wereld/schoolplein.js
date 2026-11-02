@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {
   mat, doos, cilinder, kegel, bol, grondVlak, canvasTextuur, tekstTextuur, zaadRandom,
 } from './helpers.js';
-import { LEERGROEP } from '../data/rekenen.js';
+import { LEERGROEP } from '../data/school.js';
 
 // Het plein (binnen het hek). Noord = -z (daar staat de school), zuid = +z (ingang).
 // Sfeer naar foto's van het echte plein: een natuurspeelplaats met hout, zand en groen.

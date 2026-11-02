@@ -23,6 +23,10 @@ export const ONDERDELEN = {
   // Uit = de rekenkramen en de Rekenkaart zijn weg, en de gouden rekenmachine-rugzak staat niet in de winkel.
   rekenwereld: false,
 
+  // De Spellingwereld in Leergroep 3 (herhalingsblok; woorden en instellingen: src/data/spelling.js).
+  // Werkt als de rekenwereld uit staat. Staan ze allebei uit, dan is de school dicht.
+  spellingwereld: true,
+
   // De Leeskraam (Spot aan!) met Lotte Leeslamp (vragenkaartjes: src/data/leeskaartjes.js, venster: src/ui/leesvenster.js).
   // Uit = de kraam, het podium en de spotlight staan niet op het plein.
   leeskraam: false,

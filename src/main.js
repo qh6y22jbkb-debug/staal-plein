@@ -3,7 +3,11 @@ import './style.css';
 import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR } from './wereld/schoolplein.js';
 import { GYM, GYMTIJD } from './data/gym.js';
 import { gymtijd, tijdInWoorden, tijdOpKlok } from './gymtijd.js';
-import { LEERGROEP, LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
+import { LOKALEN as REKEN_LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
+import { LEERGROEP, SCHOOL_SOORT } from './data/school.js';
+import { SPELLINGKAART, SPELLING_TEKSTEN } from './data/spelling.js';
+import { Spellingkaart, SPELLING_ACTIEF } from './ui/spellingkaart.js';
+import { spellingvoortgang } from './spellingvoortgang.js';
 import { Rekenkaart } from './ui/rekenkaart.js';
 import { Dansen, dansbezit } from './dansjes.js';
 import { Dansmenu } from './ui/dansmenu.js';
@@ -104,10 +108,12 @@ const dialoog = new Dialoog(uiLaag, { voorlezen, geluid });
 dialoog.opInstelling = () => hud.zetKnoppen();
 const kinderen = new Kinderen(scene, botsing, uiLaag, camera, voorlezen);
 const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) => [k.data.id, k.stijl.bord])));
-const rekenkaart = new Rekenkaart(uiLaag); // in Leergroep 3 zie je deze in plaats van de stempelkaart
+// In de school zie je de Rekenkaart of de Spellingkaart in plaats van de stempelkaart.
+const rekenkaart = SCHOOL_SOORT === 'rekenen' ? new Rekenkaart(uiLaag) : null;
+const spellingkaart = SCHOOL_SOORT === 'spelling' ? new Spellingkaart(uiLaag) : null;
 
 /* ---------- Gymtijd: verdiend met stempels, te zien op de kaarten, loopt af in de gymzaal ---------- */
-const gymtijdLabels = [stempelkaart.el, rekenkaart.el].map((kaart) => {
+const gymtijdLabels = [stempelkaart.el, rekenkaart?.el, spellingkaart?.el].filter(Boolean).map((kaart) => {
   const e = document.createElement('div');
   e.className = 'sk-gymtijd';
   kaart.appendChild(e);
@@ -248,7 +254,7 @@ function startGesprek(kraam, toestemming = false) {
   volgCam.draaiNaar(Math.atan2(-dx, -dz), 0.38);
   volgCam.zetGesprek(kraam.groep, binnen ? { hoogte: 5.6 } : undefined); // binnen: over de lokaalmuur heen kijken
 
-  const opSpelen = kraam.isLeeskraam ? pakKaartjes : kraam.isRekenkraam ? speelRekenspel : speelMinispel;
+  const opSpelen = kraam.isLeeskraam ? pakKaartjes : kraam.isRekenkraam ? speelRekenspel : kraam.isSpellingkraam ? speelSpellingspel : speelMinispel;
   dialoog.toon(kraam, { opSpelen, opSluiten: terugNaarPlein });
 }
 
@@ -283,7 +289,7 @@ async function speelRekenspel(kraam) {
       nieuweMedaille = null;
       // Medaille op de Rekenkaart; alle zes op Goud = feest.
       setTimeout(() => {
-        rekenkaart.stempel(id);
+        rekenkaart?.stempel(id);
         geluid.stempel();
         if (Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 900);
       }, 350);
@@ -293,10 +299,57 @@ async function speelRekenspel(kraam) {
 
 let nieuweMedaille = null;
 
+/* ---------- Spellingkramen in de Spellingwereld (herhalingsblok) ---------- */
+
+async function speelSpellingspel(kraam) {
+  // Het spellingspel wordt pas geladen als je er een start.
+  const { SpellingSpel, mixOpen } = await import('./spelling/spellingspel.js');
+  if (kraam.data.cat === 'mix' && !mixOpen()) { dialoog.zeg(SPELLING_TEKSTEN.mixOpSlot); return; }
+  dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
+  dialoog.sluit();
+  const spel = new SpellingSpel({
+    laag: uiLaag, kraam, data: { titel: kraam.data.onderwerp.charAt(0).toUpperCase() + kraam.data.onderwerp.slice(1), opdracht: '', niveaus: SPELLING_TEKSTEN.niveaus },
+    geluid, voorlezen, muntenTotaal: () => munten.totaal,
+    beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
+    opKlaar: (k, { niveau }) => {
+      const nieuw = spellingvoortgang.rondeGehaald(k.data.id, niveau);
+      if (!nieuw) return '';
+      nieuweMedaille = k.data.id;
+      return SPELLING_TEKSTEN.niveauGehaald.replace('{medaille}', SPELLING_TEKSTEN.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam) + (nieuw === 3 ? verdienGymtijd() : '');
+    },
+    opSluiten: () => {
+      actiefSpel = null;
+      klok.update();
+      terugNaarPlein();
+      if (!nieuweMedaille) return;
+      const id = nieuweMedaille;
+      nieuweMedaille = null;
+      setTimeout(() => {
+        spellingkaart?.stempel(id);
+        geluid.stempel();
+        if (Spellingkaart.vol && !spellingvoortgang.kampioen) setTimeout(startSpellingFeest, 900);
+      }, 350);
+    },
+  });
+  spel.start();
+  actiefSpel = spel;
+}
+
+/** Alle spellinglokalen op Goud: feest in de Spellingwereld. */
+function startSpellingFeest() {
+  spellingvoortgang.zetKampioen();
+  spellingkaart?.ververs();
+  geluid.feestmuziek();
+  confetti(220);
+  toonBanner(SPELLINGKAART.feestTitel);
+  voorlezen.zeg(SPELLINGKAART.feestTekst);
+  hud.toonMelding(SPELLINGKAART.feestTekst);
+}
+
 /** Feest in Leergroep 3: alle zes de rekenkramen op Goud. */
 function startRekenFeest() {
   rekenvoortgang.zetKampioen();
-  rekenkaart.ververs();
+  rekenkaart?.ververs();
   geluid.feestmuziek();
   confetti(220);
   hud.toonWolkje(null);
@@ -557,7 +610,7 @@ let schoolOpen = !LEERGROEP.wachtwoord;
 
 function probeerNaarBinnen() {
   // Rekenwereld uit en de Spellingwereld nog niet klaar: de school blijft dicht.
-  if (!ONDERDELEN.rekenwereld) { hud.toonMelding(LEERGROEP.binnenkort); return; }
+  if (!SCHOOL_SOORT) { hud.toonMelding(LEERGROEP.binnenkort); return; }
   if (schoolOpen) { naarBinnen(); return; }
   schoolSlot.opJa = () => { schoolOpen = true; naarBinnen(); };
   openVenster(schoolSlot);
@@ -588,7 +641,7 @@ async function naarBinnen(soort = 'school') {
     });
   } else {
     const { Leergroep3 } = await import('./binnen/leergroep3.js');
-    binnen = new Leergroep3({ rekenwereld: ONDERDELEN.rekenwereld });
+    binnen = new Leergroep3({ wereld: SCHOOL_SOORT });
   }
   const gebouw = GEBOUWEN[binnen.soort];
   zetSpelerIn(binnen.scene);
@@ -608,7 +661,8 @@ async function naarBinnen(soort = 'school') {
   await vanWit();
   hud.toonMelding(gebouw.welkom);
   bezigMetWisselen = false;
-  if (binnen?.soort === 'school' && Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
+  if (binnen?.soort === 'school' && rekenkaart && Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
+  if (binnen?.soort === 'school' && spellingkaart && Spellingkaart.vol && !spellingvoortgang.kampioen) setTimeout(startSpellingFeest, 1500);
 }
 
 /** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
@@ -704,7 +758,9 @@ hud.opOpnieuw = () => {
   meesters.wis();
   wisSpelOpslag();
   stempelkaart.ververs();
-  rekenkaart.ververs();
+  rekenkaart?.ververs();
+  spellingvoortgang.wis();
+  spellingkaart?.ververs();
   zetKraamSterren();
   voetbalstand.wis();
   poort.zetDicht();
@@ -868,7 +924,7 @@ function frame() {
     } else if (dichtsteKind && kinderen.ballonKind !== dichtsteKind) {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else if (isBijSchooldeur()) {
-      hud.toonWolkje(!ONDERDELEN.rekenwereld ? LEERGROEP.binnenkort : besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
+      hud.toonWolkje(!SCHOOL_SOORT ? LEERGROEP.binnenkort : besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
     } else if (isBijGymdeur()) {
       const tijd = tijdInWoorden(gymtijd.seconden);
       hud.toonWolkje(!gymtijd.heeftTijd ? GYMTIJD.deurDicht : (besturing.isTouch ? GYMTIJD.deurOpenTik : GYMTIJD.deurOpen).replace('{tijd}', tijd));
@@ -1000,9 +1056,12 @@ function speelAllesVrij() {
   voetbalstand.zetBeker();
   if (!poort.open) poort.zetOpen(true, geluid);
   zetBekerOpPlein();
-  for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3); // alle rekenkramen op Goud
+  for (const l of REKEN_LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3); // alle rekenkramen op Goud
   rekenvoortgang.zetKampioen();
-  rekenkaart.ververs();
+  rekenkaart?.ververs();
+  for (const l of SPELLING_ACTIEF) spellingvoortgang.rondeGehaald(l.id, 3); // alle spellinglokalen op Goud
+  spellingvoortgang.zetKampioen();
+  spellingkaart?.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
   dansbezit.geefAlles();
   vervoerbezit.geefAlles();
@@ -1042,18 +1101,25 @@ if (TEST.geheimeToetsF9) {
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'F9' || startOpen || voetbal) return;
     e.preventDefault();
-    // Ook alle rekenstempels (Goud) en volle gymtijd. Het rekenfeest komt in Leergroep 3.
+    // Ook alle medailles in de school (rekenen of spelling, Goud) en volle gymtijd. Het feest daarvan komt in de school.
     gymtijd.vul();
     setTimeout(() => hud.toonMelding(GYMTIJD.testtoets.replace('{max}', GYMTIJD.maxMinuten)), 2800);
-    for (const l of LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3);
-    rekenkaart.ververs();
+    if (rekenkaart) {
+      for (const l of REKEN_LOKALEN) rekenvoortgang.rondeGehaald(l.id, 3);
+      rekenkaart.ververs();
+    }
+    if (spellingkaart) {
+      for (const l of SPELLING_ACTIEF) spellingvoortgang.rondeGehaald(l.id, 3);
+      spellingkaart.ververs();
+    }
     if (binnen?.soort === 'school') {
-      hud.toonMelding(REKENKAART.testtoets);
+      hud.toonMelding(spellingkaart ? SPELLINGKAART.testtoets : REKENKAART.testtoets);
       for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
       stempelkaart.ververs();
       zetKraamSterren();
       werkPoortBordjeBij();
-      if (!rekenvoortgang.kampioen) setTimeout(startRekenFeest, 600);
+      if (rekenkaart && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 600);
+      if (spellingkaart && !spellingvoortgang.kampioen) setTimeout(startSpellingFeest, 600);
       return;
     }
     for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
@@ -1073,4 +1139,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { spellingvoortgang, spellingkaart, speelSpellingspel, rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

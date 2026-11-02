@@ -1,0 +1,227 @@
+/*
+ * ============================================================
+ *  SPELLINGWERELD – herhalingsblok (Staal groep 7)
+ * ============================================================
+ *  De binnenwereld in de school (Leergroep 3), met in elk lokaal een spellingkraam.
+ *  Leerkrachten: hier pas je de woorden, zinnen, uitleg en tips aan.
+ *
+ *  Zo schrijf je een woord:
+ *    w:    het woord, met het moeilijke stukje tussen [haakjes]: 'pro[c]ent', 'gezond[heid]', 'log[isch]'
+ *    zin:  een zin met het woord, waar het woord als ___ staat. Die zin hoort het kind bij het dictee.
+ *    fout: (mag weg) de foute schrijfwijze voor Brons. Anders maakt het spel die zelf
+ *          (c → s, c → k, heid → heit, teit → tijt, isch → ies, tie → sie).
+ *  Per niveau:
+ *    🥉 Brons  = kies de goede schrijfwijze uit 2
+ *    🥈 Zilver = vul de ontbrekende letters in
+ *    🥇 Goud   = dictee: je hoort het woord en typt het hele woord
+ *  Per ronde kiest het spel 8 woorden. Zet er per lokaal minstens 8 in.
+ * ============================================================
+ */
+
+export const SPELLING_INSTELLINGEN = {
+  // Lokaal 5 (het stationrijtje, -tie) aan of uit.
+  stationrijtje: true,
+  // Wachtwoord voor de school. '' = iedereen kan zo naar binnen.
+  wachtwoord: '',
+};
+
+/** Teksten van de Spellingwereld (vervangen die van Leergroep 3 – Rekenen). */
+export const SPELLING_LEERGROEP = {
+  naam: 'Spellingwereld',
+  deurBord: 'Spellingwereld',
+  welkom: 'Welkom in de Spellingwereld! In elk lokaal oefen je een spellingcategorie.',
+  wachtwoord: SPELLING_INSTELLINGEN.wachtwoord,
+  slotTitel: 'De Spellingwereld is nog dicht',
+};
+
+export const SPELLINGKAART = {
+  titel: 'Spellingkaart',
+  teller: '{aantal}/{totaal} Goud',
+  medailles: ['', '🥉', '🥈', '🥇'],
+  kampioen: '🏆 Spellingkampioen!',
+  feestTitel: '🏆 Spellingkampioen!',
+  feestTekst: 'Wauw! Alle lokalen op Goud. Jij bent een echte spellingkampioen!',
+  testtoets: '🧪 Testtoets: alle spellinglokalen op Goud',
+};
+
+export const SPELLING_TEKSTEN = {
+  niveauNamen: ['🥉 Brons', '🥈 Zilver', '🥇 Goud'],
+  niveaus: ['Kies de goede schrijfwijze', 'Vul de letters in', 'Dictee: luister en schrijf'],
+  opdrachtBrons: 'Kies de goede schrijfwijze.',
+  opdrachtZilver: 'Welke letters horen op de plek van het vraagteken? Typ ze.',
+  opdrachtGoud: 'Dictee! Luister goed en typ het hele woord.',
+  opdrachtMix: 'Kies eerst de categorie. Schrijf daarna het woord.',
+  welkeCategorie: 'Bij welke categorie hoort dit woord?',
+  categorieFout: 'Luister nog eens goed naar het woord. Wat hoor je, en wat schrijf je?',
+  luister: '🔊 Luister nog eens',
+  geenStem: 'Deze computer kan niet voorlezen. Kijk goed naar de zin.',
+  nogEenStap: 'Goed! Schrijf nu het woord.',
+  goedeAntwoord: 'Het goede antwoord is: {woord}',
+  niveauGehaald: '{medaille} gehaald bij {naam}!',
+  mixOpSlot: 'De Herhaalmix gaat open als je in alle andere lokalen minstens 🥉 Brons hebt. Nog even oefenen!',
+};
+
+/*
+ * De zes lokalen. Lokaal 1 t/m 3 liggen links van het leerplein, 4 t/m 6 rechts.
+ * cat = welke woordenlijst (zie SPELLING_WOORDEN hieronder). Lokaal 6 = alle categorieën door elkaar.
+ */
+const ALLE_LOKALEN = [
+  {
+    nummer: 1, id: 'centwoord', cat: 'centwoord', naam: 'Cisca Cent', onderwerp: 'centwoord', icoon: '🪙', label: 'c klinkt als s',
+    begroeting: 'Hoi! Ik ben Cisca Cent. Mijn naam begint met een c, maar je hoort een s. Bij mij oefen je centwoorden!',
+    uitleg: [
+      { tekst: 'Je hoort een s, maar je schrijft een c. Dat gebeurt vaak als er een e of i na de c komt.', voorbeeld: '**c**ent, **c**itroen, pro**c**ent' },
+    ],
+    tip: 'Je hoort een s, maar je schrijft een c. Komt er een e of i na? Dan is het vaak een c: cent, citroen.',
+  },
+  {
+    nummer: 2, id: 'heidteit', cat: 'heidteit', naam: 'Heidi Heid', onderwerp: 'heid/teit', icoon: '🌟', label: '-heid / -teit',
+    begroeting: 'Hallo! Ik ben Heidi Heid. Bij mij oefen je woorden die eindigen op -heid en -teit.',
+    uitleg: [
+      { tekst: "Hoor je aan het eind 'heit'? Dan schrijf je -heid. Hoor je 'teit'? Dan schrijf je -teit.", voorbeeld: 'gezond**heid**, kwali**teit**' },
+      { tekst: 'Let op: je hoort ij, maar je schrijft ei! En -heid eindigt op een d.', voorbeeld: 'vrij**heid** (niet vrijhijd of vrijheit)' },
+    ],
+    tip: "Je hoort ij, maar je schrijft ei. 'heit' schrijf je als -heid (met een d), 'teit' als -teit.",
+  },
+  {
+    nummer: 3, id: 'isch', cat: 'isch', naam: 'Tobias Typisch', onderwerp: 'isch', icoon: '🎩', label: '-isch',
+    begroeting: 'Goedendag! Ik ben Tobias Typisch. Typisch ik: altijd -isch! Bij mij oefen je isch-woorden.',
+    uitleg: [
+      { tekst: "Hoor je aan het eind van een woord 'ies'? Dan schrijf je vaak -isch.", voorbeeld: 'log**isch**, prakt**isch**' },
+      { tekst: 'Komt er een e achter? Dan schrijf je -ische.', voorbeeld: 'de log**ische** oplossing' },
+    ],
+    tip: "Hoor je aan het eind 'ies'? Dan schrijf je -isch. Komt er een e achter? Dan -ische.",
+  },
+  {
+    nummer: 4, id: 'colawoord', cat: 'colawoord', naam: 'Carlo Cola', onderwerp: 'colawoord', icoon: '🥤', label: 'c klinkt als k',
+    begroeting: 'Hé! Ik ben Carlo Cola. Mijn naam begint met een c, maar je hoort een k. Bij mij oefen je colawoorden!',
+    uitleg: [
+      { tekst: 'Je hoort een k, maar je schrijft een c. Dat gebeurt vaak als er een a, o, u of een medeklinker na de c komt.', voorbeeld: '**c**ola, **c**adeau, **c**lown' },
+    ],
+    tip: 'Je hoort een k, maar je schrijft een c. Komt er een a, o, u of een medeklinker na? Dan is het vaak een c: cola, clown.',
+  },
+  {
+    nummer: 5, id: 'stationrijtje', cat: 'tie', naam: 'Agent Patty', onderwerp: 'stationrijtje (-tie)', icoon: '🚓', label: '-tie',
+    begroeting: 'Goedemiddag! Ik ben Agent Patty van de politie. Bij mij oefen je woorden die eindigen op -tie.',
+    uitleg: [
+      { tekst: "Hoor je aan het eind 'sie' of 'tsie'? Dan schrijf je -tie.", voorbeeld: 'poli**tie**, vakan**tie**, informa**tie**' },
+    ],
+    tip: "Hoor je aan het eind 'sie' of 'tsie'? Dan schrijf je -tie: politie, vakantie.",
+  },
+  {
+    nummer: 6, id: 'herhaalmix', cat: 'mix', naam: 'Max Mix', onderwerp: 'herhaalmix', icoon: '🔀', label: 'mix',
+    begroeting: 'Yo! Ik ben Max Mix. Bij mij komen alle categorieën door elkaar. Eerst kies je de categorie, dan schrijf je het woord!',
+    uitleg: [
+      { tekst: 'Luister goed naar het woord. Hoor je een s die een c is? Een k die een c is? Hoor je heit, teit, ies of sie aan het eind? Kies de categorie en schrijf het woord.', voorbeeld: 'cent → centwoord<br>cola → colawoord<br>logisch → isch' },
+    ],
+    tip: 'Kijk eerst bij welke categorie het woord hoort. Gebruik dan de regel van die categorie.',
+  },
+];
+
+/** De lokalen die meedoen (lokaal 5 kan uit). Een lokaal dat uit staat, heeft geen kraam. */
+export const SPELLING_LOKALEN = ALLE_LOKALEN.map((l) => (
+  l.cat === 'tie' && !SPELLING_INSTELLINGEN.stationrijtje
+    ? { nummer: l.nummer, id: l.id, naam: `Lokaal ${l.nummer}`, onderwerp: 'gesloten', icoon: '🚪', uit: true }
+    : l
+));
+
+export const SPELLING_WOORDEN = {
+  centwoord: [
+    { w: '[c]ent', zin: 'Een euro is honderd ___.' },
+    { w: '[c]entrum', zin: 'We gaan winkelen in het ___ van de stad.' },
+    { w: '[c]entimeter', zin: 'Mijn gum is vier ___ lang.' },
+    { w: '[c]itroen', zin: 'Een ___ is geel en zuur.' },
+    { w: '[c]ijfer', zin: 'Ik kreeg een mooi ___ voor mijn toets.' },
+    { w: '[c]ircus', zin: 'In het ___ zag ik een clown op een eenwieler.' },
+    { w: '[c]irkel', zin: 'Een ___ is helemaal rond.' },
+    { w: '[c]el', zin: 'De boef zit in een ___ in de gevangenis.' },
+    { w: '[c]eremonie', zin: 'Bij de opening was er een feestelijke ___.' },
+    { w: 'de[c]ember', zin: 'Pakjesavond is in ___.' },
+    { w: 'pro[c]ent', zin: 'In de uitverkoop krijg je vijftig ___ korting.' },
+    { w: 'pre[c]ies', zin: 'Het is nu ___ twaalf uur.' },
+    { w: 're[c]ept', zin: 'Oma bakt een taart volgens een oud ___.' },
+    { w: 'medi[c]ijn', zin: 'Als je ziek bent, krijg je soms een ___.' },
+    { w: 'con[c]ert', zin: 'We gaan naar een ___ van mijn favoriete band.' },
+    { w: 'provin[c]ie', zin: 'Noord-Brabant is een ___ van Nederland.' },
+    { w: 'o[c]eaan', zin: 'De walvis zwemt in de ___.' },
+  ],
+  heidteit: [
+    { w: 'gezond[heid]', zin: 'Groente is goed voor je ___.' },
+    { w: 'waar[heid]', zin: 'Wie liegt, vertelt niet de ___.' },
+    { w: 'schoon[heid]', zin: 'Iedereen bewondert de ___ van de zonsondergang.' },
+    { w: 'een[heid]', zin: 'Een meter is een ___ om mee te meten.' },
+    { w: 'vrij[heid]', zin: 'Op 5 mei vieren we de ___.', fout: 'vrijhijd' },
+    { w: 'gelegen[heid]', zin: 'Een feest is een mooie ___ om te dansen.' },
+    { w: 'snel[heid]', zin: 'De trein rijdt met een hoge ___.', fout: 'snelhijd' },
+    { w: 'veilig[heid]', zin: 'Voor je ___ draag je een fietshelm.' },
+    { w: 'kwali[teit]', zin: 'Deze schoenen zijn van goede ___.' },
+    { w: 'universi[teit]', zin: 'Mijn zus studeert aan de ___.' },
+    { w: 'activi[teit]', zin: 'Zwemmen is een leuke ___ in de zomer.' },
+    { w: 'elektrici[teit]', zin: 'Een lamp werkt op ___.' },
+    { w: 'identi[teit]', zin: 'Met je paspoort laat je je ___ zien.' },
+    { w: 'nationali[teit]', zin: 'Zij heeft de Nederlandse ___.' },
+    { w: 'reali[teit]', zin: 'Het was geen droom, maar ___.', fout: 'realiteid' },
+    { w: 'creativi[teit]', zin: 'Bij het knutselen gebruik je je ___.' },
+    { w: 'speciali[teit]', zin: 'Pannenkoeken bakken is de ___ van mijn opa.' },
+  ],
+  isch: [
+    { w: 'log[isch]', zin: 'Het antwoord is heel ___.' },
+    { w: 'prakt[isch]', zin: 'Een rugzak is heel ___ voor school.' },
+    { w: 'typ[isch]', zin: 'Klompen zijn ___ Nederlands.' },
+    { w: 'elektr[isch]', zin: 'Deze auto rijdt ___.' },
+    { w: 'fantast[isch]', zin: 'Het schoolfeest was ___!' },
+    { w: 'histor[isch]', zin: 'Het kasteel is een ___ gebouw.' },
+    { w: 'techn[isch]', zin: 'Mijn oom is heel ___ en repareert alles.' },
+    { w: 'mag[isch]', zin: 'De tovenaar heeft een ___ zwaard.' },
+    { w: 'trop[isch]', zin: 'In de zomer was het heet en ___.' },
+    { w: 'kom[isch]', zin: 'De film was heel ___.' },
+    { w: 'log[ische]', zin: 'Dat is een ___ oplossing.' },
+    { w: 'prakt[ische]', zin: 'Ik heb een ___ tas voor op de fiets.' },
+    { w: 'elektr[ische]', zin: 'Wij hebben een ___ fiets.' },
+    { w: 'fantast[ische]', zin: 'Wat een ___ tekening!' },
+    { w: 'typ[ische]', zin: 'Dat is een ___ fout.' },
+    { w: 'histor[ische]', zin: 'De ___ optocht trekt door de stad.' },
+  ],
+  colawoord: [
+    { w: '[c]ola', zin: 'Bij de pizza drink ik een glas ___.' },
+    { w: '[c]adeau', zin: 'Voor mijn verjaardag kreeg ik een groot ___.' },
+    { w: '[c]amping', zin: 'In de zomer slapen we in een tent op de ___.' },
+    { w: '[c]omputer', zin: 'Ik typ mijn verhaal op de ___.' },
+    { w: '[c]acao', zin: 'Chocolademelk maak je van melk en ___.' },
+    { w: '[c]lown', zin: 'De ___ heeft een rode neus.' },
+    { w: '[c]avia', zin: 'Mijn ___ eet graag komkommer.' },
+    { w: '[c]ontact', zin: 'Via de app heb ik ___ met mijn oma.' },
+    { w: '[c]lub', zin: 'Mijn broer zit bij een ___ voor hardlopen.' },
+    { w: '[c]ultuur', zin: 'In de les leren we over de ___ van andere landen.' },
+    { w: '[c]amera', zin: 'Met mijn ___ maak ik mooie foto’s.' },
+    { w: '[c]arnaval', zin: 'Met ___ verkleed ik me als piraat.' },
+    { w: '[c]actus', zin: 'Een ___ heeft scherpe stekels.' },
+    { w: '[c]ollega', zin: 'De juf drinkt koffie met een ___.' },
+    { w: 'produ[c]t', zin: 'Dit ___ kun je in de winkel kopen.' },
+    { w: 'dire[c]teur', zin: 'De ___ van de school opent het schoolfeest.' },
+  ],
+  tie: [
+    { w: 'poli[tie]', zin: 'De ___ zet de straat af.' },
+    { w: 'vakan[tie]', zin: 'In de ___ gaan we naar Frankrijk.' },
+    { w: 'informa[tie]', zin: 'Op de website staat veel ___.' },
+    { w: 'posi[tie]', zin: 'De keeper staat op de goede ___.' },
+    { w: 'tradi[tie]', zin: 'Kerst vieren is een ___ in ons gezin.' },
+    { w: 'opera[tie]', zin: 'In het ziekenhuis had opa een ___ aan zijn knie.' },
+    { w: 'adverten[tie]', zin: 'In de krant staat een ___ voor een nieuwe fiets.' },
+    { w: 'administra[tie]', zin: 'De juf doet de ___ op de computer.' },
+    { w: 'situa[tie]', zin: 'Wat doe je in een gevaarlijke ___?' },
+    { w: 'garan[tie]', zin: 'Op mijn nieuwe fiets zit twee jaar ___.' },
+    { w: 'emo[tie]', zin: 'Blij zijn is een ___.' },
+    { w: 'presta[tie]', zin: 'Tien kilometer lopen is een knappe ___.' },
+    { w: 'por[tie]', zin: 'Ik wil graag een ___ patat.' },
+  ],
+};
+
+/** Hoe het spel zelf een foute schrijfwijze maakt (voor Brons), per categorie. */
+export const FOUTE_KLANK = {
+  centwoord: { c: 's' },
+  colawoord: { c: 'k' },
+  heidteit: { heid: 'heit', teit: 'tijt' },
+  isch: { isch: 'ies', ische: 'iese' },
+  tie: { tie: 'sie' },
+};

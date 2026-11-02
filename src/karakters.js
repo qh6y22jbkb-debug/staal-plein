@@ -22,6 +22,13 @@ export const STIJLEN = {
   klaas: { huid: 0xe8b48f, shirt: 0xf59f00, haar: 0x9a9a9a, extra: ['snor', 'badge'], badge: 'klok', badgeKleur: '#e67700' },
   tijn: { huid: 0xf2c29b, shirt: 0x0ca678, haar: 0xe8590c, hoed: 'petAchter', petKleur: 0xffd43b, extra: ['badge', 'vlinderdas'], badge: '1×1', badgeKleur: '#0ca678' },
   cor: { huid: 0xd99a6c, shirt: 0x2f9e44, haar: 0x2b1a10, hoed: 'petAchter', petKleur: 0xffffff, extra: ['badge', 'snor'], badge: '!', badgeKleur: '#2b8a3e' },
+  // Spellingwereld (herhalingsblok): elk karakter met een badge van zijn categorie.
+  cisca: { huid: 0xf2c29b, shirt: 0xf59f00, haar: 0x8a4b2a, kapsel: 'staartjes', extra: ['badge', 'strik'], badge: 'c=s', badgeKleur: '#e67700' },
+  heidi: { huid: 0xe8b48f, shirt: 0xe64980, haar: 0xf2c230, kapsel: 'lang', extra: ['badge'], badge: 'heid', badgeKleur: '#c2255c' },
+  tobias: { huid: 0xf0c09a, shirt: 0x5f3dc4, haar: 0x3b2314, extra: ['badge', 'bril', 'vlinderdas'], badge: 'isch', badgeKleur: '#5f3dc4' },
+  carlo: { huid: 0xa86b45, shirt: 0xe03131, haar: 0x111111, hoed: 'petAchter', petKleur: 0xe03131, extra: ['badge'], badge: 'c=k', badgeKleur: '#c92a2a' },
+  patty: { huid: 0xd99a6c, shirt: 0x1864ab, haar: 0x2b1a10, kapsel: 'knot', hoed: 'petAchter', petKleur: 0x0b2e5c, extra: ['badge'], badge: 'tie', badgeKleur: '#1864ab' },
+  max: { huid: 0xf2c29b, shirt: 0x0ca678, haar: 0xe8590c, extra: ['badge', 'snor'], badge: 'mix', badgeKleur: '#099268' },
   lotte: { huid: 0xf2c29b, shirt: 0xc92a2a, haar: 0xf2c230, kapsel: 'staartjes', extra: ['zaklamp', 'strik'] },
 };
 
