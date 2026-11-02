@@ -73,7 +73,7 @@ scene.add(zon, zon.target);
 /* ---------- Wereld, speler, camera, besturing ---------- */
 
 const botsing = new Botsing(PLEIN);
-const wereld = bouwSchoolplein(scene, botsing, { poort: ONDERDELEN.voetbalwereld });
+const wereld = bouwSchoolplein(scene, botsing, { poort: ONDERDELEN.voetbalwereld, ingangBord: ONDERDELEN.werkwoordenwereld ? TEKSTEN.pleinTitel : null });
 const kramen = bouwKramen(scene, botsing);
 const boetiek = bouwBoetiek(scene, botsing);
 // De Leeskraam telt niet mee voor stempels en poort. Staat hij uit (src/data/onderdelen.js), dan wordt hij niet gebouwd.

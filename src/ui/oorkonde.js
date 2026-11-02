@@ -1,6 +1,6 @@
 import { KRAMEN, TEKSTEN } from '../data/oefeningen.js';
+import { niveauOpKaart } from './stempelkaart.js';
 import { voortgang } from '../voortgang.js';
-import { sterren } from '../minispellen/basis.js';
 
 /** "Staal Blok 2 Kampioen!" – oorkonde op het scherm (en af te drukken). */
 export class Oorkonde {
@@ -27,7 +27,7 @@ export class Oorkonde {
           <input class="ok-naam" type="text" maxlength="30" placeholder="${TEKSTEN.oorkondeNaam}" value="${voortgang.naam.replace(/"/g, '&quot;')}" autocomplete="off" spellcheck="false">
           <p>${TEKSTEN.oorkondeTekst}</p>
           <div class="ok-kramen">
-            ${KRAMEN.map((k) => `<div><span>${k.icoon}</span><small>${sterren(Math.max(1, voortgang.niveau(k.id)))}</small></div>`).join('')}
+            ${KRAMEN.map((k) => `<div><span>${k.icoon}</span><small>${niveauOpKaart(Math.max(1, voortgang.niveau(k.id)))}</small></div>`).join('')}
           </div>
           <div class="ok-onder">
             <span>${datum}</span>

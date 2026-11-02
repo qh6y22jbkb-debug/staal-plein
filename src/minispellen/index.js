@@ -5,6 +5,7 @@ import { DrummerSpel } from './drummer.js';
 import { VoorvoegselSpel } from './voorvoegsel.js';
 import { PoffertjesSpel } from './poffertjes.js';
 import { IjsSpel } from './ijs.js';
+import { WerkwoordSpel } from './werkwoordspel.js';
 import '../ui/minispellen.css';
 import { geluid } from '../geluid.js';
 import { voorlezen } from '../voorlezen.js';
@@ -17,6 +18,12 @@ const SPEL_PER_KRAAM = {
   voorvoegsel: VoorvoegselSpel,
   poffertjes: PoffertjesSpel,
   ijs: IjsSpel,
+  // Werkwoordenwereld (herhalingsblok): één spel voor alle vijf de kramen.
+  sterk: WerkwoordSpel,
+  tegenwoordig: WerkwoordSpel,
+  verleden: WerkwoordSpel,
+  voltooid: WerkwoordSpel,
+  gebiedend: WerkwoordSpel,
 };
 
 /** Start het minispel van een kraam. */

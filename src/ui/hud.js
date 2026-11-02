@@ -9,7 +9,7 @@ export class Hud {
     this.voorlezen = voorlezen;
     this.geluid = geluid;
     laag.insertAdjacentHTML('beforeend', `
-      <div class="titel">Schoolplein De Bunders</div>
+      <div class="titel">${TEKSTEN.pleinTitel ?? 'Schoolplein De Bunders'}</div>
       <div class="hud-rechts">
         <div class="hud-knoppen">
           <button type="button" class="rond" data-knop="kast" title="Kledingkast (K)" aria-label="Kledingkast">👕</button>

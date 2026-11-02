@@ -1,9 +1,16 @@
 import { KRAMEN } from '../data/oefeningen.js';
 import { voortgang } from '../voortgang.js';
 import { sterren } from '../minispellen/basis.js';
+import { ONDERDELEN } from '../data/onderdelen.js';
+
+/** Onder een vakje: ★★☆ (blok 2) of de medaille die je hebt (Werkwoordenwereld). */
+export function niveauOpKaart(niveau) {
+  if (!niveau) return '';
+  return ONDERDELEN.werkwoordenwereld ? ['🥉', '🥈', '🥇'][niveau - 1] : sterren(niveau);
+}
 
 /**
- * De stempelkaart in beeld: 6 vakjes, één per kraam.
+ * De stempelkaart in beeld: één vakje per kraam.
  * Onder elk vakje zie je hoeveel niveaus je al gehaald hebt; bij 3 van de 3 komt de stempel.
  */
 export class Stempelkaart {
@@ -32,10 +39,10 @@ export class Stempelkaart {
     for (const vak of this.el.querySelectorAll('.sk-vak')) {
       const niveau = voortgang.niveau(vak.dataset.id);
       vak.classList.toggle('gestempeld', voortgang.heeftStempel(vak.dataset.id));
-      vak.querySelector('.sk-sterren').textContent = niveau ? sterren(niveau) : '';
+      vak.querySelector('.sk-sterren').textContent = niveauOpKaart(niveau);
       vak.title = `${vak.dataset.naam}: ${niveau} van de 3 niveaus`;
     }
-    this.teller.textContent = `${voortgang.aantal}/6`;
+    this.teller.textContent = `${voortgang.aantal}/${KRAMEN.length}`;
     this.oorkondeKnop.hidden = !voortgang.kampioen;
   }
 

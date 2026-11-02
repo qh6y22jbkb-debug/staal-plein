@@ -12,7 +12,17 @@ const UITERLIJK = {
   voorvoegsel: { kleur: 0x8d5bd6, luifel: ['#9c36b5', '#ffffff'], bord: '#9c36b5', stem: 1.35, karakters: ['vera'], versier: versierLetters },
   poffertjes: { kleur: 0xff8a2a, luifel: ['#fd7e14', '#ffffff'], bord: '#e8590c', stem: 1, stemmen: { 'Peter Persoonsvorm': 0.75, 'Olga Onderwerp': 1.35 }, karakters: ['peter', 'olga'], versier: versierPoffertjes },
   ijs: { kleur: 0x38d9a9, luifel: ['#12b886', '#e6fcf5'], bord: '#0ca678', stem: 1.1, karakters: ['gijs'], versier: versierIjs },
+  // Werkwoordenwereld (herhalingsblok): bekende karakters met een nieuw onderwerp, plus Coach Cor.
+  sterk: { kleur: 0x2a6fb5, luifel: ['#1c7ed6', '#ffd43b'], bord: '#1c7ed6', stem: 0.9, karakters: ['dirk'], versier: versierDrums },
+  tegenwoordig: { kleur: 0xf3a6c0, luifel: ['#f783ac', '#fff0f6'], bord: '#e64980', stem: 1.25, karakters: ['tessa'], versier: versierTaarten },
+  verleden: { kleur: 0x8b3a2b, luifel: ['#d9473e', '#ffffff'], bord: '#d9473e', stem: 0.7, karakters: ['kapitein'], versier: versierPiraat },
+  voltooid: { kleur: 0x8d5bd6, luifel: ['#9c36b5', '#ffffff'], bord: '#9c36b5', stem: 1.35, karakters: ['vera'], versier: versierLetters },
+  gebiedend: { kleur: 0x2f9e44, luifel: ['#2f9e44', '#ffffff'], bord: '#2b8a3e', stem: 0.85, karakters: ['cor'], versier: versierSport },
 };
+
+// Werkwoordenwereld: vier kramen in de U, de vijfde op de plek van de Leeskraam (links bij de ingang).
+const HOEKEN_WERKWOORD = [205, 250, 295, 340];
+const LOSSE_PLEK = { x: -14, z: 12 };
 
 // De kramen staan in een U rond het midden van het plein; de opening wijst naar de ingang (zuid).
 const MIDDEN = new THREE.Vector2(0, 5);
@@ -21,8 +31,13 @@ const HOEKEN = [200, 228, 256, 284, 312, 340];
 
 /** Bouwt de zes kramen. Geeft per kraam: data, groep, praatplek en karakters. */
 export function bouwKramen(scene, botsing) {
+  const werkwoord = KRAMEN.length === 5;
   return KRAMEN.map((data, i) => {
-    const hoek = THREE.MathUtils.degToRad(HOEKEN[i]);
+    if (werkwoord && i === 4) {
+      const { x, z } = LOSSE_PLEK;
+      return bouwKraam(scene, botsing, data, UITERLIJK[data.id], x, z, Math.atan2(2 - x, 20 - z)); // voorkant richting de ingang
+    }
+    const hoek = THREE.MathUtils.degToRad((werkwoord ? HOEKEN_WERKWOORD : HOEKEN)[i]);
     const x = MIDDEN.x + Math.cos(hoek) * STRAAL;
     const z = MIDDEN.y + Math.sin(hoek) * STRAAL;
     const draai = Math.atan2(MIDDEN.x - x, MIDDEN.y - z); // voorkant naar het midden
@@ -318,6 +333,18 @@ function versierTaarten(g) {
     new THREE.MeshLambertMaterial({ color: 0xd0ebff, transparent: true, opacity: 0.35 }));
   stolp.position.set(0.45, BLAD + 0.04, 0.7);
   g.add(stolp);
+}
+
+/** Coach Cor: pionnen, een bal en een fluitje op de toonbank. */
+function versierSport(g) {
+  for (const [x, z] of [[-1.35, 0.6], [-0.95, 0.8], [1.3, 0.65]]) {
+    kegel(0.13, 0.32, 0xff6b00, x, BLAD + 0.16, z, g, 10);
+    doos(0.3, 0.03, 0.3, 0xff6b00, x, BLAD + 0.015, z, g);
+  }
+  bol(0.17, 0xf8f9fa, 0.75, BLAD + 0.17, 0.75, g);
+  bol(0.06, 0x212529, 0.75, BLAD + 0.33, 0.75, g);
+  // Fluitje aan een koord.
+  cilinder(0.05, 0.16, 0xadb5bd, 0.1, BLAD + 0.05, 0.85, g, 8).rotation.z = Math.PI / 2;
 }
 
 function versierDrums(g) {

@@ -3,6 +3,8 @@
  * niveaus: { kraamId: hoogste niveau (1-3) waarop een ronde gehaald is }
  * Een kraam krijgt pas een stempel als alle 3 de niveaus gehaald zijn.
  */
+import { KRAMEN } from './data/oefeningen.js';
+
 const SLEUTEL = 'staal-blok2-voortgang';
 export const NIVEAU_VOOR_STEMPEL = 3;
 
@@ -27,7 +29,7 @@ export const voortgang = {
   niveau(id) { return staat.niveaus[id] ?? 0; },
   heeftStempel(id) { return this.niveau(id) >= NIVEAU_VOOR_STEMPEL; },
   /** Aantal stempels (kramen waar alle 3 de niveaus gehaald zijn). */
-  get aantal() { return Object.keys(staat.niveaus).filter((id) => this.heeftStempel(id)).length; },
+  get aantal() { return KRAMEN.filter((k) => this.heeftStempel(k.id)).length; }, // alleen de kramen die nu op het plein staan
   get kampioen() { return staat.kampioen; },
   get naam() { return staat.naam; },
   set naam(n) { staat.naam = n; bewaar(); },

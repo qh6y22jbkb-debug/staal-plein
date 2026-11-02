@@ -21,6 +21,7 @@ export const STIJLEN = {
   dina: { huid: 0xa86b45, shirt: 0x7048e8, haar: 0x111111, kapsel: 'knot', extra: ['badge'], badge: ':', badgeKleur: '#7048e8' },
   klaas: { huid: 0xe8b48f, shirt: 0xf59f00, haar: 0x9a9a9a, extra: ['snor', 'badge'], badge: 'klok', badgeKleur: '#e67700' },
   tijn: { huid: 0xf2c29b, shirt: 0x0ca678, haar: 0xe8590c, hoed: 'petAchter', petKleur: 0xffd43b, extra: ['badge', 'vlinderdas'], badge: '1×1', badgeKleur: '#0ca678' },
+  cor: { huid: 0xd99a6c, shirt: 0x2f9e44, haar: 0x2b1a10, hoed: 'petAchter', petKleur: 0xffffff, extra: ['badge', 'snor'], badge: '!', badgeKleur: '#2b8a3e' },
   lotte: { huid: 0xf2c29b, shirt: 0xc92a2a, haar: 0xf2c230, kapsel: 'staartjes', extra: ['zaklamp', 'strik'] },
 };
 

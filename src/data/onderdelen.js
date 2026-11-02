@@ -11,6 +11,10 @@
  * ============================================================
  */
 export const ONDERDELEN = {
+  // Werkwoordenwereld (herhalingsblok): de vijf werkwoordkramen op het schoolplein (src/data/werkwoorden.js).
+  // Uit = de zes taalkramen van Staal blok 2 komen terug (src/data/taalkramen-blok2.js).
+  werkwoordenwereld: true,
+
   // De Voetbalwereld achter de poort in het oostelijke hek (teksten: src/data/voetbal.js, code: src/voetbal/).
   // Uit = er staat een gewoon hek, de voetbalspullen staan niet in de winkel en de Bunders Beker staat niet op het plein.
   voetbalwereld: false,

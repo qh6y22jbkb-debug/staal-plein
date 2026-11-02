@@ -28,8 +28,11 @@ const KLEUR = {
  * Bouwt het hele schoolplein.
  * Geeft terug: blokkers (voor de camera) en een update-functie (wolken, vlag, schommel).
  */
-/** @param opties.poort  false = geen opening voor de poort in het oostelijke hek (Voetbalwereld uit). */
-export function bouwSchoolplein(scene, botsing, { poort = true } = {}) {
+/**
+ * @param opties.poort       false = geen opening voor de poort in het oostelijke hek (Voetbalwereld uit).
+ * @param opties.ingangBord  tekst op een boog boven de ingang (bijv. 'Werkwoordenwereld'), of null.
+ */
+export function bouwSchoolplein(scene, botsing, { poort = true, ingangBord = null } = {}) {
   const blokkers = [];
   const animaties = [];
   const stammen = new Stammen(scene);
@@ -40,6 +43,7 @@ export function bouwSchoolplein(scene, botsing, { poort = true } = {}) {
   bouwFietsenhok(scene, botsing, blokkers);
   bouwFietsenrij(scene, botsing);
   bouwHek(scene, poort);
+  if (ingangBord) bouwIngangBord(scene, ingangBord);
   bouwKeienzand(scene, botsing, -6, -14);
   bouwBalanceerpalen(scene, botsing, stammen, 11, -15);
   bouwTouwschommel(scene, botsing, -24, -10, animaties);
@@ -354,6 +358,23 @@ function bouwHek(scene, metPoort = true) {
     cilinder(0.16, 2.2, KLEUR.hek, x, 1.1, maxZ, scene);
     bol(0.22, KLEUR.geel, x, 2.3, maxZ, scene);
   }
+}
+
+/** Boog met een naambord boven de ingang (zuidkant), van twee kanten leesbaar. */
+function bouwIngangBord(scene, tekst) {
+  const z = PLEIN.maxZ;
+  for (const x of [-3.4, 3.4]) {
+    cilinder(0.12, 4.6, KLEUR.hek, x, 2.3, z, scene, 8).userData.geenKlik = true;
+    bol(0.2, KLEUR.geel, x, 4.7, z, scene).userData.geenKlik = true;
+  }
+  const tex = tekstTextuur(tekst, { rand: '#2b8a3e' });
+  const bordMat = new THREE.MeshLambertMaterial({ map: tex });
+  const rand = mat(0xffffff);
+  const bord = new THREE.Mesh(new THREE.BoxGeometry(6.4, 1.2, 0.1), [rand, rand, rand, rand, bordMat, bordMat]);
+  bord.position.set(0, 3.9, z);
+  bord.castShadow = true;
+  bord.userData.geenKlik = true;
+  scene.add(bord);
 }
 
 /* ---------- Speelplekken (naar de foto's) ---------- */

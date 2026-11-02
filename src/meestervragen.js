@@ -1,5 +1,8 @@
 import { SPELLEN, MEESTER_VRAAG } from './data/oefeningen.js';
 import { willekeurig } from './minispellen/basis.js';
+import { ONDERDELEN } from './data/onderdelen.js';
+import { WERKWOORD_SPELLEN, WERKWOORD_MEESTER } from './data/werkwoorden.js';
+import { delenVan, isGoed, goedeAntwoorden } from './minispellen/werkwoordcontrole.js';
 
 /** Kleine letters, zonder leestekens, zonder "ik"/"wij" ervoor. */
 function schoon(t) {
@@ -16,8 +19,33 @@ const makkelijk = (lijst) => lijst.filter((v) => (v.niveau ?? 1) <= 2);
  * vakken = aantal invulvakken (één per woord van het antwoord).
  */
 export function maakMeesterVraag() {
-  const vraag = maakVraag();
+  const vraag = ONDERDELEN.werkwoordenwereld ? maakWerkwoordVraag() : maakVraag();
   return { vakken: 1, ...vraag };
+}
+
+/**
+ * Werkwoordenwereld: een Zilver-vraag (typen) van een van de vijf kramen.
+ * Zo blijft het eerlijk voor iedereen en sluit het aan bij wat de kinderen bij de kramen oefenen.
+ */
+function maakWerkwoordVraag() {
+  const onderwerp = willekeurig(Object.keys(WERKWOORD_MEESTER));
+  const info = WERKWOORD_MEESTER[onderwerp];
+  const spel = WERKWOORD_SPELLEN[onderwerp];
+  const kandidaten = spel.vragen.filter((v) => v.niveau === 2 && delenVan(v).length === 1 && v.zin?.includes('___'));
+  const v = willekeurig(kandidaten);
+  const antwoord = goedeAntwoorden(v)[0];
+  const zin = v.zin.replace('___', '_____');
+  return {
+    onderwerp,
+    intro: info.intro,
+    hint: (v.tip ?? spel.tips[1]).replace(/\*\*/g, ''),
+    vraag: info.vraag,
+    voorbeeld: `${zin} <span class="mv-werkwoord">(${v.ww})</span>`,
+    controleer: (t) => isGoed(v, t),
+    antwoord,
+    // Gat vooraan in de zin? Dan met een hoofdletter (Wees stil!).
+    uitleg: v.zin.replace('___', `<mark>${v.zin.startsWith('___') ? antwoord.charAt(0).toUpperCase() + antwoord.slice(1) : antwoord}</mark>`),
+  };
 }
 
 function maakVraag() {
