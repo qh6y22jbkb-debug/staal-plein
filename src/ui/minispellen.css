@@ -460,3 +460,26 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; 
 .sp-allesgoed { align-self: center; font-size: 22px; border-color: #2b8a3e; box-shadow: 0 5px 0 #2b8a3e; }
 .sp-woord s { color: #c92a2a; }
 @media (max-width: 600px) { .sp-jachtzin, .sp-woordje { font-size: 18px; } }
+
+/* ============ De Bieb (herhalingsblok): zinsontleding met woordblokjes ============ */
+.bb-zin {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 6px;
+  background: #fff; border: 4px solid #dee2e6; border-radius: 18px; padding: 14px 16px; max-width: 100%;
+}
+.bb-woord {
+  font: inherit; font-size: 26px; cursor: pointer; color: #212529; position: relative;
+  background: #f8f9fa; border: 3px solid #ced4da; border-radius: 10px; padding: 2px 10px 4px;
+}
+.bb-woord:hover:not(:disabled) { border-color: var(--kraamkleur); }
+.bb-woord.gekozen { background: #fff3bf; border-color: #f59f00; box-shadow: 0 3px 0 #f59f00; }
+.bb-teken { font-size: 26px; margin-left: -4px; }
+/* Gevonden zinsdelen houden hun kleur (bij Goud zie je zo alle stappen terug). */
+.bb-woord.zd-pv { border-bottom: 6px solid #1c7ed6; }
+.bb-woord.zd-ow { background: #d3f9d8; border-color: #2f9e44; }
+.bb-woord.zd-wg { outline: 3px dashed #0ca678; outline-offset: 2px; }
+.bb-woord.zd-lv { background: #ffe8cc; border-color: #e8590c; }
+.bb-woord.zd-vz { background: #e5dbff; border-color: #7048e8; }
+.bb-woord:disabled { cursor: default; }
+.bb-knoppen .ww-keuze { font-size: 22px; padding: 8px 18px; }
+.bb-klaar { border-color: #2b8a3e; box-shadow: 0 5px 0 #2b8a3e; }
+@media (max-width: 600px) { .bb-woord, .bb-teken { font-size: 19px; } }

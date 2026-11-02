@@ -29,6 +29,9 @@ export const STIJLEN = {
   carlo: { huid: 0xa86b45, shirt: 0xe03131, haar: 0x111111, hoed: 'petAchter', petKleur: 0xe03131, extra: ['badge'], badge: 'c=k', badgeKleur: '#c92a2a' },
   patty: { huid: 0xd99a6c, shirt: 0x1864ab, haar: 0x2b1a10, kapsel: 'knot', hoed: 'petAchter', petKleur: 0x0b2e5c, extra: ['badge'], badge: 'tie', badgeKleur: '#1864ab' },
   max: { huid: 0xf2c29b, shirt: 0x0ca678, haar: 0xe8590c, extra: ['badge', 'snor'], badge: 'mix', badgeKleur: '#099268' },
+  // De Bieb (herhalingsblok): Peter, Olga en Gijs doen ook mee; nieuw zijn Lies en Bob.
+  lies: { huid: 0xf2c29b, shirt: 0x2b8a3e, haar: 0x9a9a9a, kapsel: 'knot', extra: ['bril', 'badge'], badge: 'lv', badgeKleur: '#e8590c' },
+  bob: { huid: 0xe8b48f, shirt: 0x7048e8, haar: 0x6b3e1f, hoed: 'petAchter', petKleur: 0x82c91e, extra: ['bril', 'badge'], badge: 'op', badgeKleur: '#7048e8' },
   lotte: { huid: 0xf2c29b, shirt: 0xc92a2a, haar: 0xf2c230, kapsel: 'staartjes', extra: ['zaklamp', 'strik'] },
 };
 

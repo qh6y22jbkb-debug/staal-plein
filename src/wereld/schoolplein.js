@@ -11,6 +11,8 @@ export const PLEIN = { minX: -40, maxX: 40, minZ: -30, maxZ: 30 };
 export const STARTPLEK = new THREE.Vector3(0, 0, 22);
 /** Voor de voordeur van de school (naar Leergroep 3). */
 export const SCHOOLDEUR = new THREE.Vector3(0, 0, -20.6);
+// De deur van de Bieb (herhalingsblok), links van de hoofdingang in dezelfde gevel.
+export const BIEBDEUR = new THREE.Vector3(-8.9, 0, -20.6);
 /** Voor de deur van de gymzaal (rechts naast de school). */
 export const GYMDEUR = new THREE.Vector3(30.0, 0, -16.8);
 
@@ -31,14 +33,15 @@ const KLEUR = {
 /**
  * @param opties.poort       false = geen opening voor de poort in het oostelijke hek (Voetbalwereld uit).
  * @param opties.ingangBord  tekst op een boog boven de ingang (bijv. 'Werkwoordenwereld'), of null.
+ * @param opties.biebBord    tekst op het bord boven de deur van de Bieb, of null (geen Bieb).
  */
-export function bouwSchoolplein(scene, botsing, { poort = true, ingangBord = null } = {}) {
+export function bouwSchoolplein(scene, botsing, { poort = true, ingangBord = null, biebBord = null } = {}) {
   const blokkers = [];
   const animaties = [];
   const stammen = new Stammen(scene);
 
   bouwGrond(scene);
-  bouwSchool(scene, botsing, blokkers);
+  bouwSchool(scene, botsing, blokkers, biebBord);
   const gymDeur = bouwGymzaal(scene, botsing, blokkers);
   bouwFietsenhok(scene, botsing, blokkers);
   bouwFietsenrij(scene, botsing);
@@ -164,7 +167,7 @@ function bouwGrond(scene) {
 
 /* ---------- Gebouwen ---------- */
 
-function bouwSchool(scene, botsing, blokkers) {
+function bouwSchool(scene, botsing, blokkers, biebBord = null) {
   const g = new THREE.Group();
   scene.add(g);
   const voor = -22; // voorgevel
@@ -179,6 +182,7 @@ function bouwSchool(scene, botsing, blokkers) {
   for (const y of [2.1, 5.1]) {
     for (let x = -26.5; x <= 26.5; x += 4.4) {
       if (Math.abs(x) < 3.5) continue;
+      if (biebBord && y < 3 && Math.abs(x - BIEBDEUR.x) < 1) continue; // daar zit de deur van de Bieb
       doos(3.2, 2.2, 0.12, 0x2f3438, x, y, voor + 0.06, g);
       doos(2.9, 1.9, 0.14, KLEUR.glas, x, y, voor + 0.08, g);
       doos(0.1, 1.9, 0.18, 0x2f3438, x, y, voor + 0.1, g);
@@ -204,6 +208,21 @@ function bouwSchool(scene, botsing, blokkers) {
   cilinder(0.12, 3.5, 0x3a3f44, 2.7, 1.75, voor + 2.4, g);
   botsing.voegCirkelToe(-2.7, voor + 2.4, 0.15, 3.6);
   botsing.voegCirkelToe(2.7, voor + 2.4, 0.15, 3.6);
+
+  // Deur van de Bieb (open glazen deur met warm licht erachter) en een bord erboven.
+  if (biebBord) {
+    const bx = BIEBDEUR.x;
+    doos(2.4, 2.8, 0.2, 0x2f3438, bx, 1.4, voor + 0.05, g);
+    doos(2.0, 2.55, 0.22, 0x7a5a3a, bx, 1.28, voor + 0.07, g);
+    doos(0.95, 2.5, 0.1, KLEUR.glas, bx - 1.45, 1.25, voor + 0.2, g); // deur opzij
+    doos(1.8, 0.04, 0.5, 0xd3d0c8, bx, 0.03, voor + 0.25, g); // drempel
+    const biebBordMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.6, 0.8),
+      new THREE.MeshLambertMaterial({ map: tekstTextuur(biebBord, { rand: '#7048e8', grootte: 110 }) }),
+    );
+    biebBordMesh.position.set(bx, 3.3, voor + 0.1);
+    g.add(biebBordMesh);
+  }
 
   // Naambord.
   const bord = new THREE.Mesh(

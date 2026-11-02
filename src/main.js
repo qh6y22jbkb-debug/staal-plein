@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import './style.css';
-import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR } from './wereld/schoolplein.js';
+import { bouwSchoolplein, PLEIN, STARTPLEK, SCHOOLDEUR, GYMDEUR, BIEBDEUR } from './wereld/schoolplein.js';
+import { BIEB, BIEBKAART, BIEB_TEKSTEN, BIEB_PLEKKEN } from './data/bieb.js';
+import { Biebkaart } from './ui/biebkaart.js';
+import { biebvoortgang } from './biebvoortgang.js';
 import { GYM, GYMTIJD } from './data/gym.js';
 import { gymtijd, tijdInWoorden, tijdOpKlok } from './gymtijd.js';
 import { LOKALEN as REKEN_LOKALEN, REKEN_TEKSTEN, REKEN_TEKSTEN_SPEL, REKENKAART } from './data/rekenen.js';
@@ -77,7 +80,7 @@ scene.add(zon, zon.target);
 /* ---------- Wereld, speler, camera, besturing ---------- */
 
 const botsing = new Botsing(PLEIN);
-const wereld = bouwSchoolplein(scene, botsing, { poort: ONDERDELEN.voetbalwereld, ingangBord: ONDERDELEN.werkwoordenwereld ? TEKSTEN.pleinTitel : null });
+const wereld = bouwSchoolplein(scene, botsing, { poort: ONDERDELEN.voetbalwereld, ingangBord: ONDERDELEN.werkwoordenwereld ? TEKSTEN.pleinTitel : null, biebBord: ONDERDELEN.bieb ? BIEB.naam : null });
 const kramen = bouwKramen(scene, botsing);
 const boetiek = bouwBoetiek(scene, botsing);
 // De Leeskraam telt niet mee voor stempels en poort. Staat hij uit (src/data/onderdelen.js), dan wordt hij niet gebouwd.
@@ -111,9 +114,10 @@ const stempelkaart = new Stempelkaart(uiLaag, Object.fromEntries(kramen.map((k) 
 // In de school zie je de Rekenkaart of de Spellingkaart in plaats van de stempelkaart.
 const rekenkaart = SCHOOL_SOORT === 'rekenen' ? new Rekenkaart(uiLaag) : null;
 const spellingkaart = SCHOOL_SOORT === 'spelling' ? new Spellingkaart(uiLaag) : null;
+const biebkaart = ONDERDELEN.bieb ? new Biebkaart(uiLaag) : null; // in de Bieb
 
 /* ---------- Gymtijd: verdiend met stempels, te zien op de kaarten, loopt af in de gymzaal ---------- */
-const gymtijdLabels = [stempelkaart.el, rekenkaart?.el, spellingkaart?.el].filter(Boolean).map((kaart) => {
+const gymtijdLabels = [stempelkaart.el, rekenkaart?.el, spellingkaart?.el, biebkaart?.el].filter(Boolean).map((kaart) => {
   const e = document.createElement('div');
   e.className = 'sk-gymtijd';
   kaart.appendChild(e);
@@ -254,7 +258,8 @@ function startGesprek(kraam, toestemming = false) {
   volgCam.draaiNaar(Math.atan2(-dx, -dz), 0.38);
   volgCam.zetGesprek(kraam.groep, binnen ? { hoogte: 5.6 } : undefined); // binnen: over de lokaalmuur heen kijken
 
-  const opSpelen = kraam.isLeeskraam ? pakKaartjes : kraam.isRekenkraam ? speelRekenspel : kraam.isSpellingkraam ? speelSpellingspel : speelMinispel;
+  const opSpelen = kraam.isLeeskraam ? pakKaartjes : kraam.isRekenkraam ? speelRekenspel : kraam.isSpellingkraam ? speelSpellingspel
+    : kraam.isBiebplek ? speelBiebspel : speelMinispel;
   dialoog.toon(kraam, { opSpelen, opSluiten: terugNaarPlein });
 }
 
@@ -333,6 +338,53 @@ async function speelSpellingspel(kraam) {
   });
   spel.start();
   actiefSpel = spel;
+}
+
+/* ---------- Leesplekken in de Bieb (herhalingsblok) ---------- */
+
+async function speelBiebspel(kraam) {
+  // Het biebspel wordt pas geladen als je er een start.
+  const { BiebSpel } = await import('./bieb/biebspel.js');
+  dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
+  dialoog.sluit();
+  const p = kraam.data;
+  const spel = new BiebSpel({
+    laag: uiLaag, kraam, data: { titel: p.onderwerp.charAt(0).toUpperCase() + p.onderwerp.slice(1), opdracht: '', niveaus: p.niveaus },
+    geluid, voorlezen, muntenTotaal: () => munten.totaal,
+    beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
+    opKlaar: (k, { niveau }) => {
+      const nieuw = biebvoortgang.rondeGehaald(k.data.id, niveau);
+      if (!nieuw) return '';
+      nieuweMedaille = k.data.id;
+      return BIEB_TEKSTEN.niveauGehaald.replace('{medaille}', BIEB_TEKSTEN.niveauNamen[nieuw - 1]).replace('{naam}', k.data.naam) + (nieuw === 3 ? verdienGymtijd() : '');
+    },
+    opSluiten: () => {
+      actiefSpel = null;
+      klok.update();
+      terugNaarPlein();
+      if (!nieuweMedaille) return;
+      const id = nieuweMedaille;
+      nieuweMedaille = null;
+      setTimeout(() => {
+        biebkaart?.stempel(id);
+        geluid.stempel();
+        if (Biebkaart.vol && !biebvoortgang.kampioen) setTimeout(startBiebFeest, 900);
+      }, 350);
+    },
+  });
+  spel.start();
+  actiefSpel = spel;
+}
+
+/** Alle leesplekken op Goud: feest in de Bieb. */
+function startBiebFeest() {
+  biebvoortgang.zetKampioen();
+  biebkaart?.ververs();
+  geluid.feestmuziek();
+  confetti(220);
+  toonBanner(BIEBKAART.feestTitel);
+  voorlezen.zeg(BIEBKAART.feestTekst);
+  hud.toonMelding(BIEBKAART.feestTekst);
 }
 
 /** Alle spellinglokalen op Goud: feest in de Spellingwereld. */
@@ -588,6 +640,10 @@ function isBijSchooldeur() {
   return Math.hypot(speler.positie.x - SCHOOLDEUR.x, speler.positie.z - SCHOOLDEUR.z) < 2.6;
 }
 
+function isBijBiebdeur() {
+  return ONDERDELEN.bieb && Math.hypot(speler.positie.x - BIEBDEUR.x, speler.positie.z - BIEBDEUR.z) < 2.8;
+}
+
 function isBijGymdeur() {
   return Math.hypot(speler.positie.x - GYMDEUR.x, speler.positie.z - GYMDEUR.z) < 2.4;
 }
@@ -598,6 +654,8 @@ const GEBOUWEN = {
     buiten: { x: SCHOOLDEUR.x, z: SCHOOLDEUR.z + 3.4, richting: 0 }, deurTekst: LEERGROEP },
   gym: { titel: GYM.naam, welkom: GYM.welkom, klasse: 'in-gym', camera: { pitch: 0.6, afstand: 9 },
     buiten: { x: GYMDEUR.x - 3, z: GYMDEUR.z, richting: -Math.PI / 2 }, deurTekst: GYM },
+  bieb: { titel: BIEB.naam, welkom: BIEB.welkom, klasse: 'in-bieb', camera: { pitch: 0.62, afstand: 6.5 },
+    buiten: { x: BIEBDEUR.x, z: BIEBDEUR.z + 3.2, richting: 0 }, deurTekst: BIEB },
 };
 
 function zetSpelerIn(doelScene) {
@@ -639,6 +697,9 @@ async function naarBinnen(soort = 'school') {
       gymtijd,
       opTijdOp: () => naarBuiten(), // gymtijd op: fluitje en terug naar het plein
     });
+  } else if (soort === 'bieb') {
+    const { Bieb } = await import('./binnen/bieb.js');
+    binnen = new Bieb();
   } else {
     const { Leergroep3 } = await import('./binnen/leergroep3.js');
     binnen = new Leergroep3({ wereld: SCHOOL_SOORT });
@@ -663,6 +724,7 @@ async function naarBinnen(soort = 'school') {
   bezigMetWisselen = false;
   if (binnen?.soort === 'school' && rekenkaart && Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
   if (binnen?.soort === 'school' && spellingkaart && Spellingkaart.vol && !spellingvoortgang.kampioen) setTimeout(startSpellingFeest, 1500);
+  if (binnen?.soort === 'bieb' && biebkaart && Biebkaart.vol && !biebvoortgang.kampioen) setTimeout(startBiebFeest, 1500);
 }
 
 /** Leergroep 3 opruimen en de speler terug op het plein zetten (zonder overgang). */
@@ -675,7 +737,7 @@ function ruimBinnenOp() {
   volgCam.pitch = pleinCamera.pitch;
   volgCam.afstand = pleinCamera.afstand;
   hud.zetTitel(null);
-  document.body.classList.remove('in-school', 'in-gym');
+  document.body.classList.remove('in-school', 'in-gym', 'in-bieb');
 }
 
 async function naarBuiten() {
@@ -761,6 +823,8 @@ hud.opOpnieuw = () => {
   rekenkaart?.ververs();
   spellingvoortgang.wis();
   spellingkaart?.ververs();
+  biebvoortgang.wis();
+  biebkaart?.ververs();
   zetKraamSterren();
   voetbalstand.wis();
   poort.zetDicht();
@@ -830,6 +894,7 @@ function praatMetDichtste() {
   else if (dichtsteMeester) spreekMeesterAan(dichtsteMeester);
   else if (dichtsteKind) spreekKindAan(dichtsteKind);
   else if (isBijSchooldeur()) probeerNaarBinnen();
+  else if (isBijBiebdeur()) naarBinnen('bieb');
   else if (isBijGymdeur()) {
     if (gymtijd.heeftTijd) naarBinnen('gym');
     else { hud.toonMelding(GYMTIJD.deurDicht); geluid.bijna(); } // zonder gymtijd is de deur dicht
@@ -925,6 +990,8 @@ function frame() {
       hud.toonWolkje((besturing.isTouch ? TEKSTEN.kindTik : TEKSTEN.kindToets).replace('{naam}', dichtsteKind.naam));
     } else if (isBijSchooldeur()) {
       hud.toonWolkje(!SCHOOL_SOORT ? LEERGROEP.binnenkort : besturing.isTouch ? LEERGROEP.naarBinnenTik : LEERGROEP.naarBinnenToets);
+    } else if (isBijBiebdeur()) {
+      hud.toonWolkje(besturing.isTouch ? BIEB.naarBinnenTik : BIEB.naarBinnenToets);
     } else if (isBijGymdeur()) {
       const tijd = tijdInWoorden(gymtijd.seconden);
       hud.toonWolkje(!gymtijd.heeftTijd ? GYMTIJD.deurDicht : (besturing.isTouch ? GYMTIJD.deurOpenTik : GYMTIJD.deurOpen).replace('{tijd}', tijd));
@@ -1062,6 +1129,9 @@ function speelAllesVrij() {
   for (const l of SPELLING_ACTIEF) spellingvoortgang.rondeGehaald(l.id, 3); // alle spellinglokalen op Goud
   spellingvoortgang.zetKampioen();
   spellingkaart?.ververs();
+  for (const p of BIEB_PLEKKEN) biebvoortgang.rondeGehaald(p.id, 3); // alle leesplekken op Goud
+  biebvoortgang.zetKampioen();
+  biebkaart?.ververs();
   kledingkast.geefAlles(KLEDING.map((k) => k.id));
   dansbezit.geefAlles();
   vervoerbezit.geefAlles();
@@ -1112,6 +1182,15 @@ if (TEST.geheimeToetsF9) {
       for (const l of SPELLING_ACTIEF) spellingvoortgang.rondeGehaald(l.id, 3);
       spellingkaart.ververs();
     }
+    if (biebkaart) {
+      for (const p of BIEB_PLEKKEN) biebvoortgang.rondeGehaald(p.id, 3);
+      biebkaart.ververs();
+    }
+    if (binnen?.soort === 'bieb') {
+      hud.toonMelding(BIEBKAART.testtoets);
+      if (!biebvoortgang.kampioen) setTimeout(startBiebFeest, 600);
+      return;
+    }
     if (binnen?.soort === 'school') {
       hud.toonMelding(spellingkaart ? SPELLINGKAART.testtoets : REKENKAART.testtoets);
       for (const k of kramen) voortgang.rondeGehaald(k.data.id, 3);
@@ -1139,4 +1218,4 @@ window.addEventListener('resize', () => {
 });
 
 // Handig voor testen in de console.
-window.__spel = { spellingvoortgang, spellingkaart, speelSpellingspel, rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };
+window.__spel = { biebvoortgang, biebkaart, speelBiebspel, naarBieb: () => naarBinnen('bieb'), spellingvoortgang, spellingkaart, speelSpellingspel, rijden, vervoerbezit, gymtijd, naarGym: () => naarBinnen('gym'), dansen, dansbezit, dansmenu, rekenkaart, startRekenFeest, schoolSlot, probeerNaarBinnen, get schoolOpen() { return schoolOpen; }, rekenvoortgang, get binnen() { return binnen; }, naarBinnen, naarBuiten, leeskraam, leesvenster, leesMelding, speler, besturing, volgCam, hud, botsing, frame, kramen, boetiek, poort, naarVoetbal, naarPlein, get voetbal() { return voetbal; }, meesters, meestervraag, winkel, kastvenster, kledingkast, kinderen, dialoog, munten, muntenteller, pleinMuntjes, voortgang, stempelkaart, startFeest, oorkonde, vuurwerk, startGesprek, speelMinispel, get actiefSpel() { return actiefSpel; }, renderer, scene, camera };

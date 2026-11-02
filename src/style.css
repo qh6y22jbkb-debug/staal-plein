@@ -916,3 +916,15 @@ body.op-vervoer .rijknop { background: #e8590c; }
 body.in-gesprek .rijknop, body.venster-open .rijknop, body.in-voetbal .rijknop, body.start-open .rijknop,
 body.in-school .rijknop, body.in-gym .rijknop { display: none; }
 .kast-vervoer-uitleg { margin: -4px 0 8px; font-size: 14px; opacity: .8; }
+
+/* ---------- De Bieb (herhalingsblok): Biebkaart in de Bieb, op de plek van de stempelkaart ---------- */
+body:not(.in-bieb) .biebkaart { display: none; }
+body.in-bieb .stempelkaart:not(.biebkaart) { display: none; }
+.biebkaart .sk-teller { color: #7048e8; }
+.biebkaart .sk-vak.brons, .biebkaart .sk-vak.zilver, .biebkaart .sk-vak.goud { border-style: solid; border-width: 4px; transform: rotate(-8deg); }
+.biebkaart .sk-vak.brons { border-color: #c0793a; background: #fbe9d8; }
+.biebkaart .sk-vak.zilver { border-color: #9aa3ad; background: #eef1f4; }
+.biebkaart .sk-vak.goud { border-color: #e0a800; background: #fff3bf; box-shadow: 0 0 0 3px rgba(250,176,5,.35); }
+.biebkaart .sk-vak.brons .sk-icoon, .biebkaart .sk-vak.zilver .sk-icoon, .biebkaart .sk-vak.goud .sk-icoon { filter: none; opacity: 1; }
+.biebkaart .sk-sterren { font-size: 16px; text-shadow: none; background: transparent; }
+body.in-bieb .rijknop { display: none; }

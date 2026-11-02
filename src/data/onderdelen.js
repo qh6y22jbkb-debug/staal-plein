@@ -27,6 +27,9 @@ export const ONDERDELEN = {
   // Werkt als de rekenwereld uit staat. Staan ze allebei uit, dan is de school dicht.
   spellingwereld: true,
 
+  // De Bieb in het schoolgebouw (herhalingsblok): vijf leesplekken met zinsontleding (src/data/bieb.js).
+  bieb: true,
+
   // De Leeskraam (Spot aan!) met Lotte Leeslamp (vragenkaartjes: src/data/leeskaartjes.js, venster: src/ui/leesvenster.js).
   // Uit = de kraam, het podium en de spotlight staan niet op het plein.
   leeskraam: false,
