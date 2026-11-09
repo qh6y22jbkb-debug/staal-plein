@@ -2,7 +2,7 @@
  * ============================================================
  *  DE BIEB – herhalingsblok (Staal groep 7): zinsontleding
  * ============================================================
- *  Een ruimte in het schoolgebouw met vijf leesplekken. Bij elke leesplek oefen je één zinsdeel:
+ *  Een ruimte in het schoolgebouw met zes leesplekken. Bij elke leesplek oefen je één zinsdeel (of het rangtelwoord):
  *  persoonsvorm, onderwerp, werkwoordelijk gezegde, lijdend voorwerp of voorzetsels.
  *  De zin verschijnt als losse woordblokjes; het kind klikt de goede woorden aan.
  *
@@ -46,6 +46,7 @@ export const BIEB_TEKSTEN = {
   niveauGehaald: '{medaille} gehaald bij {naam}!',
   klaarKnop: 'Klaar ✓',
   geenLv: 'Deze zin heeft geen lijdend voorwerp',
+  geenHt: 'Deze zin heeft geen hoofdtelwoord',
   stap: 'Stap {nr} van {totaal}',
   goedeAntwoord: 'Het goede antwoord is: {antwoord}',
   nietsGekozen: 'Klik eerst op een of meer woorden.',
@@ -56,8 +57,10 @@ export const BIEB_TEKSTEN = {
     wg: 'Klik op alle woorden van het werkwoordelijk gezegde.',
     lv: 'Klik op alle woorden van het lijdend voorwerp.',
     vz: 'Klik op alle voorzetsels in de zin.',
+    rt: 'Klik op alle rangtelwoorden in de zin.',
+    ht: 'Klik op alle hoofdtelwoorden in de zin.',
   },
-  namen: { pv: 'persoonsvorm', ow: 'onderwerp', wg: 'werkwoordelijk gezegde', lv: 'lijdend voorwerp', vz: 'voorzetsels' },
+  namen: { pv: 'persoonsvorm', ow: 'onderwerp', wg: 'werkwoordelijk gezegde', lv: 'lijdend voorwerp', vz: 'voorzetsels', rt: 'rangtelwoorden', ht: 'hoofdtelwoorden' },
   // Tips bij een fout antwoord.
   tip: {
     pv: 'Doe de vraagproef: maak er een vraag van. Het werkwoord dat vooraan komt, is de persoonsvorm. Of doe de tijdproef: welk werkwoord verandert als je de zin in een andere tijd zet?',
@@ -65,11 +68,13 @@ export const BIEB_TEKSTEN = {
     wg: 'Het werkwoordelijk gezegde zijn álle werkwoorden in de zin samen, dus ook de persoonsvorm.',
     lv: 'Vraag: wie of wat + gezegde + onderwerp? Het antwoord is het lijdend voorwerp. Niet elke zin heeft er een!',
     vz: "Doe de doostest: kun je het woord voor 'de doos' zetten (op de doos, in de doos)? Dan is het waarschijnlijk een voorzetsel.",
+    rt: 'Een rangtelwoord zegt welke plaats of welke beurt: eerste, tweede, derde, tiende, twintigste. Het eindigt meestal op -de of -ste. Let op: vierde kan ook een werkwoord zijn (zij vierde een feest)!',
+    ht: 'Een hoofdtelwoord zegt hoeveel: twee, drie, tien, twintig, honderd. Er staat geen -de of -ste achter.',
   },
 };
 
 /*
- * De vijf leesplekken. zoek = welk zinsdeel je zoekt.
+ * De zes leesplekken. zoek = welk zinsdeel je zoekt (rt = rangtelwoord, met eigen zinnen: BIEB_TELZINNEN).
  * goud = welke zinsdelen je bij Goud na elkaar zoekt (meerdere zinsdelen in één zin).
  */
 export const BIEB_PLEKKEN = [
@@ -120,6 +125,17 @@ export const BIEB_PLEKKEN = [
     uitleg: [
       { tekst: 'Een voorzetsel zegt vaak waar iets is of wanneer iets gebeurt: op, in, onder, naast, achter, voor, tussen, boven, bij, na, tijdens.', voorbeeld: 'De bal ligt **onder** de tafel.' },
       { tekst: "Twijfel je? Doe de doostest: kun je het woord voor 'de doos' zetten? Dan is het waarschijnlijk een voorzetsel.", voorbeeld: '**op** de doos, **in** de doos, **naast** de doos' },
+    ],
+  },
+  {
+    id: 'rangtelwoord', zoek: 'rt', goud: ['rt', 'ht'], naam: 'Ronja Rangtelwoord', onderwerp: 'rangtelwoord', icoon: '🔢',
+    karakter: 'ronja', kleur: '#c2255c', telzinnen: true,
+    niveaus: ['Korte zinnen', 'Met hoofdtelwoorden als valkuil', 'Rangtelwoorden én hoofdtelwoorden'],
+    begroeting: 'Hoi! Ik ben Ronja Rangtelwoord. Ik werd eerste bij de leeswedstrijd! Bij mij zoek je rangtelwoorden.',
+    uitleg: [
+      { tekst: 'Een rangtelwoord zegt welke plaats of welke beurt iets heeft: eerste, tweede, derde, tiende, twintigste.', voorbeeld: 'Ik zit in de **derde** rij.<br>Tim werd **vijfde**.' },
+      { tekst: 'Een hoofdtelwoord zegt hoeveel: twee, drie, tien, honderd. Dat is géén rangtelwoord.', voorbeeld: 'Ik lees **drie** boeken (hoofdtelwoord).<br>Het **tweede** boek is het mooist (rangtelwoord).' },
+      { tekst: 'Rangtelwoorden eindigen meestal op -de of -ste. Pas op: vierde kan ook een werkwoord zijn!', voorbeeld: 'vier → vier**de**, acht → acht**ste**, twintig → twintig**ste**<br>Sanne **vierde** haar verjaardag. (werkwoord: vieren)' },
     ],
   },
 ];
@@ -211,5 +227,69 @@ export const BIEB_KINDEREN = {
     'Ik zit het liefst op de groene bank om te lezen.',
     'Vraagproef: maak er een vraag van. Het werkwoord vooraan is de persoonsvorm!',
     'Ik heb drie boeken geleend. Eentje over haaien!',
+    'Ronja Rangtelwoord werd eerste. Eerste is een rangtelwoord, drie is een hoofdtelwoord!',
   ],
 };
+
+/*
+ * Zinnen voor Ronja Rangtelwoord.
+ *   rt:   de rangtelwoorden in de zin (eerste, derde, twintigste …), in de volgorde van de zin
+ *   ht:   de hoofdtelwoorden in de zin (twee, tien, honderd …); [] = geen
+ *   geen: woorden die op een telwoord lijken maar het niet zijn (bijv. vierde als werkwoord)
+ *   Schrijf getallen altijd in letters. Gebruik 'een' niet als telwoord (dat is verwarrend met het lidwoord).
+ */
+export const BIEB_TELZINNEN = [
+  /* ---------- Brons: korte zinnen met één rangtelwoord ---------- */
+  { niveau: 1, zin: 'Ik zit in de eerste rij.', rt: ['eerste'], ht: [] },
+  { niveau: 1, zin: 'Sanne woont op de derde verdieping.', rt: ['derde'], ht: [] },
+  { niveau: 1, zin: 'Dit is mijn tweede boek over haaien.', rt: ['tweede'], ht: [] },
+  { niveau: 1, zin: 'Tim werd vijfde bij de wedstrijd.', rt: ['vijfde'], ht: [] },
+  { niveau: 1, zin: 'Vandaag is mijn tiende verjaardag.', rt: ['tiende'], ht: [] },
+  { niveau: 1, zin: 'Het vierde hoofdstuk is spannend.', rt: ['vierde'], ht: [] },
+  { niveau: 1, zin: 'Noor zit in de zesde rij.', rt: ['zesde'], ht: [] },
+  { niveau: 1, zin: 'Ik las het boek voor de derde keer.', rt: ['derde'], ht: [] },
+  { niveau: 1, zin: 'Mila werd tweede met tekenen.', rt: ['tweede'], ht: [] },
+  { niveau: 1, zin: 'Op de zevende dag rustten we uit.', rt: ['zevende'], ht: [] },
+  { niveau: 1, zin: 'Daan staat als eerste in de rij.', rt: ['eerste'], ht: [] },
+  { niveau: 1, zin: 'Het negende huis is van mijn oma.', rt: ['negende'], ht: [] },
+  { niveau: 1, zin: 'Dit is de twaalfde bladzijde.', rt: ['twaalfde'], ht: [] },
+  { niveau: 1, zin: 'Opa viert zijn tachtigste verjaardag.', rt: ['tachtigste'], ht: [] },
+  { niveau: 1, zin: 'Wij wonen in het elfde huis.', rt: ['elfde'], ht: [] },
+  { niveau: 1, zin: 'De honderdste bezoeker krijgt een prijs.', rt: ['honderdste'], ht: [] },
+
+  /* ---------- Zilver: ook hoofdtelwoorden in de zin (die klik je níet aan) ---------- */
+  { niveau: 2, zin: 'Ik lees drie boeken, maar het tweede vind ik het mooist.', rt: ['tweede'], ht: ['drie'] },
+  { niveau: 2, zin: 'In het vierde lokaal staan twintig tafels.', rt: ['vierde'], ht: ['twintig'] },
+  { niveau: 2, zin: 'Na twee rondes ligt Noor op de eerste plaats.', rt: ['eerste'], ht: ['twee'] },
+  { niveau: 2, zin: 'Op de vijfde dag van de vakantie zagen we tien dolfijnen.', rt: ['vijfde'], ht: ['tien'] },
+  { niveau: 2, zin: 'Het zesde boek uit de serie heeft honderd bladzijden.', rt: ['zesde'], ht: ['honderd'] },
+  { niveau: 2, zin: 'Mijn zus wordt twaalf en viert haar twaalfde verjaardag.', rt: ['twaalfde'], ht: ['twaalf'] },
+  { niveau: 2, zin: 'Bij de derde vraag had ik vier punten.', rt: ['derde'], ht: ['vier'] },
+  { niveau: 2, zin: 'De trein vertrekt van het achtste spoor over vijf minuten.', rt: ['achtste'], ht: ['vijf'] },
+  { niveau: 2, zin: 'Wij staan met zes kinderen op de tweede rij.', rt: ['tweede'], ht: ['zes'] },
+  { niveau: 2, zin: 'Lisa eindigde als derde van de dertig lopers.', rt: ['derde'], ht: ['dertig'] },
+  { niveau: 2, zin: 'In de tiende minuut scoorde Daan twee goals.', rt: ['tiende'], ht: ['twee'] },
+  { niveau: 2, zin: 'Het elfde hoofdstuk is maar drie bladzijden lang.', rt: ['elfde'], ht: ['drie'] },
+  { niveau: 2, zin: 'Ik heb het zevende level na negen pogingen gehaald.', rt: ['zevende'], ht: ['negen'] },
+  { niveau: 2, zin: 'Op de vijftiende verdieping wonen twee katten.', rt: ['vijftiende'], ht: ['twee'] },
+  { niveau: 2, zin: 'De eerste prijs is een fiets met zeven versnellingen.', rt: ['eerste'], ht: ['zeven'] },
+  { niveau: 2, zin: 'Voor de negende keer las ik dit boek van vijftig bladzijden.', rt: ['negende'], ht: ['vijftig'] },
+
+  /* ---------- Goud: meer telwoorden, soms geen hoofdtelwoord, en strikvragen ---------- */
+  { niveau: 3, zin: 'De eerste twee leerlingen krijgen een prijs, de derde krijgt een boek.', rt: ['eerste', 'derde'], ht: ['twee'] },
+  { niveau: 3, zin: 'Op de tweede en de vierde dag regende het drie uur lang.', rt: ['tweede', 'vierde'], ht: ['drie'] },
+  { niveau: 3, zin: 'Van de twintig kinderen werd Tim zesde en Noor achtste.', rt: ['zesde', 'achtste'], ht: ['twintig'] },
+  { niveau: 3, zin: 'Het tiende en het elfde hoofdstuk lees ik in twee dagen.', rt: ['tiende', 'elfde'], ht: ['twee'] },
+  { niveau: 3, zin: 'Na vijf rondes staat Mila eerste en Sem tweede.', rt: ['eerste', 'tweede'], ht: ['vijf'] },
+  { niveau: 3, zin: 'Bij het honderdste bezoek kregen de vier vrienden een taart.', rt: ['honderdste'], ht: ['vier'] },
+  { niveau: 3, zin: 'Opa werd negentig en vierde zijn negentigste verjaardag.', rt: ['negentigste'], ht: ['negentig'], geen: ['vierde'] },
+  { niveau: 3, zin: 'In de derde week lazen wij zes boeken en in de vijfde week acht.', rt: ['derde', 'vijfde'], ht: ['zes', 'acht'] },
+  { niveau: 3, zin: 'Mijn broer zit in de tweede klas en mijn zus in de vierde.', rt: ['tweede', 'vierde'], ht: [] },
+  { niveau: 3, zin: 'De twaalfde en de dertiende bladzijde ontbreken in mijn boek.', rt: ['twaalfde', 'dertiende'], ht: [] },
+  { niveau: 3, zin: 'Twee meisjes en drie jongens eindigden op de eerste plaats.', rt: ['eerste'], ht: ['Twee', 'drie'] },
+  { niveau: 3, zin: 'Op zijn achtste verjaardag kreeg Daan acht cadeaus.', rt: ['achtste'], ht: ['acht'] },
+  { niveau: 3, zin: 'Vijf kinderen lazen het eerste deel en zes kinderen het tweede deel.', rt: ['eerste', 'tweede'], ht: ['Vijf', 'zes'] },
+  { niveau: 3, zin: 'Wij vieren de twintigste verjaardag van de bieb met vijftig gasten.', rt: ['twintigste'], ht: ['vijftig'] },
+  { niveau: 3, zin: 'Het eerste en het tweede antwoord zijn goed, het derde niet.', rt: ['eerste', 'tweede', 'derde'], ht: [] },
+  { niveau: 3, zin: 'Sanne vierde haar elfde verjaardag met twaalf vriendinnen.', rt: ['elfde'], ht: ['twaalf'], geen: ['vierde'] },
+];

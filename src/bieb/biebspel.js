@@ -1,17 +1,11 @@
 import { Minispel, el, kiesWillekeurig, VRAGEN_PER_RONDE } from '../minispellen/basis.js';
-import { BIEB_ZINNEN, BIEB_TEKSTEN as T } from '../data/bieb.js';
+import { BIEB_TEKSTEN as T } from '../data/bieb.js';
+import { zinnenVoor } from './zinnen.js';
+
+export { zinnenVoor };
 import { biebvoortgang } from '../biebvoortgang.js';
 import { blokjes, keuzeGoed, antwoordVan, antwoordTekst } from './ontleding.js';
 import '../ui/minispellen.css';
-
-/** Welke zinnen passen bij een leesplek en een niveau? */
-export function zinnenVoor(plek, niveau) {
-  let pool = BIEB_ZINNEN.filter((z) => z.niveau === niveau);
-  const zoekt = niveau === 3 ? plek.goud : [plek.zoek];
-  if (zoekt.includes('vz')) pool = pool.filter((z) => z.vz.length); // voorzetsels zoeken: er moet er een zijn
-  if (plek.zoek === 'lv' && niveau === 1) pool = pool.filter((z) => z.lv); // Brons: altijd een lijdend voorwerp
-  return pool;
-}
 
 /**
  * Het spel van de Bieb: de zin staat er als losse woordblokjes, het kind klikt de goede woorden aan en drukt op Klaar.
@@ -83,9 +77,9 @@ export class BiebSpel extends Minispel {
     klaar.type = 'button';
     klaar.addEventListener('click', () => this.controleer());
     this.knoppenRij.append(klaar);
-    // Lijdend voorwerp (vanaf Zilver): soms is er geen.
-    if (s === 'lv' && this.niveau >= 2) {
-      const geen = el('button', 'ww-keuze bb-geen', T.geenLv);
+    // Lijdend voorwerp (vanaf Zilver) en hoofdtelwoord (Goud): soms is er geen.
+    if ((s === 'lv' && this.niveau >= 2) || s === 'ht') {
+      const geen = el('button', 'ww-keuze bb-geen', s === 'lv' ? T.geenLv : T.geenHt);
       geen.type = 'button';
       geen.addEventListener('click', () => this.controleer(true));
       this.knoppenRij.append(geen);
@@ -114,7 +108,7 @@ export class BiebSpel extends Minispel {
     }
     if (!goed) {
       this.fouten++;
-      const antwoord = goedeNrs.length ? antwoordTekst(this.zin, s) : T.geenLv.toLowerCase();
+      const antwoord = goedeNrs.length ? antwoordTekst(this.zin, s) : (s === 'lv' ? T.geenLv : T.geenHt).toLowerCase();
       const hulp = this.fouten >= 2 ? `<br>${T.goedeAntwoord.replace('{antwoord}', `<b>${antwoord}</b>`)}` : '';
       this.fout(`${T.tip[s]}${hulp}`);
       return;

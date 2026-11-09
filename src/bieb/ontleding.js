@@ -39,14 +39,14 @@ function zoekLos(lijst, losse) {
 
 /**
  * Welke woorden (nummers in woorden(zin)) horen bij een zinsdeel?
- * soort: 'pv' | 'ow' | 'wg' | 'lv' | 'vz'. Geeft [] als het zinsdeel er niet is (lv = null), of null als het niet klopt.
+ * soort: 'pv' | 'ow' | 'wg' | 'lv' | 'vz' | 'rt' (rangtelwoorden) | 'ht' (hoofdtelwoorden). Geeft [] als het zinsdeel er niet is (lv = null), of null als het niet klopt.
  */
 export function antwoordVan(vraag, soort) {
   const lijst = woorden(vraag.zin);
   if (soort === 'lv' && vraag.lv == null) return [];
   if (soort === 'pv' || soort === 'ow' || soort === 'lv') return zoekStuk(lijst, vraag[soort]);
   if (soort === 'wg') return zoekLos(lijst, vraag.wg.split(' '));
-  if (soort === 'vz') return zoekLos(lijst, vraag.vz);
+  if (soort === 'vz' || soort === 'rt' || soort === 'ht') return zoekLos(lijst, vraag[soort] ?? []);
   return null;
 }
 

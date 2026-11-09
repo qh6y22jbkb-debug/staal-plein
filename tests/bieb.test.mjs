@@ -4,7 +4,9 @@
 // - Onderwerp, lijdend voorwerp en gezegde overlappen elkaar niet.
 // - Alle voorzetsels uit de lijst hieronder die in de zin staan, zijn ook als antwoord opgegeven (er wordt er geen vergeten).
 // - Per leesplek en per niveau zijn er minstens 15 zinnen; geen keuze die fout is wordt goed gerekend.
-import { BIEB_ZINNEN, BIEB_PLEKKEN } from '../src/data/bieb.js';
+// - Rangtelwoord: alle rang- en hoofdtelwoorden in de zin zijn opgegeven; strikvragen (vierde als werkwoord) staan bij 'geen'.
+import { BIEB_ZINNEN, BIEB_PLEKKEN, BIEB_TELZINNEN } from '../src/data/bieb.js';
+import { zinnenVoor } from '../src/bieb/zinnen.js';
 import { woorden, antwoordVan, keuzeGoed } from '../src/bieb/ontleding.js';
 
 const VOORZETSELS = ['aan', 'achter', 'bij', 'boven', 'door', 'in', 'langs', 'met', 'na', 'naar', 'naast', 'om', 'onder', 'op', 'over',
@@ -46,16 +48,47 @@ for (const v of BIEB_ZINNEN) {
   }
 }
 
+// Rangtelwoorden: elk rangtelwoord en hoofdtelwoord in de zin is opgegeven (of staat bij 'geen'), en niets dubbel.
+const RANG = new Set(['eerste', 'tweede', 'derde', 'vierde', 'vijfde', 'zesde', 'zevende', 'achtste', 'negende', 'tiende', 'elfde', 'twaalfde',
+  'dertiende', 'veertiende', 'vijftiende', 'twintigste', 'dertigste', 'veertigste', 'vijftigste', 'tachtigste', 'negentigste', 'honderdste', 'duizendste']);
+const HOOFD = new Set(['twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien', 'elf', 'twaalf', 'dertien', 'twintig', 'dertig',
+  'veertig', 'vijftig', 'tachtig', 'negentig', 'honderd', 'duizend']);
+for (const v of BIEB_TELZINNEN) {
+  const lijst = woorden(v.zin).map((x) => x.tekst.toLowerCase());
+  const geen = (v.geen ?? []).map((x) => x.toLowerCase());
+  const rt = antwoordVan(v, 'rt'), ht = antwoordVan(v, 'ht');
+  controles += 4;
+  if (!rt?.length) meld('rangtelwoord niet gevonden', v.zin);
+  if (ht == null) meld('hoofdtelwoord niet gevonden', v.zin);
+  if (!rt || ht == null) continue;
+  const rtIn = lijst.filter((w) => RANG.has(w) && !geen.includes(w));
+  const htIn = lijst.filter((w) => HOOFD.has(w));
+  if (rtIn.join(' ') !== v.rt.map((x) => x.toLowerCase()).join(' ')) meld('rangtelwoorden kloppen niet', v.zin, rtIn, v.rt);
+  if (htIn.join(' ') !== v.ht.map((x) => x.toLowerCase()).join(' ')) meld('hoofdtelwoorden kloppen niet', v.zin, htIn, v.ht);
+  for (const w of [...v.rt, ...v.ht, ...geen]) if (lijst.filter((x) => x === w.toLowerCase()).length !== 1) meld('telwoord staat vaker in de zin', w, v.zin);
+  if (/\d/.test(v.zin)) meld('getal in cijfers (schrijf het in letters)', v.zin);
+  for (const soort of ['rt', 'ht']) {
+    const goed = antwoordVan(v, soort);
+    for (let i = 0; i < lijst.length; i++) {
+      controles++;
+      const meer = goed.includes(i) ? goed.filter((x) => x !== i) : [...goed, i];
+      if (meer.length && keuzeGoed(v, soort, meer)) meld('fout antwoord goed gerekend', soort, v.zin);
+    }
+  }
+}
+// Goud bij Ronja: rangtelwoorden en hoofdtelwoorden; er zijn zinnen met en zonder hoofdtelwoord, en strikvragen.
+const goudTel = BIEB_TELZINNEN.filter((z) => z.niveau === 3);
+if (!goudTel.some((z) => !z.ht.length) || !goudTel.some((z) => z.geen?.length)) meld('Goud bij Ronja mist zinnen zonder hoofdtelwoord of strikvragen');
+if (BIEB_TELZINNEN.filter((z) => z.niveau === 2).some((z) => !z.ht.length)) meld('Zilver bij Ronja: elke zin moet een hoofdtelwoord als valkuil hebben');
+
 // Genoeg zinnen per leesplek en niveau.
 for (const plek of BIEB_PLEKKEN) {
   for (const n of [1, 2, 3]) {
-    let pool = BIEB_ZINNEN.filter((z) => z.niveau === n);
-    if (plek.zoek === 'vz') pool = pool.filter((z) => z.vz.length);
-    if (plek.zoek === 'lv' && n === 1) pool = pool.filter((z) => z.lv);
+    const pool = zinnenVoor(plek, n);
     if (pool.length < 15) meld(plek.id, `niveau ${n}: maar ${pool.length} zinnen`);
   }
   if (!plek.begroeting || !plek.uitleg?.length || plek.niveaus?.length !== 3) meld('leesplek niet compleet', plek.id);
 }
 
-console.log(`${BIEB_ZINNEN.length} biebzinnen, ${controles} controles, ${fouten} fouten`);
+console.log(`${BIEB_ZINNEN.length + BIEB_TELZINNEN.length} biebzinnen, ${controles} controles, ${fouten} fouten`);
 if (fouten) process.exit(1);
