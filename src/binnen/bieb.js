@@ -12,7 +12,7 @@ import { BIEB, BIEB_PLEKKEN } from '../data/bieb.js';
  *  - een leeshoek met een rond kleed, een groene bank en gebreide poefs
  *  - lichte houten tafels met stoelen en plantjes, een balie met een laptop en een wereldbol
  *  - het groene bord "De boekenwereld" en de letters "Griezelboeken"
- * Zes leesplekken, elk met een karakter: daar oefen je zinsontleding en het rangtelwoord.
+ * Zeven leesplekken, elk met een karakter: daar oefen je zinsontleding en het rangtelwoord.
  * Wordt pas gebouwd als je naar binnen gaat, en weer opgeruimd als je naar buiten gaat.
  */
 
@@ -75,7 +75,7 @@ export class Bieb {
     this.scene.background = new THREE.Color(0xe9eef1);
     this.botsing = new Botsing(BIEB_GRENZEN);
     this.blokkers = [];
-    this.kramen = []; // de zes leesplekken (werken als kramen: praten met E)
+    this.kramen = []; // de zeven leesplekken (werken als kramen: praten met E)
     this.eigen = new Set();
     this.boekTex = [1, 2, 3].map((z) => boekenTextuur(z));
 
@@ -251,7 +251,7 @@ export class Bieb {
   bouwMeubels() {
     const { minX, maxX, minZ, maxZ } = BIEB_GRENZEN;
     // Twee lichte houten tafels met stoelen en plantjes (zoals vooraan op de foto's).
-    for (const tx of [-6.2, 5.0]) { // de rechtertafel staat wat verder naar binnen (ruimte voor Ronja)
+    for (const tx of [-5.0, 5.0]) { // de tafels staan wat naar binnen (ruimte voor Ronja en Wanda)
       const tz = maxZ - 4.4;
       doos(2.6, 0.06, 1.3, KLEUR.berk, tx, 0.76, tz, this.groep);
       for (const [lx, lz] of [[-1.15, -0.5], [1.15, -0.5], [-1.15, 0.5], [1.15, 0.5]]) cilinder(0.04, 0.74, KLEUR.berkDonker, tx + lx, 0.37, tz + lz, this.groep, 6);
@@ -287,13 +287,12 @@ export class Bieb {
     this.massief(-10.9, wz, 1.3, 0.7, 0.8);
     // Extra boekenkasten langs de muren en twee bakken met prentenboeken.
     this.kast(minX + 0.45, -4.2, Math.PI / 2);
-    this.kast(minX + 0.45, 6.0, Math.PI / 2);
     this.kast(-8.6, maxZ - 0.45, Math.PI);
     this.kast(8.6, maxZ - 0.45, Math.PI);
     this.boekenbak(-3.9, 2.6, 0.25);
     this.boekenbak(3.9, 2.6, -0.25);
     // Plantjes bovenop een paar kasten.
-    for (const [x, z] of [[minX + 0.45, -4.2], [minX + 0.45, 6.0], [8.6, maxZ - 0.45]]) {
+    for (const [x, z] of [[minX + 0.45, -4.2], [8.6, maxZ - 0.45]]) {
       cilinder(0.15, 0.18, KLEUR.pot, x, 2.12, z, this.groep, 10);
       bol(0.26, KLEUR.plant, x, 2.34, z, this.groep, 1);
     }
@@ -333,8 +332,8 @@ export class Bieb {
   }
 
   /**
-   * Zes leesplekken: een boekenkast met daarvoor een lage bak, een karakter ertussen en een bord met de naam.
-   * Drie tegen de noordmuur, één tegen de westmuur en twee tegen de oostmuur.
+   * Zeven leesplekken: een boekenkast met daarvoor een lage bak, een karakter ertussen en een bord met de naam.
+   * Drie tegen de noordmuur, twee tegen de westmuur en twee tegen de oostmuur.
    */
   bouwLeesplekken() {
     const { minX, maxX, minZ } = BIEB_GRENZEN;
@@ -345,8 +344,9 @@ export class Bieb {
       { x: minX + 1.6, z: 1.2, draai: Math.PI / 2 },
       { x: maxX - 1.6, z: 1.0, draai: -Math.PI / 2 },
       { x: maxX - 1.6, z: 6.4, draai: -Math.PI / 2 }, // Ronja Rangtelwoord
+      { x: minX + 1.6, z: 6.4, draai: Math.PI / 2 }, // Wanda Woordsoort
     ];
-    const STEM = { peter: 0.75, olga: 1.35, gijs: 1.1, lies: 1.2, bob: 0.9, ronja: 1.3 };
+    const STEM = { peter: 0.75, olga: 1.35, gijs: 1.1, lies: 1.2, bob: 0.9, ronja: 1.3, wanda: 1.25 };
     BIEB_PLEKKEN.forEach((plek, i) => {
       const { x, z, draai } = plekken[i];
       const g = new THREE.Group();

@@ -2,7 +2,7 @@
  * ============================================================
  *  DE BIEB – herhalingsblok (Staal groep 7): zinsontleding
  * ============================================================
- *  Een ruimte in het schoolgebouw met zes leesplekken. Bij elke leesplek oefen je één zinsdeel (of het rangtelwoord):
+ *  Een ruimte in het schoolgebouw met zeven leesplekken. Bij elke leesplek oefen je één zinsdeel (of het rangtelwoord):
  *  persoonsvorm, onderwerp, werkwoordelijk gezegde, lijdend voorwerp of voorzetsels.
  *  De zin verschijnt als losse woordblokjes; het kind klikt de goede woorden aan.
  *
@@ -74,7 +74,7 @@ export const BIEB_TEKSTEN = {
 };
 
 /*
- * De zes leesplekken. zoek = welk zinsdeel je zoekt (rt = rangtelwoord, met eigen zinnen: BIEB_TELZINNEN).
+ * De zeven leesplekken. zoek = welk zinsdeel je zoekt (rt = rangtelwoord, met eigen zinnen: BIEB_TELZINNEN).
  * goud = welke zinsdelen je bij Goud na elkaar zoekt (meerdere zinsdelen in één zin).
  */
 export const BIEB_PLEKKEN = [
@@ -136,6 +136,17 @@ export const BIEB_PLEKKEN = [
       { tekst: 'Een rangtelwoord zegt welke plaats of welke beurt iets heeft: eerste, tweede, derde, tiende, twintigste.', voorbeeld: 'Ik zit in de **derde** rij.<br>Tim werd **vijfde**.' },
       { tekst: 'Een hoofdtelwoord zegt hoeveel: twee, drie, tien, honderd. Dat is géén rangtelwoord.', voorbeeld: 'Ik lees **drie** boeken (hoofdtelwoord).<br>Het **tweede** boek is het mooist (rangtelwoord).' },
       { tekst: 'Rangtelwoorden eindigen meestal op -de of -ste. Pas op: vierde kan ook een werkwoord zijn!', voorbeeld: 'vier → vier**de**, acht → acht**ste**, twintig → twintig**ste**<br>Sanne **vierde** haar verjaardag. (werkwoord: vieren)' },
+    ],
+  },
+  {
+    id: 'woordsoorten', zoek: 'woordsoort', goud: [], naam: 'Wanda Woordsoort', onderwerp: 'woordsoorten', icoon: '🏷️',
+    karakter: 'wanda', kleur: '#d6336c', woordsoorten: true,
+    niveaus: ['Lidwoord, zn, bn, werkwoord, voorzetsel, telwoord', 'Alle 11 woordsoorten', 'Zelf de woordsoort kiezen'],
+    begroeting: 'Hallo! Ik ben Wanda Woordsoort. Ik plak een etiket op elk woord. Bij mij oefen je de 11 woordsoorten van de kaart!',
+    uitleg: [
+      { tekst: 'Lidwoord: de, het, een. Zelfstandig naamwoord: mens, dier, ding of naam. Bijvoeglijk naamwoord: zegt hoe iets is.', voorbeeld: '**de** (lw) **grote** (bn) **boom** (zn)' },
+      { tekst: 'Werkwoord: wat iemand doet. Een hulpwerkwoord helpt een ander werkwoord. Het voltooid deelwoord hoort bij hebben of zijn.', voorbeeld: 'Ik **heb** (hww) gefietst (vd).<br>Ik **heb** (ww) een fiets.' },
+      { tekst: 'Voorzetsel: doostest (op de doos). Voegwoord: verbindt (en, maar, omdat). Stoffelijk bijvoeglijk naamwoord: waarvan iets gemaakt is (houten, gouden). Telwoord: hoeveel (drie). Rangtelwoord: welke plaats (derde).', voorbeeld: 'een **houten** kist, **drie** boeken, de **derde** rij' },
     ],
   },
 ];
@@ -292,4 +303,98 @@ export const BIEB_TELZINNEN = [
   { niveau: 3, zin: 'Wij vieren de twintigste verjaardag van de bieb met vijftig gasten.', rt: ['twintigste'], ht: ['vijftig'] },
   { niveau: 3, zin: 'Het eerste en het tweede antwoord zijn goed, het derde niet.', rt: ['eerste', 'tweede', 'derde'], ht: [] },
   { niveau: 3, zin: 'Sanne vierde haar elfde verjaardag met twaalf vriendinnen.', rt: ['elfde'], ht: ['twaalf'], geen: ['vierde'] },
+];
+
+/*
+ * ============================================================
+ *  WOORDSOORTEN (leesplek van Wanda Woordsoort)
+ * ============================================================
+ *  De 11 woordsoorten van de klassenkaart. Achter elk woord staat met een / de woordsoort:
+ *    lw  lidwoord                  zn  zelfstandig naamwoord      bn  bijvoeglijk naamwoord
+ *    ww  werkwoord                 hww hulpwerkwoord             vd  voltooid deelwoord
+ *    vz  voorzetsel                vw  voegwoord                 sbn stoffelijk bijvoeglijk naamwoord
+ *    tw  telwoord (hoofdtelwoord)  rtw rangtelwoord
+ *  Een woord zonder / (bijv. ik, mijn, niet, gisteren) wordt nooit gevraagd.
+ *  Let op: hebben/zijn/willen/kunnen/moeten zijn alleen een hulpwerkwoord als er nog een werkwoord bij hoort
+ *  (ik heb/hww … gekocht/vd). Ik heb/ww een fiets = gewoon werkwoord.
+ *  niveau 1 = alleen lw, zn, bn, ww, vz, tw · niveau 2 = alle 11 · niveau 3 = lange zinnen (Goud)
+ * ============================================================
+ */
+export const WOORDSOORTEN = {
+  lw: 'lidwoord', zn: 'zelfstandig naamwoord', bn: 'bijvoeglijk naamwoord', ww: 'werkwoord', hww: 'hulpwerkwoord',
+  vd: 'voltooid deelwoord', vz: 'voorzetsel', vw: 'voegwoord', sbn: 'stoffelijk bijvoeglijk naamwoord', tw: 'telwoord', rtw: 'rangtelwoord',
+};
+/** Meervoud voor "Klik op alle …". */
+export const WOORDSOORTEN_MEERVOUD = {
+  lw: 'lidwoorden', zn: 'zelfstandige naamwoorden', bn: 'bijvoeglijke naamwoorden', ww: 'werkwoorden', hww: 'hulpwerkwoorden',
+  vd: 'voltooide deelwoorden', vz: 'voorzetsels', vw: 'voegwoorden', sbn: 'stoffelijke bijvoeglijke naamwoorden', tw: 'telwoorden', rtw: 'rangtelwoorden',
+};
+export const WOORDSOORT_TIPS = {
+  lw: 'Er zijn maar drie lidwoorden: de, het en een.',
+  zn: 'Een zelfstandig naamwoord is een mens, dier, ding of naam. Je kunt er de, het of een voor zetten.',
+  bn: 'Een bijvoeglijk naamwoord zegt hoe iets is: groot, rood, lief. Het past tussen het lidwoord en het zelfstandig naamwoord (de grote boom).',
+  ww: 'Een werkwoord zegt wat iemand doet of wat er gebeurt. Is het geen hulpwerkwoord en geen voltooid deelwoord? Dan is het een werkwoord.',
+  hww: 'Een hulpwerkwoord helpt een ander werkwoord: ik heb gefietst, zij wil zwemmen. Zonder ander werkwoord (ik heb een fiets) is het een gewoon werkwoord.',
+  vd: 'Een voltooid deelwoord hoort bij hebben of zijn: (heb) gefietst, (is) gevallen, (heeft) gebroken. Het begint vaak met ge-.',
+  vz: "Doe de doostest: kun je het woord voor 'de doos' zetten (op de doos, in de doos)? Dan is het een voorzetsel.",
+  vw: 'Een voegwoord verbindt woorden of zinnen: en, maar, of, want, omdat, als, terwijl, dat, dus.',
+  sbn: 'Een stoffelijk bijvoeglijk naamwoord zegt waarvan iets gemaakt is: houten, gouden, wollen, papieren. Het eindigt op -en.',
+  tw: 'Een telwoord zegt hoeveel: twee, drie, tien, honderd.',
+  rtw: 'Een rangtelwoord zegt welke plaats of beurt: eerste, tweede, derde.',
+};
+
+export const WOORDSOORT_ZINNEN = [
+  /* ---------- niveau 1: lidwoord, zelfstandig naamwoord, bijvoeglijk naamwoord, werkwoord, voorzetsel, telwoord ---------- */
+  { niveau: 1, zin: 'De/lw kleine/bn hond/zn rent/ww door/vz het/lw park/zn.' },
+  { niveau: 1, zin: 'Een/lw rode/bn appel/zn ligt/ww op/vz de/lw tafel/zn.' },
+  { niveau: 1, zin: 'Twee/tw vogels/zn zingen/ww in/vz de/lw boom/zn.' },
+  { niveau: 1, zin: 'De/lw juf/zn leest/ww een/lw spannend/bn boek/zn.' },
+  { niveau: 1, zin: 'Mijn kat/zn slaapt/ww onder/vz het/lw bed/zn.' },
+  { niveau: 1, zin: 'Drie/tw kinderen/zn spelen/ww op/vz het/lw grote/bn plein/zn.' },
+  { niveau: 1, zin: 'De/lw bakker/zn bakt/ww vers/bn brood/zn.' },
+  { niveau: 1, zin: 'Het/lw meisje/zn draagt/ww een/lw gele/bn jas/zn.' },
+  { niveau: 1, zin: 'Wij lopen/ww met/vz de/lw hond/zn naar/vz huis/zn.' },
+  { niveau: 1, zin: 'Een/lw groene/bn kikker/zn springt/ww in/vz de/lw sloot/zn.' },
+  { niveau: 1, zin: 'Vier/tw paarden/zn staan/ww in/vz de/lw wei/zn.' },
+  { niveau: 1, zin: 'De/lw boer/zn melkt/ww de/lw koeien/zn in/vz de/lw stal/zn.' },
+  { niveau: 1, zin: 'Het/lw kleine/bn konijn/zn eet/ww een/lw wortel/zn.' },
+  { niveau: 1, zin: 'Opa/zn drinkt/ww warme/bn thee/zn bij/vz het/lw ontbijt/zn.' },
+  { niveau: 1, zin: 'Zes/tw eendjes/zn zwemmen/ww achter/vz hun moeder/zn.' },
+  { niveau: 1, zin: 'De/lw postbode/zn brengt/ww een/lw dik/bn pakket/zn.' },
+
+  /* ---------- niveau 2: ook hulpwerkwoord, voltooid deelwoord, voegwoord, stoffelijk bn en rangtelwoord ---------- */
+  { niveau: 2, zin: 'Ik heb/hww een/lw houten/sbn kist/zn gevonden/vd.' },
+  { niveau: 2, zin: 'De/lw kinderen/zn zijn/hww naar/vz het/lw strand/zn gefietst/vd.' },
+  { niveau: 2, zin: 'Oma/zn draagt/ww een/lw gouden/sbn ketting/zn en/vw een/lw zilveren/sbn ring/zn.' },
+  { niveau: 2, zin: 'Tim/zn werd/ww eerste/rtw en/vw Noor/zn werd/ww tweede/rtw.' },
+  { niveau: 2, zin: 'Mila/zn wil/hww een/lw wollen/sbn trui/zn kopen/ww.' },
+  { niveau: 2, zin: 'De/lw derde/rtw les/zn begint/ww om/vz negen/tw uur/zn.' },
+  { niveau: 2, zin: 'Papa/zn heeft/hww de/lw glazen/sbn vaas/zn gebroken/vd.' },
+  { niveau: 2, zin: 'Ik ga/ww naar/vz bed/zn, want/vw ik ben/ww moe/bn.' },
+  { niveau: 2, zin: 'De/lw stenen/sbn muur/zn is/hww gisteren omgevallen/vd.' },
+  { niveau: 2, zin: 'Sem/zn kan/hww zwemmen/ww en/vw duiken/ww.' },
+  { niveau: 2, zin: 'Na/vz de/lw tweede/rtw ronde/zn zijn/ww de/lw lopers/zn moe/bn.' },
+  { niveau: 2, zin: 'Ik heb/hww zeven/tw papieren/sbn vliegtuigjes/zn gevouwen/vd.' },
+  { niveau: 2, zin: 'De/lw leren/sbn bal/zn is/hww in/vz de/lw sloot/zn gevallen/vd.' },
+  { niveau: 2, zin: 'Lotte/zn blijft/ww in/vz bed/zn omdat/vw ze ziek/bn is/ww.' },
+  { niveau: 2, zin: 'De/lw eerste/rtw bezoekers/zn hebben/hww een/lw katoenen/sbn tas/zn gekregen/vd.' },
+  { niveau: 2, zin: 'Wij moeten/hww vijf/tw sommen/zn maken/ww of/vw een/lw verhaal/zn schrijven/ww.' },
+
+  /* ---------- niveau 3: lange zinnen met alles door elkaar (Goud) ---------- */
+  { niveau: 3, zin: 'De/lw vier/tw vrolijke/bn kinderen/zn hebben/hww in/vz de/lw zomer/zn een/lw houten/sbn hut/zn gebouwd/vd.' },
+  { niveau: 3, zin: 'Omdat/vw het/lw water/zn koud/bn was/ww, bleven/ww wij op/vz het/lw strand/zn.' },
+  { niveau: 3, zin: 'Mijn zus/zn heeft/hww voor/vz de/lw derde/rtw keer/zn een/lw gouden/sbn medaille/zn gewonnen/vd.' },
+  { niveau: 3, zin: 'De/lw kapitein/zn en/vw zijn twee/tw matrozen/zn varen/ww met/vz een/lw oud/bn schip/zn naar/vz het/lw eiland/zn.' },
+  { niveau: 3, zin: 'Na/vz het/lw eten/zn moet/hww ik de/lw zilveren/sbn lepels/zn poetsen/ww.' },
+  { niveau: 3, zin: 'De/lw juf/zn vertelde/ww dat/vw de/lw eerste/rtw bus/zn al vertrokken/vd was/hww.' },
+  { niveau: 3, zin: 'Twaalf/tw kinderen/zn zongen/ww een/lw vrolijk/bn lied/zn, terwijl/vw de/lw meester/zn gitaar/zn speelde/ww.' },
+  { niveau: 3, zin: 'In/vz de/lw stenen/sbn toren/zn woonde/ww vroeger een/lw rijke/bn koning/zn.' },
+  { niveau: 3, zin: 'Ik had/hww mijn wollen/sbn sjaal/zn vergeten/vd, dus/vw ik had/ww koude/bn handen/zn.' },
+  { niveau: 3, zin: 'Bij/vz de/lw tweede/rtw wedstrijd/zn hebben/hww wij drie/tw doelpunten/zn gescoord/vd.' },
+  { niveau: 3, zin: 'Opa/zn heeft/ww een/lw grote/bn tuin/zn met/vz zes/tw hoge/bn bomen/zn.' },
+  { niveau: 3, zin: 'De/lw katten/zn hebben/hww de/lw hele/bn nacht/zn op/vz het/lw zachte/bn kussen/zn geslapen/vd.' },
+  { niveau: 3, zin: 'Als/vw de/lw zon/zn schijnt/ww, gaan/ww wij met/vz vijf/tw vrienden/zn naar/vz het/lw zwembad/zn.' },
+  { niveau: 3, zin: 'De/lw nieuwe/bn leerling/zn is/hww in/vz de/lw eerste/rtw week/zn verdwaald/vd.' },
+  { niveau: 3, zin: 'Tom/zn en/vw Lisa/zn hebben/hww een/lw papieren/sbn draak/zn gemaakt/vd.' },
+  { niveau: 3, zin: 'De/lw honderd/tw gasten/zn aten/ww taart/zn, maar/vw de/lw bruid/zn at/ww alleen fruit/zn.' },
 ];

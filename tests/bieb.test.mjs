@@ -4,9 +4,12 @@
 // - Onderwerp, lijdend voorwerp en gezegde overlappen elkaar niet.
 // - Alle voorzetsels uit de lijst hieronder die in de zin staan, zijn ook als antwoord opgegeven (er wordt er geen vergeten).
 // - Per leesplek en per niveau zijn er minstens 15 zinnen; geen keuze die fout is wordt goed gerekend.
+// - Woordsoorten: labels bestaan; lidwoorden, voorzetsels, voegwoorden, telwoorden en hulpwerkwoorden zijn goed gelabeld.
 // - Rangtelwoord: alle rang- en hoofdtelwoorden in de zin zijn opgegeven; strikvragen (vierde als werkwoord) staan bij 'geen'.
 import { BIEB_ZINNEN, BIEB_PLEKKEN, BIEB_TELZINNEN } from '../src/data/bieb.js';
 import { zinnenVoor } from '../src/bieb/zinnen.js';
+import { WOORDSOORT_ZINNEN } from '../src/data/bieb.js';
+import { ontleedWoordsoorten, nummersVan, isWoordsoort, BASIS_SOORTEN } from '../src/bieb/woordsoorten.js';
 import { woorden, antwoordVan, keuzeGoed } from '../src/bieb/ontleding.js';
 
 const VOORZETSELS = ['aan', 'achter', 'bij', 'boven', 'door', 'in', 'langs', 'met', 'na', 'naar', 'naast', 'om', 'onder', 'op', 'over',
@@ -81,6 +84,40 @@ const goudTel = BIEB_TELZINNEN.filter((z) => z.niveau === 3);
 if (!goudTel.some((z) => !z.ht.length) || !goudTel.some((z) => z.geen?.length)) meld('Goud bij Ronja mist zinnen zonder hoofdtelwoord of strikvragen');
 if (BIEB_TELZINNEN.filter((z) => z.niveau === 2).some((z) => !z.ht.length)) meld('Zilver bij Ronja: elke zin moet een hoofdtelwoord als valkuil hebben');
 
+// Woordsoorten (Wanda): elk label bestaat, en vaste woordgroepen hebben altijd het goede label.
+const LIDWOORDEN = ['de', 'het', 'een'];
+const VOEGWOORDEN = ['en', 'maar', 'of', 'want', 'omdat', 'als', 'terwijl', 'dat', 'dus', 'toen', 'zodat', 'nadat'];
+const HULP = ['heb', 'hebt', 'heeft', 'hebben', 'had', 'hadden', 'ben', 'is', 'zijn', 'was', 'waren', 'wil', 'wilde', 'kan', 'kon', 'moet', 'moeten', 'moest', 'zal', 'zullen', 'gaat', 'gaan', 'ging', 'mag', 'wordt', 'werd'];
+for (const z of WOORDSOORT_ZINNEN) {
+  const tokens = ontleedWoordsoorten(z.zin).filter((t) => t.woord);
+  for (const t of tokens) {
+    const w = t.tekst.toLowerCase();
+    controles++;
+    if (t.fout) meld('woordsoort: onleesbaar stukje', t.tekst, z.zin);
+    if (t.soort && !isWoordsoort(t.soort)) meld('woordsoort: onbekend label', t.soort, z.zin);
+    if (LIDWOORDEN.includes(w) && t.soort !== 'lw') meld('woordsoort: lidwoord zonder lw', w, z.zin);
+    if (t.soort === 'lw' && !LIDWOORDEN.includes(w)) meld('woordsoort: geen lidwoord', w, z.zin);
+    if (VOORZETSELS.includes(w) && t.soort !== 'vz') meld('woordsoort: voorzetsel zonder vz', w, z.zin);
+    if (t.soort === 'vz' && !VOORZETSELS.includes(w)) meld('woordsoort: geen voorzetsel', w, z.zin);
+    if (VOEGWOORDEN.includes(w) && t.soort !== 'vw') meld('woordsoort: voegwoord zonder vw', w, z.zin);
+    if (t.soort === 'vw' && !VOEGWOORDEN.includes(w)) meld('woordsoort: geen voegwoord', w, z.zin);
+    if (HOOFD.has(w) && t.soort !== 'tw') meld('woordsoort: telwoord zonder tw', w, z.zin);
+    if (t.soort === 'tw' && !HOOFD.has(w)) meld('woordsoort: geen telwoord', w, z.zin);
+    if (RANG.has(w) && t.soort !== 'rtw') meld('woordsoort: rangtelwoord zonder rtw', w, z.zin);
+    if (t.soort === 'rtw' && !RANG.has(w)) meld('woordsoort: geen rangtelwoord', w, z.zin);
+    if (t.soort === 'sbn' && !w.endsWith('en')) meld('woordsoort: stoffelijk bn eindigt niet op -en', w, z.zin);
+    if (t.soort === 'hww' && !HULP.includes(w)) meld('woordsoort: onbekend hulpwerkwoord', w, z.zin);
+  }
+  // Een hulpwerkwoord heeft altijd een ander werkwoord of voltooid deelwoord in de zin.
+  if (tokens.some((t) => t.soort === 'hww') && !tokens.some((t) => t.soort === 'vd' || t.soort === 'ww')) meld('woordsoort: hulpwerkwoord zonder ander werkwoord', z.zin);
+  if (tokens.some((t) => t.soort === 'vd') && !tokens.some((t) => t.soort === 'hww')) meld('woordsoort: voltooid deelwoord zonder hulpwerkwoord', z.zin);
+  if (z.niveau === 1 && tokens.some((t) => t.soort && !BASIS_SOORTEN.includes(t.soort))) meld('woordsoort: niveau 1 met lastige woordsoort', z.zin);
+  for (const soort of new Set(tokens.filter((t) => t.soort).map((t) => t.soort))) {
+    controles++;
+    if (!nummersVan(z.zin, soort).length) meld('woordsoort: nummers niet gevonden', soort, z.zin);
+  }
+}
+
 // Genoeg zinnen per leesplek en niveau.
 for (const plek of BIEB_PLEKKEN) {
   for (const n of [1, 2, 3]) {
@@ -90,5 +127,5 @@ for (const plek of BIEB_PLEKKEN) {
   if (!plek.begroeting || !plek.uitleg?.length || plek.niveaus?.length !== 3) meld('leesplek niet compleet', plek.id);
 }
 
-console.log(`${BIEB_ZINNEN.length + BIEB_TELZINNEN.length} biebzinnen, ${controles} controles, ${fouten} fouten`);
+console.log(`${BIEB_ZINNEN.length + BIEB_TELZINNEN.length + WOORDSOORT_ZINNEN.length} biebzinnen, ${controles} controles, ${fouten} fouten`);
 if (fouten) process.exit(1);

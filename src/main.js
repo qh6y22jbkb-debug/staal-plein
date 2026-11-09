@@ -344,8 +344,8 @@ async function speelSpellingspel(kraam) {
 /* ---------- Leesplekken in de Bieb (herhalingsblok) ---------- */
 
 async function speelBiebspel(kraam) {
-  // Het biebspel wordt pas geladen als je er een start.
-  const { BiebSpel } = await import('./bieb/biebspel.js');
+  // Het biebspel wordt pas geladen als je er een start (Wanda Woordsoort heeft een eigen spel).
+  const { BiebSpel } = kraam.data.woordsoorten ? { BiebSpel: (await import('./bieb/woordsoortspel.js')).WoordsoortSpel } : await import('./bieb/biebspel.js');
   dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
   dialoog.sluit();
   const p = kraam.data;

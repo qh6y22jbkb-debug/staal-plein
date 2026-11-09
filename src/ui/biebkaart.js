@@ -1,7 +1,7 @@
 import { BIEB_PLEKKEN, BIEBKAART, BIEB_TEKSTEN } from '../data/bieb.js';
 import { biebvoortgang } from '../biebvoortgang.js';
 
-/** De zes leesplekken. */
+/** De zeven leesplekken. */
 export const BIEB_ACTIEF = BIEB_PLEKKEN;
 
 /**

@@ -483,3 +483,8 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; 
 .bb-knoppen .ww-keuze { font-size: 22px; padding: 8px 18px; }
 .bb-klaar { border-color: #2b8a3e; box-shadow: 0 5px 0 #2b8a3e; }
 @media (max-width: 600px) { .bb-woord, .bb-teken { font-size: 19px; } }
+/* Wanda Woordsoort: het woord waar het om gaat (Goud) en de 11 keuzeknoppen */
+.bb-woord.bb-doel { background: #fff3bf; border-color: #f59f00; box-shadow: 0 0 0 4px rgba(245,159,0,.35); opacity: 1; }
+.bb-woord:disabled:not(.bb-doel):not(.zd-ow) { opacity: .8; }
+.ws-keuze { font-size: 17px !important; padding: 6px 12px !important; }
+.ws-keuze:disabled:not(.goed) { opacity: .4; }
