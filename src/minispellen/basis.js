@@ -58,7 +58,8 @@ export function el(tag, klasse, html) {
  *   toets(e)            → (optioneel) toetsenbord
  */
 export class Minispel {
-  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen, beloon, muntenTotaal, voortgang: eigenVoortgang }) {
+  constructor({ laag, kraam, data, opKlaar, opSluiten, geluid, voorlezen, beloon, muntenTotaal, voortgang: eigenVoortgang, wereld }) {
+    this.wereld = wereld ?? null; // 'werkwoorden', 'spelling', 'bieb' of 'rekenen' (voor het leerkrachtportaal)
     this.voortgang = eigenVoortgang ?? voortgang; // rekenspellen hebben een eigen voortgang
     this.muntenTotaal = muntenTotaal;
     this.voorlezen = voorlezen;
@@ -138,6 +139,7 @@ export class Minispel {
     this.reeks = 0;
     this.verdiendAntwoorden = 0;
     this.verdiendReeks = 0;
+    this.foutLabels = []; // welke vragen fout gingen (voor het leerkrachtportaal van Meester Jop)
     this.vragen = this.maakVragen();
     this.bouwVenster(true);
     this.volgendeVraag();
@@ -253,6 +255,10 @@ export class Minispel {
 
   /** Fout antwoord: nooit straffen, wel een vriendelijke hint. Daarna nog een poging. */
   fout(hintHtml) {
+    if (!this.foutDezeVraag) {
+      const label = this.foutLabel();
+      if (label && !this.foutLabels?.includes(label)) this.foutLabels?.push(label);
+    }
     this.foutDezeVraag = true;
     this.pogingen++;
     this.rondeFouten++;
@@ -265,7 +271,31 @@ export class Minispel {
     this.voorlezen?.zeg(this.feedback.innerHTML.replace(/<s>.*?<\/s>/g, 'dat woord'));
   }
 
+  /** Korte tekst voor de vraag die fout ging (het woord of de zin). Spellen kunnen dit aanpassen. */
+  foutLabel() {
+    const v = this.vragen?.[this.nr];
+    const tekst = (x) => (typeof x === 'string' && x.trim() ? x : null);
+    const ruw = tekst(this.w?.woord) ?? tekst(v?.goed) ?? tekst(v?.woord) ?? tekst(v?.hele) ?? tekst(v?.ww)
+      ?? tekst(v?.zin) ?? tekst(v?.vraag) ?? tekst(v?.som) ?? tekst(v);
+    if (!ruw) return null;
+    return ruw.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/_{2,}/g, '…').replace(/\s+/g, ' ').trim().slice(0, 60) || null;
+  }
+
+  /** Meldt de ronde aan Meester Jop (alleen als het spel daar draait; anders gebeurt er niets). */
+  meldRonde() {
+    try {
+      window.meesterJop?.meld({
+        onderdeel: this.kraam.data.naam ?? this.data.titel,
+        niveau: this.niveau,
+        goed: this.inEenKeer,
+        totaal: this.aantalVragen,
+        details: { wereld: this.wereld ?? undefined, fouten: this.foutLabels ?? [] },
+      });
+    } catch { /* niet in Meester Jop */ }
+  }
+
   klaar() {
+    this.meldRonde();
     this.wachtOpVolgende = false;
     this.geluid?.klaar();
     this.voorlezen?.zeg(SPEL_TEKSTEN.klaarTitel);

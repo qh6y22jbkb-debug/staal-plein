@@ -277,6 +277,7 @@ async function speelRekenspel(kraam) {
   dialoog.sluit();
   actiefSpel = startRekenspel(kraam, {
     laag: uiLaag,
+    wereld: 'rekenen',
     beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
     // Ronde gehaald: Brons, Zilver of Goud (apart van de taalstempels, telt niet mee voor de poort).
     opKlaar: (k, { niveau }) => {
@@ -314,7 +315,7 @@ async function speelSpellingspel(kraam) {
   dialoog.acties = null; // dialoog dicht zonder terug te gaan naar het plein
   dialoog.sluit();
   const spel = new SpellingSpel({
-    laag: uiLaag, kraam, data: { titel: kraam.data.onderwerp.charAt(0).toUpperCase() + kraam.data.onderwerp.slice(1), opdracht: '', niveaus: SPELLING_TEKSTEN.niveaus },
+    laag: uiLaag, kraam, wereld: 'spelling', data: { titel: kraam.data.onderwerp.charAt(0).toUpperCase() + kraam.data.onderwerp.slice(1), opdracht: '', niveaus: SPELLING_TEKSTEN.niveaus },
     geluid, voorlezen, muntenTotaal: () => munten.totaal,
     beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
     opKlaar: (k, { niveau }) => {
@@ -350,7 +351,7 @@ async function speelBiebspel(kraam) {
   dialoog.sluit();
   const p = kraam.data;
   const spel = new BiebSpel({
-    laag: uiLaag, kraam, data: { titel: p.onderwerp.charAt(0).toUpperCase() + p.onderwerp.slice(1), opdracht: '', niveaus: p.niveaus },
+    laag: uiLaag, kraam, wereld: 'bieb', data: { titel: p.onderwerp.charAt(0).toUpperCase() + p.onderwerp.slice(1), opdracht: '', niveaus: p.niveaus },
     geluid, voorlezen, muntenTotaal: () => munten.totaal,
     beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
     opKlaar: (k, { niveau }) => {
@@ -470,6 +471,7 @@ function speelMinispel(kraam) {
   dialoog.sluit();
   actiefSpel = startMinispel(kraam, {
     laag: uiLaag,
+    wereld: 'werkwoorden',
     beloon: (aantal, van, label) => muntenteller.beloon(aantal, van, label),
     // Ronde gehaald: een niveau verder. Alle 3 de niveaus gehaald = stempel.
     opKlaar: (k, { niveau }) => {
