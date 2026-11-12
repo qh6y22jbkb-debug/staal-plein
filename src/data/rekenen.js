@@ -33,6 +33,17 @@ export const LEERGROEP = {
   slotPlaatshouder: 'Wachtwoord',
 };
 
+/* Startscherm van de bouwvariant Rekenplein (Meester Jop): je begint meteen in de school. */
+export const REKENPLEIN_START = {
+  iconen: '➕ ➖ ✖️ ➗ 🕒 🏁',
+  titel: 'Rekenwereld',
+  ondertitel: 'Leergroep 3 · rekenen · groep 7',
+  uitleg: 'Loop door de school en praat met de karakters in de zes rekenlokalen. Speel hun rekenspel en haal Brons, Zilver of Goud!',
+  extra: '🪙 Verdien munten en vul je Rekenkaart met medailles.',
+  knop: 'Spelen',
+  deurTerugBord: 'Rekenwereld', // bord boven de deur (die gaat in het Rekenplein niet open)
+};
+
 /*
  * De zes lokalen, elk met één rekenkraam. Lokaal 1 t/m 3 liggen links van het leerplein, 4 t/m 6 rechts.
  * naam        = naam van de kraam en het karakter (staat op het bord bij de deur)

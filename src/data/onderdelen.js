@@ -38,7 +38,8 @@ export const ONDERDELEN = {
 /*
  *  BOUWVARIANT REKENPLEIN (voor Meester Jop, tegel Rekenen)
  *  Bouw je met VITE_WERELD=rekenen, dan zit de rekenwereld in de school (in plaats van de
- *  Spellingwereld) en is de Bieb dicht. De rest van het plein blijft hetzelfde.
+ *  Spellingwereld) en is de Bieb dicht. Je begint meteen binnen in de school en blijft daar:
+ *  het schoolplein doet niet mee (startteksten: REKENPLEIN_START in src/data/rekenen.js).
  *  Gewoon `npm run build` of `npm run deploy` = Staal Plein zoals hierboven ingesteld.
  */
 export const VARIANT = import.meta.env?.VITE_WERELD === 'rekenen' ? 'rekenen' : '';

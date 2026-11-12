@@ -40,7 +40,9 @@ import { voortgang, NIVEAU_VOOR_STEMPEL } from './voortgang.js';
 import { Stempelkaart } from './ui/stempelkaart.js';
 import { Oorkonde } from './ui/oorkonde.js';
 import { toonStartscherm } from './ui/startscherm.js';
-import { ONDERDELEN } from './data/onderdelen.js';
+import { ONDERDELEN, VARIANT } from './data/onderdelen.js';
+// Bouwvariant Rekenplein: meteen in de school (rekenwereld) en daar blijven; het plein doet niet mee.
+const ALLEEN_SCHOOL = VARIANT === 'rekenen';
 import { LeerkrachtSlot, isLeerkrachtSneltoets } from './ui/leerkrachtslot.js';
 import { confetti } from './ui/confetti.js';
 import { Vuurwerk } from './wereld/vuurwerk.js';
@@ -117,7 +119,7 @@ const spellingkaart = SCHOOL_SOORT === 'spelling' ? new Spellingkaart(uiLaag) : 
 const biebkaart = ONDERDELEN.bieb ? new Biebkaart(uiLaag) : null; // in de Bieb
 
 /* ---------- Gymtijd: verdiend met stempels, te zien op de kaarten, loopt af in de gymzaal ---------- */
-const gymtijdLabels = [stempelkaart.el, rekenkaart?.el, spellingkaart?.el, biebkaart?.el].filter(Boolean).map((kaart) => {
+const gymtijdLabels = (ALLEEN_SCHOOL ? [] : [stempelkaart.el, rekenkaart?.el, spellingkaart?.el, biebkaart?.el]).filter(Boolean).map((kaart) => {
   const e = document.createElement('div');
   e.className = 'sk-gymtijd';
   kaart.appendChild(e);
@@ -742,9 +744,9 @@ async function naarBinnen(soort = 'school') {
   hud.zetTitel(gebouw.titel);
   document.body.classList.add(gebouw.klasse);
   klok.update();
-  besturing.aan = true;
+  besturing.aan = !startOpen; // (Rekenplein: de school laadt al achter het startscherm)
   await vanWit();
-  hud.toonMelding(gebouw.welkom);
+  if (!startOpen) hud.toonMelding(gebouw.welkom); // Rekenplein: de welkomst komt na het startscherm
   bezigMetWisselen = false;
   if (binnen?.soort === 'school' && rekenkaart && Rekenkaart.vol && !rekenvoortgang.kampioen) setTimeout(startRekenFeest, 1500);
   if (binnen?.soort === 'school' && spellingkaart && Spellingkaart.vol && !spellingvoortgang.kampioen) setTimeout(startSpellingFeest, 1500);
@@ -767,7 +769,7 @@ function ruimBinnenOp() {
 }
 
 async function naarBuiten() {
-  if (bezigMetWisselen || !binnen) return;
+  if (bezigMetWisselen || !binnen || ALLEEN_SCHOOL) return;
   bezigMetWisselen = true;
   besturing.aan = false;
   besturing.doel = null;
@@ -1144,6 +1146,8 @@ renderer.setAnimationLoop(frame);
 
 // Startscherm: pas na een klik kan de browser geluid en voorlezen gebruiken.
 let startOpen = true;
+// Rekenplein: meteen naar binnen (nog vóór het eerste beeld, dus het plein wordt nooit getekend).
+if (ALLEEN_SCHOOL) naarBinnen();
 besturing.aan = false;
 /* ---------- Leerkrachtmodus: alles vrijspelen met de code ---------- */
 
@@ -1198,6 +1202,10 @@ toonStartscherm(uiLaag, () => {
   startOpen = false;
   besturing.aan = true;
   geluid.plop();
+  if (ALLEEN_SCHOOL) {
+    hud.toonMelding(LEERGROEP.welkom);
+    return;
+  }
   // Al alle stempels (bijv. van vóór de Voetbalwereld)? Dan gaat de poort nu open.
   if (voortgang.aantal === KRAAM_AANTAL && !poort.open) setTimeout(openPoortMetMelding, 1200);
 });
