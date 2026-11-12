@@ -34,3 +34,12 @@ export const ONDERDELEN = {
   // Uit = de kraam, het podium en de spotlight staan niet op het plein.
   leeskraam: false,
 };
+
+/*
+ *  BOUWVARIANT REKENPLEIN (voor Meester Jop, tegel Rekenen)
+ *  Bouw je met VITE_WERELD=rekenen, dan zit de rekenwereld in de school (in plaats van de
+ *  Spellingwereld) en is de Bieb dicht. De rest van het plein blijft hetzelfde.
+ *  Gewoon `npm run build` of `npm run deploy` = Staal Plein zoals hierboven ingesteld.
+ */
+export const VARIANT = import.meta.env?.VITE_WERELD === 'rekenen' ? 'rekenen' : '';
+if (VARIANT === 'rekenen') Object.assign(ONDERDELEN, { rekenwereld: true, spellingwereld: false, bieb: false });
